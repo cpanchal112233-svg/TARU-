@@ -219,6 +219,34 @@ class _HealthProfileFormState extends ConsumerState<_HealthProfileForm> {
     setState(() => _dateOfBirth = picked);
   }
 
+  bool get _hasUnsavedChanges =>
+      !_draftProfile.hasSameAnswersAs(widget.initialProfile);
+
+  /// Asks before throwing away medical details someone just typed in.
+  Future<bool> _confirmDiscard() async {
+    final bool? shouldDiscard = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext dialogContext) => AlertDialog(
+        title: const Text('Discard changes?'),
+        content: const Text(
+          'Your health profile has unsaved changes. Leaving now will lose them.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Keep editing'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Discard'),
+          ),
+        ],
+      ),
+    );
+
+    return shouldDiscard ?? false;
+  }
+
   Future<void> _save() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
@@ -233,7 +261,9 @@ class _HealthProfileFormState extends ConsumerState<_HealthProfileForm> {
         const SnackBar(content: Text('Health profile saved.')),
       );
 
-      Navigator.of(context).maybePop();
+      // pop rather than maybePop: the work is saved, so the unsaved-changes
+      // guard must not intercept this.
+      Navigator.of(context).pop();
     } catch (error) {
       if (!mounted) return;
 
@@ -249,6 +279,24 @@ class _HealthProfileFormState extends ConsumerState<_HealthProfileForm> {
   Widget build(BuildContext context) {
     final HealthProfile draft = _draftProfile;
 
+    return PopScope(
+      // Only intercepts when there is something to lose, so the iOS swipe-back
+      // gesture keeps working on an untouched form.
+      canPop: !_hasUnsavedChanges,
+      onPopInvokedWithResult: (bool didPop, Object? result) async {
+        if (didPop) return;
+
+        final bool shouldDiscard = await _confirmDiscard();
+
+        if (shouldDiscard && context.mounted) {
+          Navigator.of(context).pop();
+        }
+      },
+      child: _buildForm(draft),
+    );
+  }
+
+  Widget _buildForm(HealthProfile draft) {
     return Form(
       key: _formKey,
       child: ListView(
@@ -430,6 +478,7 @@ class _HealthProfileFormState extends ConsumerState<_HealthProfileForm> {
             controller: _contactRelationController,
             textCapitalization: TextCapitalization.words,
             decoration: _fieldDecoration('Relationship', hint: 'e.g. Spouse'),
+            onChanged: (_) => setState(() {}),
           ),
 
           const SizedBox(height: 16),
