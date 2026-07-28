@@ -185,6 +185,24 @@ class HealthProfile {
 
   bool get isComplete => missingItems.isEmpty;
 
+  /// Compares only the answers the user gave, ignoring server-managed metadata
+  /// such as [updatedAt]. Used to tell whether a form has unsaved edits.
+  bool hasSameAnswersAs(HealthProfile other) {
+    return dateOfBirth == other.dateOfBirth &&
+        biologicalSex == other.biologicalSex &&
+        heightCm == other.heightCm &&
+        weightKg == other.weightKg &&
+        bloodGroup == other.bloodGroup &&
+        pregnancyStatus == other.pregnancyStatus &&
+        preferredUnits == other.preferredUnits &&
+        _trimToNull(emergencyContactName) ==
+            _trimToNull(other.emergencyContactName) &&
+        _trimToNull(emergencyContactRelation) ==
+            _trimToNull(other.emergencyContactRelation) &&
+        _trimToNull(emergencyContactPhone) ==
+            _trimToNull(other.emergencyContactPhone);
+  }
+
   /// Reads defensively: a malformed field should cost that one value, never
   /// crash the screen and lock someone out of their own health record.
   factory HealthProfile.fromMap(Map<String, dynamic> map) {
