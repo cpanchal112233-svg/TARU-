@@ -10,8 +10,17 @@ Bottom navigation with Home, Reports, Routine, Progress, and Profile tabs.
 Riverpod + repositories keep auth and onboarding state out of the widgets.
 
 ## Phase 2 — Health profile
-Age, sex, height, weight, conditions, allergies, medications, blood group.
-This is the clinical context every later feature reads from.
+The clinical context every later feature reads from.
+
+- **2a — Basics ✅** Date of birth, biological sex, height, weight, blood group,
+  pregnancy status, emergency contact. Derives age and BMI. Metric and imperial
+  input, always stored in cm/kg.
+- **2b — Conditions** Diabetes, hypertension, asthma, thyroid, kidney, heart,
+  and free-text additions.
+- **2c — Allergies** Structured drug allergies so they can be checked in code,
+  plus food and environmental.
+- **2d — Medications** Name, dose, frequency. Feeds interaction checks,
+  reminders, and adherence tracking.
 
 ## Phase 3 — Medical reports
 Upload PDF/image reports to Firebase Storage + Firestore metadata.

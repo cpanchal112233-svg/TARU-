@@ -1,0 +1,23 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    // Everything under a user document is personal health information. There is
+    // no legitimate cross-user or public read, so ownership is the only rule.
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+
+      // Covers health/profile today, plus reports and medications later.
+      match /{documents=**} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    // Anything not matched above is denied.
+  }
+}

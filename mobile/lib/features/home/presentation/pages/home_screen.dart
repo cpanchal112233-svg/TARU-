@@ -1,8 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class HomeScreen extends StatefulWidget {
+import '../../../health_profile/presentation/widgets/health_profile_completeness_card.dart';
+
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key, this.onSelectTab});
 
   /// Switches the parent [MainShell] tab. Indices:
@@ -10,10 +13,10 @@ class HomeScreen extends StatefulWidget {
   final ValueChanged<int>? onSelectTab;
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -175,6 +178,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                 ),
+
+                const SizedBox(height: 20),
+
+                const HealthProfileCompletenessCard(),
 
                 const SizedBox(height: 25),
 
