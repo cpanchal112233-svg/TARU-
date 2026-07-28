@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../auth/data/auth_service.dart';
+import '../../../health_profile/presentation/pages/health_profile_screen.dart';
 import 'reauthentication_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -388,6 +389,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
 
                 const SizedBox(height: 35),
+
+                // HEALTH PROFILE
+                _buildProfileOption(
+                  icon: Icons.monitor_heart_outlined,
+                  title: 'Health Profile',
+                  subtitle: 'Age, sex, measurements, emergency contact',
+
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (_) => const HealthProfileScreen(),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 15),
 
                 // EDIT NAME
                 _buildProfileOption(
