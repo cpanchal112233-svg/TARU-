@@ -9,7 +9,6 @@ import '../widgets/auth_textfield.dart';
 import '../widgets/social_login_button.dart';
 import 'forgot_password_screen.dart';
 import 'signup_screen.dart';
-import '../../../home/presentation/pages/home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -46,17 +45,8 @@ class _LoginScreenState extends State<LoginScreen> {
         password: passwordController.text.trim(),
       );
 
-      if (!mounted) return;
-
-      // Navigate to Home Screen after successful Firebase login.
-      //
-      // pushAndRemoveUntil removes LoginScreen from the navigation stack.
-      // This prevents the user from pressing Back and returning to Login.
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-        (route) => false,
-      );
+      // No navigation here: AuthGate listens to the auth state and swaps this
+      // screen for the app shell as soon as the sign-in lands.
     } on FirebaseAuthException catch (e) {
       debugPrint('Firebase Auth Error Code: ${e.code}');
 

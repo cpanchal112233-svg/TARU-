@@ -1,0 +1,22 @@
+---
+description: How to run the TARU app during development
+alwaysApply: true
+---
+
+# Running TARU
+
+TARU is a mobile-first health app. When asked to run, build, or test the app,
+use **only the Android emulator and the iOS simulator**:
+
+```bash
+cd mobile
+flutter run -d <android-emulator-id>
+flutter run -d <ios-simulator-id>
+```
+
+Do **not** launch macOS desktop or Chrome web targets, and do not use
+`flutter run -d all`. Web and desktop are out of scope for now.
+
+Notes:
+- Port 5555 is used by the Android emulator; never pick it for a web port.
+- Both mobile targets use application/bundle id `com.taru.health`.

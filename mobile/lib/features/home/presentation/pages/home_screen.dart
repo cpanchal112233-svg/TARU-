@@ -2,34 +2,20 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import '../../../auth/data/auth_service.dart';
-import '../../../auth/presentation/pages/login_screen.dart';
-import '../../../profile/presentation/pages/profile_screen.dart';
-
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.onSelectTab});
+
+  /// Switches the parent [MainShell] tab. Indices:
+  /// 0 Home, 1 Reports, 2 Routine, 3 Progress, 4 Profile.
+  final ValueChanged<int>? onSelectTab;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final AuthService _authService = AuthService();
-
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-  Future<void> logout() async {
-    await _authService.logout();
-
-    if (!mounted) return;
-
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
-      (route) => false,
-    );
-  }
 
   Future<void> createMissingUserProfile(User user) async {
     final userDocument = _firestore.collection('users').doc(user.uid);
@@ -43,6 +29,12 @@ class _HomeScreenState extends State<HomeScreen> {
         'createdAt': FieldValue.serverTimestamp(),
       });
     }
+  }
+
+  void _showComingSoon(String feature) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('$feature is coming soon.')),
+    );
   }
 
   @override
@@ -65,10 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
         centerTitle: true,
         backgroundColor: Colors.white,
         elevation: 0,
-
-        actions: [
-          IconButton(icon: const Icon(Icons.logout), onPressed: logout),
-        ],
+        automaticallyImplyLeading: false,
       ),
 
       body: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
@@ -200,9 +189,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Expanded(
                       child: _buildFeatureCard(
-                        icon: Icons.chat_bubble_outline,
-                        title: 'AI Assistant',
-                        onTap: () {},
+                        icon: Icons.description_outlined,
+                        title: 'Reports',
+                        onTap: () => widget.onSelectTab?.call(1),
                       ),
                     ),
 
@@ -210,9 +199,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     Expanded(
                       child: _buildFeatureCard(
-                        icon: Icons.monitor_heart_outlined,
-                        title: 'Health Data',
-                        onTap: () {},
+                        icon: Icons.calendar_today_outlined,
+                        title: 'Routine',
+                        onTap: () => widget.onSelectTab?.call(2),
                       ),
                     ),
                   ],
@@ -225,8 +214,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     Expanded(
                       child: _buildFeatureCard(
                         icon: Icons.insights_outlined,
-                        title: 'Insights',
-                        onTap: () {},
+                        title: 'Progress',
+                        onTap: () => widget.onSelectTab?.call(3),
                       ),
                     ),
 
@@ -234,16 +223,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     Expanded(
                       child: _buildFeatureCard(
-                        icon: Icons.person_outline,
-                        title: 'Profile',
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const ProfileScreen(),
-                            ),
-                          );
-                        },
+                        icon: Icons.chat_bubble_outline,
+                        title: 'AI Assistant',
+                        onTap: () => _showComingSoon('AI Assistant'),
                       ),
                     ),
                   ],
