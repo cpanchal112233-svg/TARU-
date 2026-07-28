@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../application/onboarding_providers.dart';
 import '../../data/onboarding_data.dart';
 import '../widgets/onboarding_page.dart';
-import '../../../auth/presentation/pages/login_screen.dart';
 
-class OnboardingScreen extends StatefulWidget {
+class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
   @override
-  State<OnboardingScreen> createState() => _OnboardingScreenState();
+  ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen> {
+class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final PageController _pageController = PageController();
 
   int currentPage = 0;
@@ -20,6 +21,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void dispose() {
     _pageController.dispose();
     super.dispose();
+  }
+
+  /// Marks onboarding as done; the auth gate then decides where to go next.
+  Future<void> _finishOnboarding() {
+    return ref.read(onboardingControllerProvider.notifier).complete();
   }
 
   @override
@@ -32,12 +38,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Align(
               alignment: Alignment.topRight,
               child: TextButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => const LoginScreen()),
-                  );
-                },
+                onPressed: _finishOnboarding,
                 child: const Text("Skip"),
               ),
             ),
@@ -88,10 +89,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 child: ElevatedButton(
                   onPressed: () {
                     if (currentPage == onboardingPages.length - 1) {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (_) => const LoginScreen()),
-                      );
+                      _finishOnboarding();
                     } else {
                       if (_pageController.hasClients) {
                         _pageController.nextPage(

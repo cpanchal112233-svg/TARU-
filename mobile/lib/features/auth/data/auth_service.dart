@@ -42,4 +42,10 @@ class AuthService {
   }
 
   User? get currentUser => _auth.currentUser;
+
+  /// Emits the signed-in user, or null when signed out.
+  ///
+  /// Firebase restores the previous session on launch, so the first event may
+  /// already contain a user.
+  Stream<User?> get authStateChanges => _auth.authStateChanges();
 }

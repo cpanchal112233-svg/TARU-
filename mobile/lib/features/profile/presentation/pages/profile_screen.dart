@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../auth/data/auth_service.dart';
-import '../../../auth/presentation/pages/login_screen.dart';
 import 'reauthentication_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -27,15 +26,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> logout() async {
     try {
+      // AuthGate reacts to the signed-out state and shows the login screen.
       await _authService.logout();
-
-      if (!mounted) return;
-
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-        (route) => false,
-      );
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
 
@@ -59,6 +51,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> editName(String currentName) async {
     final bool verified = await verifyIdentity('change your name');
+
+    if (!mounted) return;
 
     if (!verified) {
       return;
@@ -163,6 +157,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return;
     }
 
+    if (!mounted) return;
+
     setState(() {
       isChangingPassword = true;
     });
@@ -200,6 +196,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> changeEmail(String currentEmail) async {
     final bool verified = await verifyIdentity('change your email');
+
+    if (!mounted) return;
 
     if (!verified) {
       return;
@@ -249,6 +247,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return;
     }
 
+    if (!mounted) return;
+
     setState(() {
       isChangingEmail = true;
     });
@@ -287,6 +287,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> changePhoneNumber() async {
     final bool verified = await verifyIdentity('change your phone number');
 
+    if (!mounted) return;
+
     if (!verified) {
       return;
     }
@@ -319,6 +321,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         centerTitle: true,
         backgroundColor: Colors.white,
         elevation: 0,
+        automaticallyImplyLeading: false,
       ),
 
       body: StreamBuilder<DocumentSnapshot>(
