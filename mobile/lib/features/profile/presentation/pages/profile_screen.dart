@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../auth/data/auth_service.dart';
+import '../../../health_profile/presentation/pages/conditions_screen.dart';
 import '../../../health_profile/presentation/pages/health_profile_screen.dart';
 import 'reauthentication_screen.dart';
 
@@ -400,6 +401,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     context,
                     MaterialPageRoute<void>(
                       builder: (_) => const HealthProfileScreen(),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 15),
+
+                // MEDICAL CONDITIONS
+                _buildProfileOption(
+                  icon: Icons.medical_information_outlined,
+                  title: 'Medical Conditions',
+                  subtitle: 'What you already live with',
+
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (_) => const ConditionsScreen(),
                     ),
                   ),
                 ),

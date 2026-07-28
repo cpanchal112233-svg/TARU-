@@ -15,8 +15,9 @@ The clinical context every later feature reads from.
 - **2a — Basics ✅** Date of birth, biological sex, height, weight, blood group,
   pregnancy status, emergency contact. Derives age and BMI. Metric and imperial
   input, always stored in cm/kg.
-- **2b — Conditions** Diabetes, hypertension, asthma, thyroid, kidney, heart,
-  and free-text additions.
+- **2b — Conditions ✅** 44 conditions grouped by body system, searchable by
+  everyday words ("sugar", "BP"), with optional year diagnosed and how well
+  controlled. Stored as stable codes, mappable to ICD-10 later.
 - **2c — Allergies** Structured drug allergies so they can be checked in code,
   plus food and environmental.
 - **2d — Medications** Name, dose, frequency. Feeds interaction checks,

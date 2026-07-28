@@ -12,6 +12,9 @@
   biological sex, height, weight, blood group, pregnancy status, emergency
   contact. Live BMI with a caveat where BMI is not clinically meaningful.
   Metric/imperial entry, stored in cm and kg. Completeness card on Home.
+- **Medical conditions**: searchable checklist covering 44 conditions by body
+  system, with everyday-language search and optional year diagnosed plus how
+  well controlled. Stored as codes, not display text.
 - **Firestore rules** are now in the repo (`firestore.rules`) and restrict every
   user document and subcollection to its owner.
 
