@@ -1,5 +1,6 @@
 import Flutter
 import UIKit
+import UserNotifications
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
@@ -7,6 +8,10 @@ import UIKit
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    // Required by flutter_local_notifications so a reminder that arrives while
+    // TARU is open is still shown instead of being swallowed.
+    UNUserNotificationCenter.current().delegate = self
+
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
