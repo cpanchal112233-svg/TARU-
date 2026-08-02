@@ -386,14 +386,20 @@ class _MedicationCard extends StatelessWidget {
 
     final MedicineWarningSeverity? severity = warningSeverity;
 
+    final Color? accent = clashesWithAllergy
+        ? Colors.red
+        : severity == null
+        ? null
+        : MedicineWarningStyle.of(severity).colour;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: clashesWithAllergy
-            ? Border.all(color: Colors.red.withValues(alpha: 0.4))
-            : null,
+        border: accent == null
+            ? null
+            : Border.all(color: accent.withValues(alpha: 0.4)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),

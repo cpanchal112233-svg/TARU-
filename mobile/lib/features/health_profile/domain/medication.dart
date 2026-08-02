@@ -184,6 +184,7 @@ enum MedicationIngredient {
   ramipril('Ramipril', searchTerms: ['ramipril', 'cardace']),
   metoprolol('Metoprolol', searchTerms: ['metoprolol', 'metolar']),
   atenolol('Atenolol', searchTerms: ['atenolol', 'aten']),
+  carvedilol('Carvedilol', searchTerms: ['carvedilol', 'cardivas']),
   furosemide('Furosemide', searchTerms: ['furosemide', 'lasix', 'frusemide']),
   atorvastatin(
     'Atorvastatin',
@@ -200,6 +201,23 @@ enum MedicationIngredient {
     searchTerms: ['clopidogrel', 'plavix', 'clopilet'],
   ),
   warfarin('Warfarin', searchTerms: ['warfarin', 'blood thinner']),
+  apixaban('Apixaban', searchTerms: ['apixaban', 'eliquis', 'blood thinner']),
+  rivaroxaban(
+    'Rivaroxaban',
+    searchTerms: ['rivaroxaban', 'xarelto', 'blood thinner'],
+  ),
+  dabigatran(
+    'Dabigatran',
+    searchTerms: ['dabigatran', 'pradaxa', 'blood thinner'],
+  ),
+  hydrochlorothiazide(
+    'Hydrochlorothiazide',
+    searchTerms: ['hydrochlorothiazide', 'hctz', 'water tablet'],
+  ),
+  spironolactone(
+    'Spironolactone',
+    searchTerms: ['spironolactone', 'aldactone'],
+  ),
 
   omeprazole('Omeprazole', searchTerms: ['omeprazole', 'omez']),
   pantoprazole('Pantoprazole', searchTerms: ['pantoprazole', 'pan', 'pantop']),

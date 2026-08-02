@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../emergency/presentation/pages/emergency_card_screen.dart';
 import '../../../health_profile/presentation/widgets/health_profile_completeness_card.dart';
+import '../../../interactions/presentation/pages/medicine_safety_screen.dart';
 import '../../../interactions/presentation/widgets/medicine_safety_banner.dart';
 import '../../../triage/presentation/pages/symptom_check_screen.dart';
 
@@ -237,11 +238,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                     Expanded(
                       child: _buildFeatureCard(
-                        icon: Icons.health_and_safety_outlined,
-                        title: 'Symptom check',
+                        icon: Icons.rule_outlined,
+                        title: 'Medicine safety',
                         onTap: () => Navigator.of(context).push(
                           MaterialPageRoute<void>(
-                            builder: (_) => const SymptomCheckScreen(),
+                            builder: (_) => const MedicineSafetyScreen(),
                           ),
                         ),
                       ),

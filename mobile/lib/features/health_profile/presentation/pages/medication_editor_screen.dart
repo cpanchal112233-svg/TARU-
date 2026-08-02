@@ -121,10 +121,11 @@ class _MedicationEditorScreenState
 
     final UserAllergy? clash = _clashingAllergy(allergies);
 
+    final UserMedication current = _current;
     final List<MedicineWarning> warnings = MedicineChecker.check(
-      medicines: <UserMedication>[...widget.others, _current],
+      medicines: <UserMedication>[...widget.others, current],
       profile: ref.watch(safetyProfileProvider),
-    ).forMedicine(_current);
+    ).forMedicine(current);
 
     return PopScope(
       canPop: !_hasUnsavedChanges,
