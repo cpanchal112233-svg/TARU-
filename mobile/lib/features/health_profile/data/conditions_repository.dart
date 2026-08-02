@@ -12,8 +12,6 @@ class ConditionsRepository {
 
   final FirebaseFirestore _firestore;
 
-  static const String _itemsField = 'items';
-
   DocumentReference<Map<String, dynamic>> _conditionsDocument(String uid) =>
       _firestore
           .collection('users')
@@ -21,25 +19,22 @@ class ConditionsRepository {
           .collection('health')
           .doc('conditions');
 
-  Stream<List<UserCondition>> watch(String uid) {
+  Stream<ConditionRecord> watch(String uid) {
     return _conditionsDocument(uid).snapshots().map((snapshot) {
-      final Object? items = snapshot.data()?[_itemsField];
+      final Map<String, dynamic>? data = snapshot.data();
 
-      if (items is! List) return const <UserCondition>[];
+      if (!snapshot.exists || data == null) return ConditionRecord.empty;
 
-      return items
-          .whereType<Map<String, dynamic>>()
-          .map(UserCondition.fromMap)
-          .whereType<UserCondition>()
-          .toList();
+      return ConditionRecord.fromMap(data);
     });
   }
 
-  Future<void> save(String uid, List<UserCondition> conditions) {
+  Future<void> save(String uid, ConditionRecord record) {
     return _conditionsDocument(uid).set(<String, dynamic>{
-      _itemsField: conditions
+      'items': record.conditions
           .map((UserCondition condition) => condition.toMap())
           .toList(),
+      'noKnownConditions': record.noKnownConditions,
       'updatedAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
   }
