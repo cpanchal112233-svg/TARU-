@@ -1,7 +1,7 @@
 import 'symptom.dart';
 import 'symptom_guidance.dart';
 import 'triage_level.dart';
-import 'triage_profile.dart';
+import '../../safety/domain/safety_profile.dart';
 import 'triage_result.dart';
 import 'triage_rules.dart';
 
@@ -19,7 +19,7 @@ class TriageEngine {
   static TriageResult assess({
     required List<Symptom> symptoms,
     required Set<String> flaggedCodes,
-    required TriageProfile profile,
+    required SafetyProfile profile,
   }) {
     TriageLevel level = TriageLevel.selfCare;
 
