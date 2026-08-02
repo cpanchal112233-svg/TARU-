@@ -62,14 +62,14 @@ const Map<Symptom, SymptomGuidance> bodyGuidance = <Symptom, SymptomGuidance>{
     ],
     escalations: <RiskEscalation>[
       RiskEscalation(
-        factor: TriageRiskFactor.pregnant,
+        factor: HealthRiskFactor.pregnant,
         level: TriageLevel.emergency,
         reason:
             'Belly pain in pregnancy is assessed in person now, because an '
             'ectopic pregnancy or a placental problem has to be ruled out.',
       ),
       RiskEscalation(
-        factor: TriageRiskFactor.olderAdult,
+        factor: HealthRiskFactor.olderAdult,
         level: TriageLevel.urgent,
         reason:
             'Serious causes of belly pain often hurt less than expected after '
@@ -136,7 +136,7 @@ const Map<Symptom, SymptomGuidance> bodyGuidance = <Symptom, SymptomGuidance>{
     ],
     escalations: <RiskEscalation>[
       RiskEscalation(
-        factor: TriageRiskFactor.diabetes,
+        factor: HealthRiskFactor.diabetes,
         level: TriageLevel.urgent,
         reason:
             'Vomiting with diabetes can tip into a dangerous state within '
@@ -144,14 +144,14 @@ const Map<Symptom, SymptomGuidance> bodyGuidance = <Symptom, SymptomGuidance>{
             'Never stop insulin because you are not eating.',
       ),
       RiskEscalation(
-        factor: TriageRiskFactor.kidneyDisease,
+        factor: HealthRiskFactor.kidneyDisease,
         level: TriageLevel.urgent,
         reason:
             'Kidneys already under strain cope badly with fluid loss, and some '
             'of your medicines may need pausing while you are ill.',
       ),
       RiskEscalation(
-        factor: TriageRiskFactor.olderAdult,
+        factor: HealthRiskFactor.olderAdult,
         level: TriageLevel.urgent,
         reason: 'Dehydration develops faster and shows itself later after 65.',
       ),
@@ -223,19 +223,19 @@ const Map<Symptom, SymptomGuidance> bodyGuidance = <Symptom, SymptomGuidance>{
     ],
     escalations: <RiskEscalation>[
       RiskEscalation(
-        factor: TriageRiskFactor.kidneyDisease,
+        factor: HealthRiskFactor.kidneyDisease,
         level: TriageLevel.urgent,
         reason:
             'Fluid loss puts kidneys already under strain at real risk, and '
             'some medicines need pausing during it.',
       ),
       RiskEscalation(
-        factor: TriageRiskFactor.immunosuppressed,
+        factor: HealthRiskFactor.immunosuppressed,
         level: TriageLevel.urgent,
         reason: 'Gut infections are harder to shake off and spread further.',
       ),
       RiskEscalation(
-        factor: TriageRiskFactor.diabetes,
+        factor: HealthRiskFactor.diabetes,
         level: TriageLevel.soon,
         reason:
             'Being ill unsettles blood sugar, so check yours more often than '
@@ -310,14 +310,14 @@ const Map<Symptom, SymptomGuidance> bodyGuidance = <Symptom, SymptomGuidance>{
     ],
     escalations: <RiskEscalation>[
       RiskEscalation(
-        factor: TriageRiskFactor.heartDisease,
+        factor: HealthRiskFactor.heartDisease,
         level: TriageLevel.urgent,
         reason:
             'Burning in the chest is much harder to tell apart from angina '
             'when you already have a heart condition.',
       ),
       RiskEscalation(
-        factor: TriageRiskFactor.olderAdult,
+        factor: HealthRiskFactor.olderAdult,
         level: TriageLevel.soon,
         reason:
             'New indigestion after 55 is investigated rather than treated '
@@ -404,26 +404,26 @@ const Map<Symptom, SymptomGuidance> bodyGuidance = <Symptom, SymptomGuidance>{
     ],
     escalations: <RiskEscalation>[
       RiskEscalation(
-        factor: TriageRiskFactor.immunosuppressed,
+        factor: HealthRiskFactor.immunosuppressed,
         level: TriageLevel.urgent,
         reason:
             'A fever needs same-day assessment when your immune system is '
             'suppressed, even if you otherwise feel reasonably well.',
       ),
       RiskEscalation(
-        factor: TriageRiskFactor.pregnant,
+        factor: HealthRiskFactor.pregnant,
         level: TriageLevel.urgent,
         reason: 'A fever in pregnancy is checked the same day.',
       ),
       RiskEscalation(
-        factor: TriageRiskFactor.olderAdult,
+        factor: HealthRiskFactor.olderAdult,
         level: TriageLevel.urgent,
         reason:
             'Infections after 65 can be advanced while the temperature stays '
             'modest.',
       ),
       RiskEscalation(
-        factor: TriageRiskFactor.diabetes,
+        factor: HealthRiskFactor.diabetes,
         level: TriageLevel.soon,
         reason:
             'Infection raises blood sugar, so check yours more often while '
@@ -496,7 +496,7 @@ const Map<Symptom, SymptomGuidance> bodyGuidance = <Symptom, SymptomGuidance>{
     ],
     escalations: <RiskEscalation>[
       RiskEscalation(
-        factor: TriageRiskFactor.immunosuppressed,
+        factor: HealthRiskFactor.immunosuppressed,
         level: TriageLevel.urgent,
         reason:
             'New tiredness deserves a same-day look when your immune system is '
@@ -560,28 +560,28 @@ const Map<Symptom, SymptomGuidance> bodyGuidance = <Symptom, SymptomGuidance>{
     ],
     escalations: <RiskEscalation>[
       RiskEscalation(
-        factor: TriageRiskFactor.pregnant,
+        factor: HealthRiskFactor.pregnant,
         level: TriageLevel.urgent,
         reason:
             'Swelling in pregnancy is checked alongside blood pressure for '
             'pre-eclampsia, particularly if your face or hands are puffy.',
       ),
       RiskEscalation(
-        factor: TriageRiskFactor.heartDisease,
+        factor: HealthRiskFactor.heartDisease,
         level: TriageLevel.urgent,
         reason:
             'New swelling with a heart condition usually means the fluid '
             'balance needs adjusting.',
       ),
       RiskEscalation(
-        factor: TriageRiskFactor.kidneyDisease,
+        factor: HealthRiskFactor.kidneyDisease,
         level: TriageLevel.urgent,
         reason:
             'Swelling can be the first sign that kidney function has '
             'slipped.',
       ),
       RiskEscalation(
-        factor: TriageRiskFactor.liverDisease,
+        factor: HealthRiskFactor.liverDisease,
         level: TriageLevel.urgent,
         reason: 'Fluid retention with liver disease needs reviewing promptly.',
       ),
@@ -652,7 +652,7 @@ const Map<Symptom, SymptomGuidance> bodyGuidance = <Symptom, SymptomGuidance>{
     ],
     escalations: <RiskEscalation>[
       RiskEscalation(
-        factor: TriageRiskFactor.diabetes,
+        factor: HealthRiskFactor.diabetes,
         level: TriageLevel.urgent,
         reason:
             'You already have diabetes, so these symptoms mean the control has '
@@ -721,19 +721,19 @@ const Map<Symptom, SymptomGuidance> bodyGuidance = <Symptom, SymptomGuidance>{
     ],
     escalations: <RiskEscalation>[
       RiskEscalation(
-        factor: TriageRiskFactor.pregnant,
+        factor: HealthRiskFactor.pregnant,
         level: TriageLevel.urgent,
         reason:
             'Urine infections in pregnancy are treated promptly, because they '
             'can bring on early labour.',
       ),
       RiskEscalation(
-        factor: TriageRiskFactor.diabetes,
+        factor: HealthRiskFactor.diabetes,
         level: TriageLevel.urgent,
         reason: 'Urine infections spread more readily with diabetes.',
       ),
       RiskEscalation(
-        factor: TriageRiskFactor.kidneyDisease,
+        factor: HealthRiskFactor.kidneyDisease,
         level: TriageLevel.urgent,
         reason:
             'An infection reaching kidneys that are already impaired needs '

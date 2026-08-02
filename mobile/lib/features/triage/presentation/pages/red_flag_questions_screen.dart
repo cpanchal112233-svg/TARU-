@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../application/triage_providers.dart';
+import '../../../safety/application/safety_providers.dart';
+import '../../../safety/domain/safety_profile.dart';
 import '../../domain/symptom.dart';
 import '../../domain/symptom_guidance.dart';
 import '../../domain/triage_engine.dart';
 import '../../domain/triage_level.dart';
-import '../../domain/triage_profile.dart';
 import '../../domain/triage_rules.dart';
 import '../widgets/triage_widgets.dart';
 import 'triage_result_screen.dart';
@@ -42,7 +42,7 @@ class _RedFlagQuestionsScreenState
 
   /// True once an answer on its own means emergency care, so the rest of the
   /// questionnaire can be skipped.
-  bool _emergencyAlready(TriageProfile profile) {
+  bool _emergencyAlready(SafetyProfile profile) {
     return _allFlags.any((RedFlag flag) {
       if (_answers[flag.code] != true) return false;
 
@@ -51,7 +51,7 @@ class _RedFlagQuestionsScreenState
     });
   }
 
-  void _showResult(TriageProfile profile) {
+  void _showResult(SafetyProfile profile) {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute<void>(
         builder: (_) => TriageResultScreen(
@@ -76,7 +76,7 @@ class _RedFlagQuestionsScreenState
 
   @override
   Widget build(BuildContext context) {
-    final TriageProfile profile = ref.watch(triageProfileProvider);
+    final SafetyProfile profile = ref.watch(safetyProfileProvider);
 
     final List<RedFlag> flags = _allFlags;
     final int answered = _answers.length;

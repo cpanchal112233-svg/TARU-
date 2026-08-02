@@ -7,20 +7,20 @@ import 'package:mobile/features/triage/domain/symptom.dart';
 import 'package:mobile/features/triage/domain/symptom_guidance.dart';
 import 'package:mobile/features/triage/domain/triage_engine.dart';
 import 'package:mobile/features/triage/domain/triage_level.dart';
-import 'package:mobile/features/triage/domain/triage_profile.dart';
+import 'package:mobile/features/safety/domain/safety_profile.dart';
 import 'package:mobile/features/triage/domain/triage_result.dart';
 import 'package:mobile/features/triage/domain/triage_rules.dart';
 
 /// Builds a triage profile the way the app does, from real health records,
 /// so these tests break if the mapping from conditions to risk factors drifts.
-TriageProfile profileWith({
+SafetyProfile profileWith({
   List<MedicalConditionType> conditions = const <MedicalConditionType>[],
   List<AllergenType> allergies = const <AllergenType>[],
   List<MedicationIngredient> medicines = const <MedicationIngredient>[],
   DateTime? dateOfBirth,
   PregnancyStatus? pregnancyStatus,
 }) {
-  return TriageProfile.from(
+  return SafetyProfile.from(
     profile: HealthProfile(
       dateOfBirth: dateOfBirth,
       pregnancyStatus: pregnancyStatus,
@@ -51,7 +51,7 @@ TriageProfile profileWith({
 TriageResult assess(
   List<Symptom> symptoms, {
   Set<String> answeredYes = const <String>{},
-  TriageProfile? profile,
+  SafetyProfile? profile,
 }) {
   return TriageEngine.assess(
     symptoms: symptoms,
@@ -254,7 +254,7 @@ void main() {
     test('advice comes with a warning while allergies are unanswered', () {
       final TriageResult result = assess(<Symptom>[
         Symptom.headache,
-      ], profile: TriageProfile.unknown);
+      ], profile: SafetyProfile.unknown);
 
       expect(
         result.cautions.any((String line) => line.contains('allergies')),
@@ -279,13 +279,13 @@ void main() {
 
   group('risk factors read from the profile', () {
     test('type 2 diabetes and warfarin are both recognised', () {
-      final TriageProfile profile = profileWith(
+      final SafetyProfile profile = profileWith(
         conditions: <MedicalConditionType>[MedicalConditionType.type2Diabetes],
         medicines: <MedicationIngredient>[MedicationIngredient.warfarin],
       );
 
-      expect(profile.has(TriageRiskFactor.diabetes), isTrue);
-      expect(profile.has(TriageRiskFactor.bleedingRisk), isTrue);
+      expect(profile.has(HealthRiskFactor.diabetes), isTrue);
+      expect(profile.has(HealthRiskFactor.bleedingRisk), isTrue);
     });
 
     test('age decides the older adult factor', () {
@@ -294,14 +294,14 @@ void main() {
       );
 
       expect(
-        profileWith(dateOfBirth: seventy).has(TriageRiskFactor.olderAdult),
+        profileWith(dateOfBirth: seventy).has(HealthRiskFactor.olderAdult),
         isTrue,
       );
-      expect(profileWith().has(TriageRiskFactor.olderAdult), isFalse);
+      expect(profileWith().has(HealthRiskFactor.olderAdult), isFalse);
     });
 
     test('a life-threatening allergy is carried into triage', () {
-      final TriageProfile profile = TriageProfile.from(
+      final SafetyProfile profile = SafetyProfile.from(
         profile: HealthProfile.empty,
         conditions: ConditionRecord.empty,
         allergies: const AllergyRecord(
@@ -315,7 +315,7 @@ void main() {
         medications: MedicationRecord.empty,
       );
 
-      expect(profile.has(TriageRiskFactor.anaphylaxisHistory), isTrue);
+      expect(profile.has(HealthRiskFactor.anaphylaxisHistory), isTrue);
     });
   });
 }

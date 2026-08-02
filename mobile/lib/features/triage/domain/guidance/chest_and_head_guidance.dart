@@ -63,7 +63,7 @@ chestAndHeadGuidance = <Symptom, SymptomGuidance>{
     ],
     escalations: <RiskEscalation>[
       RiskEscalation(
-        factor: TriageRiskFactor.heartDisease,
+        factor: HealthRiskFactor.heartDisease,
         level: TriageLevel.emergency,
         reason:
             'You already have a heart condition, so new chest pain is '
@@ -178,14 +178,14 @@ chestAndHeadGuidance = <Symptom, SymptomGuidance>{
     ],
     escalations: <RiskEscalation>[
       RiskEscalation(
-        factor: TriageRiskFactor.lungDisease,
+        factor: HealthRiskFactor.lungDisease,
         level: TriageLevel.soon,
         reason:
             'A new cough is often the first step of a flare-up when you '
             'have asthma or COPD.',
       ),
       RiskEscalation(
-        factor: TriageRiskFactor.immunosuppressed,
+        factor: HealthRiskFactor.immunosuppressed,
         level: TriageLevel.urgent,
         reason:
             'Chest infections move faster when your immune system is '
@@ -256,7 +256,7 @@ chestAndHeadGuidance = <Symptom, SymptomGuidance>{
     ],
     escalations: <RiskEscalation>[
       RiskEscalation(
-        factor: TriageRiskFactor.immunosuppressed,
+        factor: HealthRiskFactor.immunosuppressed,
         level: TriageLevel.urgent,
         reason:
             'A sore throat can be the first sign of a low white cell count '
@@ -315,7 +315,7 @@ chestAndHeadGuidance = <Symptom, SymptomGuidance>{
     ],
     escalations: <RiskEscalation>[
       RiskEscalation(
-        factor: TriageRiskFactor.heartDisease,
+        factor: HealthRiskFactor.heartDisease,
         level: TriageLevel.urgent,
         reason:
             'A new rhythm matters more when you already have a heart '
@@ -371,7 +371,7 @@ chestAndHeadGuidance = <Symptom, SymptomGuidance>{
         reason:
             'A headache after a head injury needs checking for slow '
             'bleeding inside the skull.',
-        emergencyWhen: <TriageRiskFactor>{TriageRiskFactor.bleedingRisk},
+        emergencyWhen: <HealthRiskFactor>{HealthRiskFactor.bleedingRisk},
       ),
       RedFlag(
         code: 'headache.worseLyingDown',
@@ -386,7 +386,7 @@ chestAndHeadGuidance = <Symptom, SymptomGuidance>{
     ],
     escalations: <RiskEscalation>[
       RiskEscalation(
-        factor: TriageRiskFactor.pregnant,
+        factor: HealthRiskFactor.pregnant,
         level: TriageLevel.urgent,
         reason:
             'A new headache in pregnancy needs a blood pressure and urine '
@@ -394,7 +394,7 @@ chestAndHeadGuidance = <Symptom, SymptomGuidance>{
             'pre-eclampsia.',
       ),
       RiskEscalation(
-        factor: TriageRiskFactor.olderAdult,
+        factor: HealthRiskFactor.olderAdult,
         level: TriageLevel.soon,
         reason:
             'A genuinely new type of headache after 65 is looked at more '
@@ -469,7 +469,7 @@ chestAndHeadGuidance = <Symptom, SymptomGuidance>{
     ],
     escalations: <RiskEscalation>[
       RiskEscalation(
-        factor: TriageRiskFactor.bleedingRisk,
+        factor: HealthRiskFactor.bleedingRisk,
         level: TriageLevel.urgent,
         reason:
             'On a blood thinner, feeling faint can be the first sign of '
@@ -531,7 +531,7 @@ chestAndHeadGuidance = <Symptom, SymptomGuidance>{
     ],
     escalations: <RiskEscalation>[
       RiskEscalation(
-        factor: TriageRiskFactor.strokeHistory,
+        factor: HealthRiskFactor.strokeHistory,
         level: TriageLevel.emergency,
         reason:
             'You have had a stroke or TIA before, which makes new weakness '
@@ -581,7 +581,7 @@ chestAndHeadGuidance = <Symptom, SymptomGuidance>{
         question: 'Did you hit your head when you fell?',
         level: TriageLevel.urgent,
         reason: 'A head injury from a fall needs its own assessment.',
-        emergencyWhen: <TriageRiskFactor>{TriageRiskFactor.bleedingRisk},
+        emergencyWhen: <HealthRiskFactor>{HealthRiskFactor.bleedingRisk},
       ),
       RedFlag(
         code: 'fainting.noWarning',
@@ -594,7 +594,7 @@ chestAndHeadGuidance = <Symptom, SymptomGuidance>{
     ],
     escalations: <RiskEscalation>[
       RiskEscalation(
-        factor: TriageRiskFactor.heartDisease,
+        factor: HealthRiskFactor.heartDisease,
         level: TriageLevel.emergency,
         reason:
             'Fainting with a known heart condition is assessed as a heart '
@@ -652,7 +652,7 @@ chestAndHeadGuidance = <Symptom, SymptomGuidance>{
     ],
     escalations: <RiskEscalation>[
       RiskEscalation(
-        factor: TriageRiskFactor.diabetes,
+        factor: HealthRiskFactor.diabetes,
         level: TriageLevel.urgent,
         reason:
             'Vision changes with diabetes are checked promptly, because '

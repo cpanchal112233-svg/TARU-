@@ -61,21 +61,21 @@ skinInjuryAndMindGuidance = <Symptom, SymptomGuidance>{
     ],
     escalations: <RiskEscalation>[
       RiskEscalation(
-        factor: TriageRiskFactor.anaphylaxisHistory,
+        factor: HealthRiskFactor.anaphylaxisHistory,
         level: TriageLevel.urgent,
         reason:
             'You have had a life-threatening reaction before, so a new '
             'rash is watched much more closely.',
       ),
       RiskEscalation(
-        factor: TriageRiskFactor.immunosuppressed,
+        factor: HealthRiskFactor.immunosuppressed,
         level: TriageLevel.urgent,
         reason:
             'Skin infections spread faster with a suppressed immune '
             'system.',
       ),
       RiskEscalation(
-        factor: TriageRiskFactor.diabetes,
+        factor: HealthRiskFactor.diabetes,
         level: TriageLevel.soon,
         reason: 'Skin infections take hold more easily with diabetes.',
       ),
@@ -146,7 +146,7 @@ skinInjuryAndMindGuidance = <Symptom, SymptomGuidance>{
     ],
     escalations: <RiskEscalation>[
       RiskEscalation(
-        factor: TriageRiskFactor.anaphylaxisHistory,
+        factor: HealthRiskFactor.anaphylaxisHistory,
         level: TriageLevel.emergency,
         reason:
             'You have had a life-threatening reaction before, so this one '
@@ -175,7 +175,7 @@ skinInjuryAndMindGuidance = <Symptom, SymptomGuidance>{
         question: 'Is it still bleeding after 10 minutes of firm pressure?',
         level: TriageLevel.emergency,
         reason: 'Bleeding that will not stop needs closing properly.',
-        emergencyWhen: <TriageRiskFactor>{TriageRiskFactor.bleedingRisk},
+        emergencyWhen: <HealthRiskFactor>{HealthRiskFactor.bleedingRisk},
       ),
       RedFlag(
         code: 'wound.streaks',
@@ -212,14 +212,14 @@ skinInjuryAndMindGuidance = <Symptom, SymptomGuidance>{
     ],
     escalations: <RiskEscalation>[
       RiskEscalation(
-        factor: TriageRiskFactor.diabetes,
+        factor: HealthRiskFactor.diabetes,
         level: TriageLevel.urgent,
         reason:
             'Foot and leg wounds with diabetes are seen quickly, because '
             'they get deep before they hurt and heal slowly once infected.',
       ),
       RiskEscalation(
-        factor: TriageRiskFactor.immunosuppressed,
+        factor: HealthRiskFactor.immunosuppressed,
         level: TriageLevel.urgent,
         reason: 'Wound infections escalate faster when immunity is low.',
       ),
@@ -287,14 +287,14 @@ skinInjuryAndMindGuidance = <Symptom, SymptomGuidance>{
     ],
     escalations: <RiskEscalation>[
       RiskEscalation(
-        factor: TriageRiskFactor.immunosuppressed,
+        factor: HealthRiskFactor.immunosuppressed,
         level: TriageLevel.urgent,
         reason:
             'Spinal infections are rare but far more likely when immunity '
             'is suppressed.',
       ),
       RiskEscalation(
-        factor: TriageRiskFactor.olderAdult,
+        factor: HealthRiskFactor.olderAdult,
         level: TriageLevel.soon,
         reason:
             'New back pain after 65 is more often a fracture than a strain.',
@@ -365,19 +365,19 @@ skinInjuryAndMindGuidance = <Symptom, SymptomGuidance>{
         reason:
             'Head injuries are watched for 48 hours even when they '
             'seem minor.',
-        emergencyWhen: <TriageRiskFactor>{TriageRiskFactor.bleedingRisk},
+        emergencyWhen: <HealthRiskFactor>{HealthRiskFactor.bleedingRisk},
       ),
     ],
     escalations: <RiskEscalation>[
       RiskEscalation(
-        factor: TriageRiskFactor.bleedingRisk,
+        factor: HealthRiskFactor.bleedingRisk,
         level: TriageLevel.urgent,
         reason:
             'On a blood thinner, bleeding inside the body can start slowly '
             'and show itself hours later.',
       ),
       RiskEscalation(
-        factor: TriageRiskFactor.olderAdult,
+        factor: HealthRiskFactor.olderAdult,
         level: TriageLevel.urgent,
         reason:
             'A fall after 65 is worth checking even when it feels minor, '
@@ -441,19 +441,19 @@ skinInjuryAndMindGuidance = <Symptom, SymptomGuidance>{
         question: 'Did it follow a fall or a knock?',
         level: TriageLevel.urgent,
         reason: 'Injury plus bleeding needs the extent checked properly.',
-        emergencyWhen: <TriageRiskFactor>{TriageRiskFactor.bleedingRisk},
+        emergencyWhen: <HealthRiskFactor>{HealthRiskFactor.bleedingRisk},
       ),
     ],
     escalations: <RiskEscalation>[
       RiskEscalation(
-        factor: TriageRiskFactor.bleedingRisk,
+        factor: HealthRiskFactor.bleedingRisk,
         level: TriageLevel.urgent,
         reason:
             'You take a blood thinner, so bleeding takes longer to stop '
             'and needs reviewing even when it looks small.',
       ),
       RiskEscalation(
-        factor: TriageRiskFactor.liverDisease,
+        factor: HealthRiskFactor.liverDisease,
         level: TriageLevel.urgent,
         reason: 'Liver disease reduces the proteins that make blood clot.',
       ),

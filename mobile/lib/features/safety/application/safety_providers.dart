@@ -8,14 +8,14 @@ import '../../health_profile/domain/allergy.dart';
 import '../../health_profile/domain/health_profile.dart';
 import '../../health_profile/domain/medical_condition.dart';
 import '../../health_profile/domain/medication.dart';
-import '../domain/triage_profile.dart';
+import '../domain/safety_profile.dart';
 
-/// The health profile reduced to what triage needs.
+/// The health profile reduced to what safety checks need.
 ///
-/// Falls back to [TriageProfile.unknown] while anything is still loading,
+/// Falls back to [SafetyProfile.unknown] while anything is still loading,
 /// which makes TARU more cautious rather than less: an unknown profile counts
 /// as unanswered allergies and medicines.
-final triageProfileProvider = Provider<TriageProfile>((ref) {
+final safetyProfileProvider = Provider<SafetyProfile>((ref) {
   final HealthProfile? profile = ref.watch(healthProfileProvider).value;
   final ConditionRecord? conditions = ref.watch(conditionsProvider).value;
   final AllergyRecord? allergies = ref.watch(allergiesProvider).value;
@@ -25,10 +25,10 @@ final triageProfileProvider = Provider<TriageProfile>((ref) {
       conditions == null ||
       allergies == null ||
       medications == null) {
-    return TriageProfile.unknown;
+    return SafetyProfile.unknown;
   }
 
-  return TriageProfile.from(
+  return SafetyProfile.from(
     profile: profile,
     conditions: conditions,
     allergies: allergies,

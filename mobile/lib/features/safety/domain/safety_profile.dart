@@ -4,31 +4,32 @@ import '../../health_profile/domain/allergy.dart';
 import '../../health_profile/domain/health_profile.dart';
 import '../../health_profile/domain/medical_condition.dart';
 import '../../health_profile/domain/medication.dart';
-import 'triage_rules.dart';
+import 'health_risk.dart';
 
-/// The health profile, reduced to the handful of facts that change a triage
+/// The health profile, reduced to the handful of facts that change a safety
 /// decision.
 ///
 /// The rest of the profile — height, blood group, when a condition was
 /// diagnosed — matters elsewhere but not here, and leaving it behind keeps the
-/// engine testable with a couple of lines of setup.
+/// symptom check and the interaction checker testable with a couple of lines
+/// of setup.
 @immutable
-class TriageProfile {
-  const TriageProfile({
-    this.riskFactors = const <TriageRiskFactor>{},
+class SafetyProfile {
+  const SafetyProfile({
+    this.riskFactors = const <HealthRiskFactor>{},
     this.blockedGuards = const <SelfCareGuard, String>{},
     this.allergiesUnanswered = false,
     this.medicationsUnanswered = false,
     this.conditionsUnanswered = false,
   });
 
-  static const TriageProfile unknown = TriageProfile(
+  static const SafetyProfile unknown = SafetyProfile(
     allergiesUnanswered: true,
     medicationsUnanswered: true,
     conditionsUnanswered: true,
   );
 
-  factory TriageProfile.from({
+  factory SafetyProfile.from({
     required HealthProfile profile,
     required ConditionRecord conditions,
     required AllergyRecord allergies,
@@ -54,9 +55,7 @@ class TriageProfile {
         takes.contains(MedicationIngredient.aspirin);
 
     final bool immunosuppressed =
-        hasCondition.contains(
-          MedicalConditionType.humanImmunodeficiencyVirus,
-        ) ||
+        hasCondition.contains(MedicalConditionType.humanImmunodeficiencyVirus) ||
         hasCondition.contains(MedicalConditionType.cancer) ||
         takes.contains(MedicationIngredient.prednisolone);
 
@@ -76,41 +75,44 @@ class TriageProfile {
 
     final bool pregnant = profile.pregnancyStatus == PregnancyStatus.pregnant;
 
-    final Set<TriageRiskFactor> factors = <TriageRiskFactor>{
-      if (pregnant) TriageRiskFactor.pregnant,
-      if (age != null && age >= 65) TriageRiskFactor.olderAdult,
-      if (age != null && age < 16) TriageRiskFactor.child,
+    final Set<HealthRiskFactor> factors = <HealthRiskFactor>{
+      if (pregnant) HealthRiskFactor.pregnant,
+      if (profile.pregnancyStatus == PregnancyStatus.breastfeeding)
+        HealthRiskFactor.breastfeeding,
+      if (age != null && age >= 65) HealthRiskFactor.olderAdult,
+      if (age != null && age < 16) HealthRiskFactor.child,
       if (hasCondition.contains(MedicalConditionType.type1Diabetes) ||
           hasCondition.contains(MedicalConditionType.type2Diabetes))
-        TriageRiskFactor.diabetes,
+        HealthRiskFactor.diabetes,
       if (hasCondition.contains(MedicalConditionType.coronaryArteryDisease) ||
           heartFailure ||
           hasCondition.contains(MedicalConditionType.atrialFibrillation))
-        TriageRiskFactor.heartDisease,
+        HealthRiskFactor.heartDisease,
+      if (heartFailure) HealthRiskFactor.heartFailure,
       if (hasCondition.contains(MedicalConditionType.hypertension))
-        TriageRiskFactor.highBloodPressure,
+        HealthRiskFactor.highBloodPressure,
       if (hasCondition.contains(MedicalConditionType.strokeHistory))
-        TriageRiskFactor.strokeHistory,
-      if (kidneyDisease) TriageRiskFactor.kidneyDisease,
+        HealthRiskFactor.strokeHistory,
+      if (kidneyDisease) HealthRiskFactor.kidneyDisease,
       if (cirrhosis ||
           hasCondition.contains(MedicalConditionType.hepatitisB) ||
           hasCondition.contains(MedicalConditionType.hepatitisC))
-        TriageRiskFactor.liverDisease,
+        HealthRiskFactor.liverDisease,
       if (hasCondition.contains(MedicalConditionType.asthma) ||
           hasCondition.contains(
             MedicalConditionType.chronicObstructivePulmonaryDisease,
           ))
-        TriageRiskFactor.lungDisease,
-      if (immunosuppressed) TriageRiskFactor.immunosuppressed,
-      if (onBloodThinner) TriageRiskFactor.bleedingRisk,
+        HealthRiskFactor.lungDisease,
+      if (immunosuppressed) HealthRiskFactor.immunosuppressed,
+      if (onBloodThinner) HealthRiskFactor.bleedingRisk,
       if (allergies.emergencyRisks.isNotEmpty)
-        TriageRiskFactor.anaphylaxisHistory,
-      if (ulcer) TriageRiskFactor.stomachUlcer,
+        HealthRiskFactor.anaphylaxisHistory,
+      if (ulcer) HealthRiskFactor.stomachUlcer,
       if (hasCondition.contains(MedicalConditionType.epilepsy))
-        TriageRiskFactor.epilepsy,
+        HealthRiskFactor.epilepsy,
     };
 
-    return TriageProfile(
+    return SafetyProfile(
       riskFactors: factors,
       blockedGuards: _blockedGuards(
         allergicTo: allergicTo,
@@ -154,8 +156,7 @@ class TriageProfile {
     }
 
     const String noNsaid =
-        'Ibuprofen and similar painkillers are not '
-        'suggested because ';
+        'Ibuprofen and similar painkillers are not suggested because ';
 
     if (allergicTo.contains(AllergenType.nonSteroidalAntiInflammatories) ||
         allergicTo.contains(AllergenType.aspirin)) {
@@ -187,7 +188,7 @@ class TriageProfile {
     return blocked;
   }
 
-  final Set<TriageRiskFactor> riskFactors;
+  final Set<HealthRiskFactor> riskFactors;
   final Map<SelfCareGuard, String> blockedGuards;
 
   /// Advice is given more cautiously when TARU has never been told these.
@@ -195,7 +196,7 @@ class TriageProfile {
   final bool medicationsUnanswered;
   final bool conditionsUnanswered;
 
-  bool has(TriageRiskFactor factor) => riskFactors.contains(factor);
+  bool has(HealthRiskFactor factor) => riskFactors.contains(factor);
 
   bool allows(SelfCareGuard? guard) =>
       guard == null || !blockedGuards.containsKey(guard);
