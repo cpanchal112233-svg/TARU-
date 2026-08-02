@@ -84,8 +84,14 @@
   screen. 36 unit tests cover both directions: the combinations that must fire
   and the ones that must stay quiet.
 
+- **Medical reports**: upload a PDF or photo of a lab result, scan,
+  prescription or discharge letter. Files go to Firebase Storage under the
+  user's own path; metadata lives in Firestore so the list stays fast. Images
+  open in-app, PDFs in the device viewer. Delete removes both the file and the
+  metadata. Owner-only Storage rules, 20 MB cap. Plain-language explanation of
+  what a report means waits for the AI phase.
+
 ## In progress / placeholders
-- Reports
 - Progress
 - AI health chat — the safety layer it must route through now exists
 - Wider daily routine (diet, exercise, sleep, mindfulness)

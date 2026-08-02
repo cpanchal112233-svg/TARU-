@@ -1,0 +1,18 @@
+rules_version = '2';
+
+// Medical reports are personal. Only the owner of users/{userId}/… may read or
+// write those objects. Size is capped so a mistap cannot fill the bucket.
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /users/{userId}/{allPaths=**} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+
+      allow write: if request.auth != null
+                   && request.auth.uid == userId
+                   && request.resource.size < 20 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*|application/pdf');
+
+      allow delete: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
