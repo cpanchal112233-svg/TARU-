@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../interactions/domain/medicine_checker.dart';
+import '../../../interactions/domain/medicine_warning.dart';
+import '../../../interactions/presentation/widgets/medicine_warning_widgets.dart';
+import '../../../safety/application/safety_providers.dart';
 import '../../application/allergies_providers.dart';
 import '../../domain/allergy.dart';
 import '../../domain/medication.dart';
@@ -13,9 +17,17 @@ import '../widgets/health_form_widgets.dart';
 /// food, reason — so each one gets its own page instead of an inline card that
 /// would bury the list.
 class MedicationEditorScreen extends ConsumerStatefulWidget {
-  const MedicationEditorScreen({super.key, required this.medication});
+  const MedicationEditorScreen({
+    super.key,
+    required this.medication,
+    this.others = const <UserMedication>[],
+  });
 
   final UserMedication medication;
+
+  /// The rest of the list, so a clash is visible while the medicine is being
+  /// added rather than only after it lands on the list behind this page.
+  final List<UserMedication> others;
 
   @override
   ConsumerState<MedicationEditorScreen> createState() =>
@@ -109,6 +121,11 @@ class _MedicationEditorScreenState
 
     final UserAllergy? clash = _clashingAllergy(allergies);
 
+    final List<MedicineWarning> warnings = MedicineChecker.check(
+      medicines: <UserMedication>[...widget.others, _current],
+      profile: ref.watch(safetyProfileProvider),
+    ).forMedicine(_current);
+
     return PopScope(
       canPop: !_hasUnsavedChanges,
       onPopInvokedWithResult: (bool didPop, Object? result) async {
@@ -142,6 +159,11 @@ class _MedicationEditorScreenState
                       allergy: clash,
                     ),
                     const SizedBox(height: 16),
+                  ],
+
+                  if (warnings.isNotEmpty) ...[
+                    MedicineWarningsPanel(warnings: warnings),
+                    const SizedBox(height: 8),
                   ],
 
                   if (_draft.ingredient.isCustom) ...[

@@ -57,9 +57,17 @@ model to route through when it arrives.
   suggest. Rule-based and offline. Unit tests cover the rules that matter —
   no de-escalation, no home remedies above "today", no ibuprofen for kidney
   disease.
-- **3b — Drug interaction checks** Beyond the allergy-family check that
-  already exists: pairs that should not be taken together, and doses that
-  need adjusting for kidney function.
+- **3b — Drug interaction & dose safety checks ✅** Beyond the allergy-family
+  check that already exists. Ingredients are mapped to pharmacological groups,
+  and 30 rules are written between groups rather than between brands, so "a
+  blood thinner with an anti-inflammatory" is one rule instead of a dozen
+  pairs. 22 further cautions come from the profile rather than another
+  medicine: ibuprofen with kidney disease, metformin against eGFR, ACE
+  inhibitors in pregnancy, codeine while breastfeeding. Three severities only,
+  because a list where everything is amber gets scrolled past. Warnings appear
+  live while a medicine is being added, on the saved list, on Home when there
+  is something to say, and on a Medicine safety screen. Nothing ever tells
+  someone to stop a prescribed medicine.
 
 ## Phase 4 — Medical reports
 Upload PDF/image reports to Firebase Storage + Firestore metadata.

@@ -2,6 +2,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../interactions/domain/medicine_checker.dart';
+import '../../../interactions/domain/medicine_warning.dart';
+import '../../../interactions/presentation/widgets/medicine_warning_widgets.dart';
+import '../../../safety/application/safety_providers.dart';
 import '../../application/allergies_providers.dart';
 import '../../application/medications_providers.dart';
 import '../../domain/allergy.dart';
@@ -100,6 +104,7 @@ class _MedicationsEditorState extends ConsumerState<_MedicationsEditor> {
           MaterialPageRoute<UserMedication>(
             builder: (_) => MedicationEditorScreen(
               medication: UserMedication(ingredient: ingredient),
+              others: _selected,
             ),
           ),
         );
@@ -118,8 +123,13 @@ class _MedicationsEditorState extends ConsumerState<_MedicationsEditor> {
     final UserMedication? updated = await Navigator.of(context)
         .push<UserMedication>(
           MaterialPageRoute<UserMedication>(
-            builder: (_) =>
-                MedicationEditorScreen(medication: _selected[index]),
+            builder: (_) => MedicationEditorScreen(
+              medication: _selected[index],
+              others: <UserMedication>[
+                for (int i = 0; i < _selected.length; i++)
+                  if (i != index) _selected[i],
+              ],
+            ),
           ),
         );
 
@@ -168,6 +178,13 @@ class _MedicationsEditorState extends ConsumerState<_MedicationsEditor> {
 
     final List<({UserMedication medication, UserAllergy allergy})> conflicts =
         MedicationRecord(medications: _selected).conflictsWith(allergies);
+
+    // Checked against the list being edited rather than the saved one, so a
+    // clash shows up the moment a medicine is added instead of after saving.
+    final List<MedicineWarning> warnings = MedicineChecker.check(
+      medicines: _selected,
+      profile: ref.watch(safetyProfileProvider),
+    );
 
     return PopScope(
       canPop: !_hasUnsavedChanges,
@@ -223,9 +240,19 @@ class _MedicationsEditorState extends ConsumerState<_MedicationsEditor> {
                         (conflict) =>
                             identical(conflict.medication, _selected[index]),
                       ),
+                      warningSeverity: warnings
+                          .forMedicine(_selected[index])
+                          .highestSeverity,
                       onTap: () => _edit(index),
                       onRemove: () => _removeAt(index),
                     ),
+                ],
+
+                if (warnings.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  HealthSectionLabel('Taken together'),
+                  MedicineWarningsPanel(warnings: warnings),
+                  const MedicineSafetyDisclaimer(),
                 ],
 
                 const SizedBox(height: 20),
@@ -336,12 +363,18 @@ class _MedicationCard extends StatelessWidget {
   const _MedicationCard({
     required this.medication,
     required this.clashesWithAllergy,
+    required this.warningSeverity,
     required this.onTap,
     required this.onRemove,
   });
 
   final UserMedication medication;
   final bool clashesWithAllergy;
+
+  /// Worst interaction this medicine is part of, if any, so the card can carry
+  /// a marker that points at the explanation further down the page.
+  final MedicineWarningSeverity? warningSeverity;
+
   final VoidCallback onTap;
   final VoidCallback onRemove;
 
@@ -350,6 +383,8 @@ class _MedicationCard extends StatelessWidget {
     final String? brand = medication.brandName?.trim();
     final String? schedule = medication.scheduleSummary;
     final String? reason = medication.reason?.trim();
+
+    final MedicineWarningSeverity? severity = warningSeverity;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -378,6 +413,13 @@ class _MedicationCard extends StatelessWidget {
                 const Icon(
                   Icons.warning_amber_rounded,
                   color: Colors.red,
+                  size: 18,
+                ),
+                const SizedBox(width: 6),
+              ] else if (severity != null) ...[
+                Icon(
+                  MedicineWarningStyle.of(severity).icon,
+                  color: MedicineWarningStyle.of(severity).colour,
                   size: 18,
                 ),
                 const SizedBox(width: 6),
