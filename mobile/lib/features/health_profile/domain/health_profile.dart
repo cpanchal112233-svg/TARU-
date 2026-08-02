@@ -212,7 +212,10 @@ class HealthProfile {
       heightCm: _readDouble(map['heightCm']),
       weightKg: _readDouble(map['weightKg']),
       bloodGroup: _readEnum(map['bloodGroup'], BloodGroup.values),
-      pregnancyStatus: _readEnum(map['pregnancyStatus'], PregnancyStatus.values),
+      pregnancyStatus: _readEnum(
+        map['pregnancyStatus'],
+        PregnancyStatus.values,
+      ),
       emergencyContactName: _readString(map['emergencyContactName']),
       emergencyContactRelation: _readString(map['emergencyContactRelation']),
       emergencyContactPhone: _readString(map['emergencyContactPhone']),
@@ -232,7 +235,9 @@ class HealthProfile {
       'heightCm': heightCm,
       'weightKg': weightKg,
       'bloodGroup': bloodGroup?.name,
-      'pregnancyStatus': pregnancyQuestionApplies ? pregnancyStatus?.name : null,
+      'pregnancyStatus': pregnancyQuestionApplies
+          ? pregnancyStatus?.name
+          : null,
       'emergencyContactName': _trimToNull(emergencyContactName),
       'emergencyContactRelation': _trimToNull(emergencyContactRelation),
       'emergencyContactPhone': _trimToNull(emergencyContactPhone),

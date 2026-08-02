@@ -182,9 +182,8 @@ class _HealthProfileFormState extends ConsumerState<_HealthProfileForm> {
     setState(() {
       _weightKg = switch (_units) {
         UnitSystem.metric => entered,
-        UnitSystem.imperial => entered == null
-            ? null
-            : HealthUnits.poundsToKilograms(entered),
+        UnitSystem.imperial =>
+          entered == null ? null : HealthUnits.poundsToKilograms(entered),
       };
     });
   }
@@ -257,9 +256,9 @@ class _HealthProfileFormState extends ConsumerState<_HealthProfileForm> {
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Health profile saved.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Health profile saved.')));
 
       // pop rather than maybePop: the work is saved, so the unsaved-changes
       // guard must not intercept this.
@@ -308,7 +307,8 @@ class _HealthProfileFormState extends ConsumerState<_HealthProfileForm> {
 
           _SectionHeader(
             title: 'Units',
-            subtitle: 'Enter measurements however you normally think about them.',
+            subtitle:
+                'Enter measurements however you normally think about them.',
           ),
           SegmentedButton<UnitSystem>(
             segments: [
@@ -327,7 +327,8 @@ class _HealthProfileFormState extends ConsumerState<_HealthProfileForm> {
 
           _SectionHeader(
             title: 'About you',
-            subtitle: 'Age and sex change what is normal for almost every test '
+            subtitle:
+                'Age and sex change what is normal for almost every test '
                 'result and dose.',
           ),
           _DateOfBirthField(
@@ -367,7 +368,8 @@ class _HealthProfileFormState extends ConsumerState<_HealthProfileForm> {
               initialValue: _pregnancyStatus,
               decoration: _fieldDecoration(
                 'Pregnancy status',
-                helper: 'Some common medicines are unsafe while pregnant or '
+                helper:
+                    'Some common medicines are unsafe while pregnant or '
                     'breastfeeding.',
               ),
               items: [
@@ -626,8 +628,18 @@ class _DateOfBirthField extends StatelessWidget {
   final VoidCallback onTap;
 
   static const List<String> _monthNames = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
   ];
 
   @override
