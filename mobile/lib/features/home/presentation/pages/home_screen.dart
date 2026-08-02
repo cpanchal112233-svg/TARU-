@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../emergency/presentation/pages/emergency_card_screen.dart';
 import '../../../health_profile/presentation/widgets/health_profile_completeness_card.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -35,9 +36,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _showComingSoon(String feature) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$feature is coming soon.')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('$feature is coming soon.')));
   }
 
   @override
@@ -183,6 +184,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                 const HealthProfileCompletenessCard(),
 
+                const SizedBox(height: 15),
+
+                _buildEmergencyCardButton(),
+
                 const SizedBox(height: 25),
 
                 const Text(
@@ -241,6 +246,33 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  /// Kept directly on Home rather than buried in the profile, because the one
+  /// moment it matters is the moment nobody can go looking for it.
+  Widget _buildEmergencyCardButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: OutlinedButton.icon(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: const Color(0xffB3261E),
+          side: const BorderSide(color: Color(0xffB3261E)),
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+        onPressed: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(builder: (_) => const EmergencyCardScreen()),
+        ),
+        icon: const Icon(Icons.emergency_outlined),
+        label: const Text(
+          'Emergency card',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
       ),
     );
   }
