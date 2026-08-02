@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../emergency/presentation/pages/emergency_card_screen.dart';
 import '../../../health_profile/presentation/widgets/health_profile_completeness_card.dart';
+import '../../../triage/presentation/pages/symptom_check_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key, this.onSelectTab});
@@ -33,12 +34,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         'createdAt': FieldValue.serverTimestamp(),
       });
     }
-  }
-
-  void _showComingSoon(String feature) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('$feature is coming soon.')));
   }
 
   @override
@@ -186,6 +181,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                 const SizedBox(height: 15),
 
+                _buildSymptomCheckButton(),
+
+                const SizedBox(height: 12),
+
                 _buildEmergencyCardButton(),
 
                 const SizedBox(height: 25),
@@ -235,9 +234,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                     Expanded(
                       child: _buildFeatureCard(
-                        icon: Icons.chat_bubble_outline,
-                        title: 'AI Assistant',
-                        onTap: () => _showComingSoon('AI Assistant'),
+                        icon: Icons.health_and_safety_outlined,
+                        title: 'Symptom check',
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => const SymptomCheckScreen(),
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -246,6 +249,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildSymptomCheckButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: FilledButton.icon(
+        style: FilledButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+        onPressed: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(builder: (_) => const SymptomCheckScreen()),
+        ),
+        icon: const Icon(Icons.health_and_safety_outlined),
+        label: const Text(
+          'Check a symptom',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
       ),
     );
   }
