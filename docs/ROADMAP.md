@@ -38,27 +38,42 @@ Completeness across every part of the profile drives the Home card. Allergies
 count as safety-critical: while unanswered the card turns amber instead of
 showing tidy progress, since basics alone never make advice safe.
 
-## Phase 3 — Medical reports
+- **2f — Medication reminders & adherence ✅** Today's doses as a checklist on
+  the Routine tab, derived from each medicine's frequency and times of day.
+  Local notifications (one per time of day, listing what is due). Taken /
+  skipped logging in Firestore. A 7-day adherence summary that counts from
+  when tracking began, so a first-day user is not shown a misleadingly low
+  percentage.
+
+## Phase 3 — Safety layer
+Built before the AI rather than after it, so there is something for a language
+model to route through when it arrives.
+
+- **3a — Symptom check & red-flag triage ✅** 26 symptoms, each with the
+  warning-sign questions that separate "manage at home" from "go now". The
+  outcome is one of four levels and it only ever escalates. The health profile
+  feeds in: conditions, allergies, medicines, age and pregnancy all raise
+  urgency where they should, and filter which home remedies are safe to
+  suggest. Rule-based and offline. Unit tests cover the rules that matter —
+  no de-escalation, no home remedies above "today", no ibuprofen for kidney
+  disease.
+- **3b — Drug interaction checks** Beyond the allergy-family check that
+  already exists: pairs that should not be taken together, and doses that
+  need adjusting for kidney function.
+
+## Phase 4 — Medical reports
 Upload PDF/image reports to Firebase Storage + Firestore metadata.
 
-## Phase 4 — AI assistant (with safety layer)
-Report explanations and health chat, built on top of the health profile.
-Safety is part of the feature, not an afterthought:
-- Red-flag triage that escalates emergencies instead of advising
-- Allergy and drug-interaction checks against the user's profile
+## Phase 5 — AI assistant
+Report explanations and health chat, built on the health profile and routed
+through the Phase 3 safety layer:
+- Triage runs first; the model never gets to talk someone out of an ambulance
 - Possible causes and "see a doctor if…" thresholds, never firm diagnoses
 - Visible disclaimer plus recorded consent
 
-## Phase 2f — Medication reminders & adherence ✅
-Today's doses as a checklist on the Routine tab, derived from each medicine's
-frequency and times of day. Local notifications (one per time of day, listing
-what is due). Taken / skipped logging in Firestore. A 7-day adherence summary
-that counts from when tracking began, so a first-day user is not shown a
-misleadingly low percentage.
-
-## Phase 5 — Daily routine (wider)
+## Phase 6 — Daily routine (wider)
 Diet, exercise, sleep and mindfulness checklist, on top of the medicine
 reminders already in place.
 
-## Phase 6 — Progress & insights
+## Phase 7 — Progress & insights
 Charts, streaks, and personalized health insights.

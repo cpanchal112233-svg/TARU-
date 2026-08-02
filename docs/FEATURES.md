@@ -38,8 +38,25 @@
   time of day, listing every dose due then. A short adherence summary covers
   the days since tracking began (not a padded empty week).
 
+- **Symptom check with red-flag triage**: pick up to three symptoms from 26,
+  searchable in everyday words, answer the warning-sign questions for each,
+  and get one of four answers — emergency, today, in a few days, or manage at
+  home. Rule-based and offline: no AI service is involved.
+
+  What makes it more than a checklist is the profile. Chest pain becomes an
+  emergency if a heart condition is on file; a knock on the head becomes one
+  if you take warfarin; belly pain in pregnancy is never filed under "wait and
+  see". Home remedies are filtered the same way, so ibuprofen is never
+  suggested to someone with kidney disease, an ulcer or an NSAID allergy — and
+  TARU says which suggestion it withheld and why.
+
+  Two rules are enforced in code and covered by tests: the outcome only ever
+  escalates, so one reassuring answer cannot cancel a worrying one; and home
+  remedies vanish above "see a doctor today". Answering yes to an emergency
+  question ends the questionnaire early rather than making someone finish it.
+
 ## In progress / placeholders
 - Reports
 - Progress
-- AI Assistant — Home quick action shows “coming soon”
+- AI health chat — the safety layer it must route through now exists
 - Wider daily routine (diet, exercise, sleep, mindfulness)
