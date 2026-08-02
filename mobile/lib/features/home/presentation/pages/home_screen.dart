@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../emergency/presentation/pages/emergency_card_screen.dart';
 import '../../../health_profile/presentation/widgets/health_profile_completeness_card.dart';
+import '../../../interactions/presentation/widgets/medicine_safety_banner.dart';
 import '../../../triage/presentation/pages/symptom_check_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -180,6 +181,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 const HealthProfileCompletenessCard(),
 
                 const SizedBox(height: 15),
+
+                const MedicineSafetyBanner(),
 
                 _buildSymptomCheckButton(),
 

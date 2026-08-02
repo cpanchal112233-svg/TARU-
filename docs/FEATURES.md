@@ -55,6 +55,33 @@
   remedies vanish above "see a doctor today". Answering yes to an emergency
   question ends the questionnaire early rather than making someone finish it.
 
+- **Medicine safety checks**: TARU reads the medicine list as a whole rather
+  than one entry at a time. Ingredients are grouped pharmacologically, and the
+  rules are written between groups — warfarin with any anti-inflammatory is a
+  single rule, not nine. Alongside those, cautions come from the profile:
+  ibuprofen with kidney disease or heart failure, metformin against kidney
+  function, ACE inhibitors or statins in pregnancy, codeine while
+  breastfeeding, benzodiazepines in older adults.
+
+  It also catches the quiet ones. Two entries that both contain paracetamol
+  are flagged, because that is how people exceed the daily limit without
+  noticing, and liver damage from it has no early symptoms. Omeprazole
+  alongside clopidogrel is flagged with the specific fix — pantoprazole does
+  the same job without blunting it.
+
+  Three severities only: speak to a doctor, worth checking, space them apart.
+  Overlapping rules collapse into one, so someone on the classic "triple
+  whammy" reads a single clear warning rather than three partial ones. Every
+  warning names the medicines from their own list, explains why in plain
+  words, and ends with something to do. None of them tell anyone to stop a
+  prescribed medicine — that is more dangerous than the interactions
+  themselves.
+
+  Warnings appear while a medicine is still being added, on the saved list, on
+  Home when there is something to say, and in full on a Medicine safety
+  screen. 36 unit tests cover both directions: the combinations that must fire
+  and the ones that must stay quiet.
+
 ## In progress / placeholders
 - Reports
 - Progress

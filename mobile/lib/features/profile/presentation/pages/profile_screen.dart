@@ -8,6 +8,7 @@ import '../../../health_profile/presentation/pages/allergies_screen.dart';
 import '../../../health_profile/presentation/pages/conditions_screen.dart';
 import '../../../health_profile/presentation/pages/health_profile_screen.dart';
 import '../../../health_profile/presentation/pages/medications_screen.dart';
+import '../../../interactions/presentation/pages/medicine_safety_screen.dart';
 import 'reauthentication_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -452,6 +453,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     context,
                     MaterialPageRoute<void>(
                       builder: (_) => const MedicationsScreen(),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 15),
+
+                // MEDICINE SAFETY
+                _buildProfileOption(
+                  icon: Icons.rule_outlined,
+                  title: 'Medicine Safety',
+                  subtitle: 'Interactions and cautions across what you take',
+
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (_) => const MedicineSafetyScreen(),
                     ),
                   ),
                 ),
