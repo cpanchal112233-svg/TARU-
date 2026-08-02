@@ -10,8 +10,7 @@ class HealthUnits {
   static const double centimetresPerInch = 2.54;
   static const int inchesPerFoot = 12;
 
-  static double poundsToKilograms(double pounds) =>
-      pounds * kilogramsPerPound;
+  static double poundsToKilograms(double pounds) => pounds * kilogramsPerPound;
 
   static double kilogramsToPounds(double kilograms) =>
       kilograms / kilogramsPerPound;

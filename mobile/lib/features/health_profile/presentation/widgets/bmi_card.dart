@@ -4,7 +4,12 @@ import '../../domain/health_profile.dart';
 
 /// Shows the BMI derived from the entered height and weight.
 class BmiCard extends StatelessWidget {
-  const BmiCard({super.key, required this.bmi, required this.category, this.needsCaveat = false});
+  const BmiCard({
+    super.key,
+    required this.bmi,
+    required this.category,
+    this.needsCaveat = false,
+  });
 
   final double? bmi;
   final BmiCategory? category;
@@ -64,7 +69,10 @@ class BmiCard extends StatelessWidget {
               ),
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: accent.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(20),

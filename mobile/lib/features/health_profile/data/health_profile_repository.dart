@@ -13,7 +13,11 @@ class HealthProfileRepository {
   final FirebaseFirestore _firestore;
 
   DocumentReference<Map<String, dynamic>> _profileDocument(String uid) =>
-      _firestore.collection('users').doc(uid).collection('health').doc('profile');
+      _firestore
+          .collection('users')
+          .doc(uid)
+          .collection('health')
+          .doc('profile');
 
   Stream<HealthProfile> watch(String uid) {
     return _profileDocument(uid).snapshots().map((snapshot) {
