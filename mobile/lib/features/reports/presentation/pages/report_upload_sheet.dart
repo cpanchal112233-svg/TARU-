@@ -69,7 +69,7 @@ class _ReportUploadSheetState extends ConsumerState<_ReportUploadSheet> {
     });
 
     try {
-      final FilePickerResult? result = await FilePicker.pickFiles(
+      final FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: const <String>[
           'pdf',
