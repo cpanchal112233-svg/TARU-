@@ -3,8 +3,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../auth/data/auth_service.dart';
+import '../../../emergency/presentation/pages/emergency_card_screen.dart';
+import '../../../health_profile/presentation/pages/allergies_screen.dart';
 import '../../../health_profile/presentation/pages/conditions_screen.dart';
 import '../../../health_profile/presentation/pages/health_profile_screen.dart';
+import '../../../health_profile/presentation/pages/medications_screen.dart';
 import 'reauthentication_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -417,6 +420,54 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     context,
                     MaterialPageRoute<void>(
                       builder: (_) => const ConditionsScreen(),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 15),
+
+                // ALLERGIES
+                _buildProfileOption(
+                  icon: Icons.warning_amber_rounded,
+                  title: 'Allergies',
+                  subtitle: 'Medicines, food and environmental triggers',
+
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (_) => const AllergiesScreen(),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 15),
+
+                // MEDICATIONS
+                _buildProfileOption(
+                  icon: Icons.medication_outlined,
+                  title: 'Medications',
+                  subtitle: 'What you take, how much and when',
+
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (_) => const MedicationsScreen(),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 15),
+
+                // EMERGENCY CARD
+                _buildProfileOption(
+                  icon: Icons.emergency_outlined,
+                  title: 'Emergency Card',
+                  subtitle: 'What a paramedic needs to know, on one screen',
+
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (_) => const EmergencyCardScreen(),
                     ),
                   ),
                 ),
