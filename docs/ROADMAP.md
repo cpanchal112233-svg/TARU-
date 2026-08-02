@@ -69,8 +69,11 @@ model to route through when it arrives.
   is something to say, and on a Medicine safety screen. Nothing ever tells
   someone to stop a prescribed medicine.
 
-## Phase 4 — Medical reports
-Upload PDF/image reports to Firebase Storage + Firestore metadata.
+## Phase 4 — Medical reports ✅
+Upload PDF or image reports (lab, scan, prescription, discharge) to Firebase
+Storage, with metadata in Firestore under `users/{uid}/reports`. Owner-only
+Storage rules, 20 MB cap. List, open (image in-app, PDF externally), and
+delete. Plain-language explanation of what a report means waits for Phase 5.
 
 ## Phase 5 — AI assistant
 Report explanations and health chat, built on the health profile and routed
