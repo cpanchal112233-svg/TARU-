@@ -433,3 +433,38 @@ class UserCondition {
     );
   }
 }
+
+/// The user's answer to "what do you live with?".
+///
+/// [noKnownConditions] is stored separately because "I am otherwise healthy"
+/// and "I have not filled this in yet" lead to different advice, and an empty
+/// list alone cannot tell them apart.
+@immutable
+class ConditionRecord {
+  const ConditionRecord({
+    this.conditions = const <UserCondition>[],
+    this.noKnownConditions = false,
+  });
+
+  static const ConditionRecord empty = ConditionRecord();
+
+  final List<UserCondition> conditions;
+  final bool noKnownConditions;
+
+  bool get hasAnswered => noKnownConditions || conditions.isNotEmpty;
+
+  factory ConditionRecord.fromMap(Map<String, dynamic> map) {
+    final Object? items = map['items'];
+
+    return ConditionRecord(
+      conditions: items is List
+          ? items
+                .whereType<Map<String, dynamic>>()
+                .map(UserCondition.fromMap)
+                .whereType<UserCondition>()
+                .toList()
+          : const <UserCondition>[],
+      noKnownConditions: map['noKnownConditions'] == true,
+    );
+  }
+}

@@ -1,38 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../application/health_profile_providers.dart';
-import '../../domain/health_profile.dart';
+import '../../application/health_completeness_providers.dart';
+import '../../domain/health_completeness.dart';
+import '../pages/allergies_screen.dart';
+import '../pages/conditions_screen.dart';
 import '../pages/health_profile_screen.dart';
+import '../pages/medications_screen.dart';
 
-/// Nudges the user to finish their health basics, and shows what is still missing.
+/// Nudges the user to finish their health profile, and shows what is missing.
 ///
 /// Partial answers are genuinely useful, so this reports progress rather than
-/// blocking the app behind a mandatory form.
+/// blocking the app behind a mandatory form. An unanswered allergy question is
+/// treated differently from an untidy one: it turns the card amber, because
+/// nothing TARU suggests later is safe until that gap is closed.
 class HealthProfileCompletenessCard extends ConsumerWidget {
   const HealthProfileCompletenessCard({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final AsyncValue<HealthProfile> asyncProfile = ref.watch(
-      healthProfileProvider,
+    final HealthCompleteness? completeness = ref.watch(
+      healthCompletenessProvider,
     );
-
-    final HealthProfile? profile = asyncProfile.value;
 
     // Stay out of the layout until the real numbers are known, so the card does
     // not flash a misleading 0%.
-    if (profile == null) return const SizedBox.shrink();
+    if (completeness == null) return const SizedBox.shrink();
 
-    final bool isComplete = profile.isComplete;
+    final bool isComplete = completeness.isComplete;
+    final HealthCompletenessItem? criticalGap = completeness.criticalGap;
 
     final Color accent = isComplete
         ? const Color(0xff16A34A)
+        : criticalGap != null
+        ? const Color(0xffD97706)
         : Theme.of(context).colorScheme.primary;
 
     return InkWell(
       onTap: () => Navigator.of(context).push(
-        MaterialPageRoute<void>(builder: (_) => const HealthProfileScreen()),
+        MaterialPageRoute<void>(
+          builder: (_) => _screenFor(completeness.nextSection),
+        ),
       ),
       borderRadius: BorderRadius.circular(20),
       child: Container(
@@ -53,7 +61,7 @@ class HealthProfileCompletenessCard extends ConsumerWidget {
         child: Row(
           children: [
             _ProgressRing(
-              progress: profile.completion,
+              progress: completeness.completion,
               accent: accent,
               isComplete: isComplete,
             ),
@@ -63,9 +71,7 @@ class HealthProfileCompletenessCard extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    isComplete
-                        ? 'Health profile complete'
-                        : 'Complete your health profile',
+                    _titleFor(isComplete, criticalGap),
                     style: const TextStyle(
                       fontSize: 16.5,
                       fontWeight: FontWeight.bold,
@@ -73,7 +79,7 @@ class HealthProfileCompletenessCard extends ConsumerWidget {
                   ),
                   const SizedBox(height: 5),
                   Text(
-                    _subtitleFor(profile),
+                    _subtitleFor(completeness),
                     style: TextStyle(
                       fontSize: 13,
                       height: 1.35,
@@ -84,21 +90,50 @@ class HealthProfileCompletenessCard extends ConsumerWidget {
               ),
             ),
             const SizedBox(width: 8),
-            Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey.shade500),
+            Icon(
+              Icons.arrow_forward_ios,
+              size: 16,
+              color: Colors.grey.shade500,
+            ),
           ],
         ),
       ),
     );
   }
 
-  static String _subtitleFor(HealthProfile profile) {
-    final List<String> missing = profile.missingItems;
+  static Widget _screenFor(HealthProfileSection section) {
+    switch (section) {
+      case HealthProfileSection.basics:
+        return const HealthProfileScreen();
+      case HealthProfileSection.conditions:
+        return const ConditionsScreen();
+      case HealthProfileSection.allergies:
+        return const AllergiesScreen();
+      case HealthProfileSection.medications:
+        return const MedicationsScreen();
+    }
+  }
+
+  static String _titleFor(bool isComplete, HealthCompletenessItem? gap) {
+    if (isComplete) return 'Health profile complete';
+    if (gap != null) return 'TARU does not know your allergies';
+
+    return 'Complete your health profile';
+  }
+
+  static String _subtitleFor(HealthCompleteness completeness) {
+    final List<String> missing = completeness.missingLabels;
 
     if (missing.isEmpty) {
       return 'Tap to review or update your details.';
     }
 
-    if (profile.completion == 0) {
+    if (completeness.criticalGap != null) {
+      return 'Until you answer this, TARU cannot rule out a reaction to '
+          'anything it suggests. It takes a moment.';
+    }
+
+    if (completeness.completion == 0) {
       return 'TARU needs a few basics before it can give advice that fits you.';
     }
 
