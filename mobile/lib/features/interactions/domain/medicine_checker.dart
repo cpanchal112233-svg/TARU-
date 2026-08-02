@@ -1,5 +1,4 @@
 import '../../health_profile/domain/medication.dart';
-import '../../safety/domain/health_risk.dart';
 import '../../safety/domain/safety_profile.dart';
 import 'interaction_rules.dart';
 import 'medicine_group.dart';
@@ -156,14 +155,3 @@ extension MedicineWarningList on List<MedicineWarning> {
     return highest;
   }
 }
-
-/// Risk factors the checker can act on, exposed so the UI can explain why a
-/// profile gap matters ("you have not told us about your conditions yet").
-const List<HealthRiskFactor> cautionFactors = <HealthRiskFactor>[
-  HealthRiskFactor.kidneyDisease,
-  HealthRiskFactor.liverDisease,
-  HealthRiskFactor.heartFailure,
-  HealthRiskFactor.stomachUlcer,
-  HealthRiskFactor.pregnant,
-  HealthRiskFactor.breastfeeding,
-];

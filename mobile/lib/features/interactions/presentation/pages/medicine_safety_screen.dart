@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../health_profile/application/medications_providers.dart';
 import '../../../health_profile/domain/medication.dart';
+import '../../../health_profile/presentation/pages/allergies_screen.dart';
 import '../../../health_profile/presentation/pages/conditions_screen.dart';
 import '../../../health_profile/presentation/pages/medications_screen.dart';
 import '../../../safety/application/safety_providers.dart';
@@ -22,6 +23,7 @@ class MedicineSafetyScreen extends ConsumerWidget {
 
     final List<MedicineWarning> warnings = ref.watch(medicineWarningsProvider);
     final SafetyProfile profile = ref.watch(safetyProfileProvider);
+    final List<_ProfileGap> gaps = _gaps(profile);
 
     return Scaffold(
       backgroundColor: const Color(0xffF8FAFC),
@@ -45,9 +47,9 @@ class MedicineSafetyScreen extends ConsumerWidget {
                       'interaction checks.',
                 ),
 
-                if (_gaps(profile).isNotEmpty) ...[
+                if (gaps.isNotEmpty) ...[
                   const SizedBox(height: 16),
-                  _ProfileGapCard(gaps: _gaps(profile)),
+                  _ProfileGapCard(gaps: gaps),
                 ],
 
                 const SizedBox(height: 24),
@@ -58,13 +60,36 @@ class MedicineSafetyScreen extends ConsumerWidget {
   }
 
   /// What TARU still does not know that would change these checks.
-  static List<String> _gaps(SafetyProfile profile) => <String>[
+  static List<_ProfileGap> _gaps(SafetyProfile profile) => <_ProfileGap>[
     if (profile.conditionsUnanswered)
-      'your conditions — kidney, liver, heart and stomach history change '
-          'several of these warnings',
+      const _ProfileGap(
+        text:
+            'your conditions — kidney, liver, heart and stomach history change '
+            'several of these warnings',
+        screenBuilder: ConditionsScreen.new,
+        buttonLabel: 'Add conditions',
+      ),
     if (profile.allergiesUnanswered)
-      'your allergies — so TARU can spot a medicine from a family you react to',
+      const _ProfileGap(
+        text:
+            'your allergies — so TARU can spot a medicine from a family you '
+            'react to',
+        screenBuilder: AllergiesScreen.new,
+        buttonLabel: 'Add allergies',
+      ),
   ];
+}
+
+class _ProfileGap {
+  const _ProfileGap({
+    required this.text,
+    required this.screenBuilder,
+    required this.buttonLabel,
+  });
+
+  final String text;
+  final Widget Function() screenBuilder;
+  final String buttonLabel;
 }
 
 class _Header extends StatelessWidget {
@@ -121,7 +146,7 @@ class _Header extends StatelessWidget {
 class _ProfileGapCard extends StatelessWidget {
   const _ProfileGapCard({required this.gaps});
 
-  final List<String> gaps;
+  final List<_ProfileGap> gaps;
 
   @override
   Widget build(BuildContext context) {
@@ -141,25 +166,24 @@ class _ProfileGapCard extends StatelessWidget {
             style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 8),
-          for (final String gap in gaps)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 6),
-              child: Text(
-                'TARU still needs $gap.',
-                style: TextStyle(
-                  fontSize: 13,
-                  height: 1.45,
-                  color: Colors.grey.shade800,
-                ),
+          for (final _ProfileGap gap in gaps) ...[
+            Text(
+              'TARU still needs ${gap.text}.',
+              style: TextStyle(
+                fontSize: 13,
+                height: 1.45,
+                color: Colors.grey.shade800,
               ),
             ),
-          const SizedBox(height: 4),
-          OutlinedButton(
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(builder: (_) => const ConditionsScreen()),
+            const SizedBox(height: 8),
+            OutlinedButton(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => gap.screenBuilder()),
+              ),
+              child: Text(gap.buttonLabel),
             ),
-            child: const Text('Complete my health profile'),
-          ),
+            if (gap != gaps.last) const SizedBox(height: 8),
+          ],
         ],
       ),
     );

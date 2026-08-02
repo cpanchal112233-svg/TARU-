@@ -57,8 +57,10 @@
 
 - **Medicine safety checks**: TARU reads the medicine list as a whole rather
   than one entry at a time. Ingredients are grouped pharmacologically, and the
-  rules are written between groups — warfarin with any anti-inflammatory is a
-  single rule, not nine. Alongside those, cautions come from the profile:
+  rules are written between groups — a blood thinner (including warfarin and
+  the newer tablet anticoagulants) with any anti-inflammatory is a single rule,
+  not nine. INR-shifting antibiotic rules stay warfarin-only, because DOACs do
+  not use INR. Alongside those, cautions come from the profile:
   ibuprofen with kidney disease or heart failure, metformin against kidney
   function, ACE inhibitors or statins in pregnancy, codeine while
   breastfeeding, benzodiazepines in older adults.

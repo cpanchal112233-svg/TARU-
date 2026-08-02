@@ -51,11 +51,16 @@ class SafetyProfile {
 
     final bool onBloodThinner =
         takes.contains(MedicationIngredient.warfarin) ||
+        takes.contains(MedicationIngredient.apixaban) ||
+        takes.contains(MedicationIngredient.rivaroxaban) ||
+        takes.contains(MedicationIngredient.dabigatran) ||
         takes.contains(MedicationIngredient.clopidogrel) ||
         takes.contains(MedicationIngredient.aspirin);
 
     final bool immunosuppressed =
-        hasCondition.contains(MedicalConditionType.humanImmunodeficiencyVirus) ||
+        hasCondition.contains(
+          MedicalConditionType.humanImmunodeficiencyVirus,
+        ) ||
         hasCondition.contains(MedicalConditionType.cancer) ||
         takes.contains(MedicationIngredient.prednisolone);
 

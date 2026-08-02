@@ -19,9 +19,9 @@ const List<InteractionRule> interactionRules = <InteractionRule>[
     severity: MedicineWarningSeverity.serious,
     title: 'A blood thinner with an anti-inflammatory painkiller',
     detail:
-        'Warfarin already slows clotting. Anti-inflammatory painkillers thin '
-        'the blood further and strip the stomach lining at the same time, so '
-        'the pair causes bleeds that neither causes alone.',
+        'Your blood thinner already slows clotting. Anti-inflammatory '
+        'painkillers thin the blood further and strip the stomach lining at '
+        'the same time, so the pair causes bleeds that neither causes alone.',
     action:
         'Ask a pharmacist about paracetamol for the pain instead. If a doctor '
         'has told you to take both, watch for black stools, unusual bruising, '
@@ -84,13 +84,10 @@ const List<InteractionRule> interactionRules = <InteractionRule>[
         'while the steroid course lasts.',
   ),
 
-  // ------------------------------------------------------- antibiotic + INR
+  // --------------------------------------------- antibiotic + INR (warfarin)
   InteractionRule(
-    code: 'anticoagulant+sulfonamide',
-    groups: <MedicineGroup>[
-      MedicineGroup.anticoagulant,
-      MedicineGroup.sulfonamide,
-    ],
+    code: 'warfarin+sulfonamide',
+    groups: <MedicineGroup>[MedicineGroup.warfarin, MedicineGroup.sulfonamide],
     severity: MedicineWarningSeverity.serious,
     title: 'This antibiotic can push your INR up sharply',
     detail:
@@ -101,9 +98,9 @@ const List<InteractionRule> interactionRules = <InteractionRule>[
         'ask for an INR check during the course.',
   ),
   InteractionRule(
-    code: 'anticoagulant+nitroimidazole',
+    code: 'warfarin+nitroimidazole',
     groups: <MedicineGroup>[
-      MedicineGroup.anticoagulant,
+      MedicineGroup.warfarin,
       MedicineGroup.nitroimidazole,
     ],
     severity: MedicineWarningSeverity.serious,
@@ -116,11 +113,8 @@ const List<InteractionRule> interactionRules = <InteractionRule>[
         'bruising.',
   ),
   InteractionRule(
-    code: 'anticoagulant+macrolide',
-    groups: <MedicineGroup>[
-      MedicineGroup.anticoagulant,
-      MedicineGroup.macrolide,
-    ],
+    code: 'warfarin+macrolide',
+    groups: <MedicineGroup>[MedicineGroup.warfarin, MedicineGroup.macrolide],
     severity: MedicineWarningSeverity.caution,
     title: 'This antibiotic can unsettle your INR',
     detail: 'Azithromycin can increase the effect of warfarin over a few days.',
@@ -128,11 +122,8 @@ const List<InteractionRule> interactionRules = <InteractionRule>[
         'Mention the warfarin to your prescriber and ask about an INR check.',
   ),
   InteractionRule(
-    code: 'anticoagulant+quinolone',
-    groups: <MedicineGroup>[
-      MedicineGroup.anticoagulant,
-      MedicineGroup.quinolone,
-    ],
+    code: 'warfarin+quinolone',
+    groups: <MedicineGroup>[MedicineGroup.warfarin, MedicineGroup.quinolone],
     severity: MedicineWarningSeverity.caution,
     title: 'This antibiotic can unsettle your INR',
     detail:
@@ -142,11 +133,8 @@ const List<InteractionRule> interactionRules = <InteractionRule>[
         'Mention the warfarin to your prescriber and ask about an INR check.',
   ),
   InteractionRule(
-    code: 'anticoagulant+paracetamol',
-    groups: <MedicineGroup>[
-      MedicineGroup.anticoagulant,
-      MedicineGroup.paracetamol,
-    ],
+    code: 'warfarin+paracetamol',
+    groups: <MedicineGroup>[MedicineGroup.warfarin, MedicineGroup.paracetamol],
     severity: MedicineWarningSeverity.caution,
     title: 'Regular paracetamol can nudge your INR up',
     detail:
@@ -212,7 +200,7 @@ const List<InteractionRule> interactionRules = <InteractionRule>[
     code: 'triple-whammy',
     groups: <MedicineGroup>[
       MedicineGroup.aceInhibitorOrArb,
-      MedicineGroup.loopDiuretic,
+      MedicineGroup.diuretic,
       MedicineGroup.nsaid,
     ],
     supersedes: <String>['nsaid+ace', 'nsaid+diuretic'],
@@ -258,6 +246,22 @@ const List<InteractionRule> interactionRules = <InteractionRule>[
         'course runs longer than a week or you already have kidney problems.',
   ),
   InteractionRule(
+    code: 'ace+spironolactone',
+    groups: <MedicineGroup>[
+      MedicineGroup.aceInhibitorOrArb,
+      MedicineGroup.potassiumSparingDiuretic,
+    ],
+    severity: MedicineWarningSeverity.caution,
+    title: 'These two can push potassium too high',
+    detail:
+        'Spironolactone and ACE inhibitors or ARBs both hold potassium in the '
+        'body. Together that is useful for heart failure, but only with blood '
+        'tests to keep potassium in range.',
+    action:
+        'Keep your blood tests up to date. Tell a doctor if you get muscle '
+        'weakness, a fluttering heart, or feel unusually tired.',
+  ),
+  InteractionRule(
     code: 'nsaid+ace',
     groups: <MedicineGroup>[
       MedicineGroup.nsaid,
@@ -274,7 +278,7 @@ const List<InteractionRule> interactionRules = <InteractionRule>[
   ),
   InteractionRule(
     code: 'nsaid+diuretic',
-    groups: <MedicineGroup>[MedicineGroup.nsaid, MedicineGroup.loopDiuretic],
+    groups: <MedicineGroup>[MedicineGroup.nsaid, MedicineGroup.diuretic],
     severity: MedicineWarningSeverity.caution,
     title: 'An anti-inflammatory blunts your water tablet',
     detail:
@@ -629,11 +633,11 @@ const List<ConditionCaution> conditionCautions = <ConditionCaution>[
     group: MedicineGroup.anticoagulant,
     factor: HealthRiskFactor.pregnant,
     severity: MedicineWarningSeverity.serious,
-    title: 'Warfarin can harm a developing baby',
+    title: 'This blood thinner is not used in pregnancy',
     detail:
-        'It crosses the placenta and can cause birth defects, particularly in '
-        'the first trimester. Pregnancy is usually managed with an injectable '
-        'blood thinner instead.',
+        'Warfarin and the newer tablet blood thinners can harm a developing '
+        'baby. Pregnancy is usually managed with an injectable blood thinner '
+        'instead.',
     action:
         'Contact your doctor urgently — do not stop it on your own, because '
         'the clot risk it is treating does not go away.',

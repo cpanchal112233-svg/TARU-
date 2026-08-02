@@ -16,6 +16,7 @@ enum MedicineGroup {
   paracetamol('paracetamol'),
   antiplatelet('blood-thinning antiplatelets'),
   anticoagulant('anticoagulants'),
+  warfarin('warfarin'),
   clopidogrel('clopidogrel'),
   bloodThinning('medicines that thin the blood or irritate the stomach'),
   opioid('opioid painkillers'),
@@ -26,7 +27,8 @@ enum MedicineGroup {
   qtProlonging('medicines that affect heart rhythm'),
   aceInhibitorOrArb('blood pressure medicines (ACE inhibitors and ARBs)'),
   betaBlocker('beta blockers'),
-  loopDiuretic('water tablets'),
+  diuretic('water tablets'),
+  potassiumSparingDiuretic('potassium-sparing water tablets'),
   statin('statins'),
   protonPumpInhibitor('acid-reducing medicines'),
   acidReducer('acid-reducing medicines'),
@@ -69,11 +71,19 @@ _members = <MedicineGroup, Set<MedicationIngredient>>{
   },
   MedicineGroup.anticoagulant: <MedicationIngredient>{
     MedicationIngredient.warfarin,
+    MedicationIngredient.apixaban,
+    MedicationIngredient.rivaroxaban,
+    MedicationIngredient.dabigatran,
   },
+  // INR-shifting interactions are warfarin-specific; DOACs do not use INR.
+  MedicineGroup.warfarin: <MedicationIngredient>{MedicationIngredient.warfarin},
   // Anything that makes a bleed more likely, whether by thinning the blood
   // or by stripping the stomach lining.
   MedicineGroup.bloodThinning: <MedicationIngredient>{
     MedicationIngredient.warfarin,
+    MedicationIngredient.apixaban,
+    MedicationIngredient.rivaroxaban,
+    MedicationIngredient.dabigatran,
     MedicationIngredient.aspirin,
     MedicationIngredient.clopidogrel,
     MedicationIngredient.ibuprofen,
@@ -116,9 +126,14 @@ _members = <MedicineGroup, Set<MedicationIngredient>>{
   MedicineGroup.betaBlocker: <MedicationIngredient>{
     MedicationIngredient.metoprolol,
     MedicationIngredient.atenolol,
+    MedicationIngredient.carvedilol,
   },
-  MedicineGroup.loopDiuretic: <MedicationIngredient>{
+  MedicineGroup.diuretic: <MedicationIngredient>{
     MedicationIngredient.furosemide,
+    MedicationIngredient.hydrochlorothiazide,
+  },
+  MedicineGroup.potassiumSparingDiuretic: <MedicationIngredient>{
+    MedicationIngredient.spironolactone,
   },
   MedicineGroup.statin: <MedicationIngredient>{
     MedicationIngredient.atorvastatin,

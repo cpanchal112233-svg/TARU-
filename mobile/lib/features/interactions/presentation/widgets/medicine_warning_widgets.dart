@@ -38,12 +38,13 @@ class MedicineWarningStyle {
   }
 }
 
-/// One warning, collapsed to a headline until someone wants the reasoning.
+/// One warning, with the reasoning behind a tap rather than an ExpansionTile.
 ///
-/// The medicine names and the action are always visible; the explanation is
-/// behind a tap. Someone scanning for "is this a problem" gets an answer
-/// without reading three paragraphs, and someone who wants the why can have it.
-class MedicineWarningTile extends StatelessWidget {
+/// ExpansionTile toggles [TickerMode] during build, which in Riverpod 3
+/// resumes provider subscriptions mid-frame and throws
+/// "setState() or markNeedsBuild() called during build". A plain toggle keeps
+/// the same UX without that side effect.
+class MedicineWarningTile extends StatefulWidget {
   const MedicineWarningTile({
     super.key,
     required this.warning,
@@ -54,7 +55,15 @@ class MedicineWarningTile extends StatelessWidget {
   final bool initiallyExpanded;
 
   @override
+  State<MedicineWarningTile> createState() => _MedicineWarningTileState();
+}
+
+class _MedicineWarningTileState extends State<MedicineWarningTile> {
+  late bool _expanded = widget.initiallyExpanded;
+
+  @override
   Widget build(BuildContext context) {
+    final MedicineWarning warning = widget.warning;
     final MedicineWarningStyle style = MedicineWarningStyle.of(
       warning.severity,
     );
@@ -62,74 +71,103 @@ class MedicineWarningTile extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _expanded ? style.tint.withValues(alpha: 0.45) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: style.colour.withValues(alpha: 0.3)),
       ),
-      clipBehavior: Clip.antiAlias,
-      child: Theme(
-        data: Theme.of(
-          context,
-        ).copyWith(dividerColor: Colors.transparent, splashColor: style.tint),
-        child: ExpansionTile(
-          initiallyExpanded: initiallyExpanded,
-          backgroundColor: style.tint.withValues(alpha: 0.45),
-          tilePadding: const EdgeInsets.fromLTRB(14, 4, 12, 4),
-          childrenPadding: const EdgeInsets.fromLTRB(48, 0, 16, 16),
-          expandedCrossAxisAlignment: CrossAxisAlignment.start,
-          leading: Icon(style.icon, color: style.colour),
-          title: Text(
-            warning.title,
-            style: TextStyle(
-              fontSize: 14.5,
-              height: 1.35,
-              fontWeight: FontWeight.w700,
-              color: style.colour,
-            ),
-          ),
-          subtitle: Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: Text(
-              warning.medicineNames,
-              style: TextStyle(fontSize: 12.5, color: Colors.grey.shade700),
-            ),
-          ),
-          children: [
-            Text(
-              warning.detail,
-              style: TextStyle(
-                fontSize: 13.5,
-                height: 1.5,
-                color: Colors.grey.shade900,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Row(
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () => setState(() => _expanded = !_expanded),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(14, 14, 12, 14),
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 1),
-                  child: Icon(
-                    Icons.check_circle_outline,
-                    size: 16,
-                    color: style.colour,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    warning.action,
-                    style: TextStyle(
-                      fontSize: 13.5,
-                      height: 1.5,
-                      fontWeight: FontWeight.w600,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(style.icon, color: style.colour),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            warning.title,
+                            style: TextStyle(
+                              fontSize: 14.5,
+                              height: 1.35,
+                              fontWeight: FontWeight.w700,
+                              color: style.colour,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            warning.medicineNames,
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              color: Colors.grey.shade700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      _expanded ? Icons.expand_less : Icons.expand_more,
                       color: style.colour,
                     ),
-                  ),
+                  ],
                 ),
+                if (_expanded) ...[
+                  const SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 36),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          warning.detail,
+                          style: TextStyle(
+                            fontSize: 13.5,
+                            height: 1.5,
+                            color: Colors.grey.shade900,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(top: 1),
+                              child: Icon(
+                                Icons.check_circle_outline,
+                                size: 16,
+                                color: style.colour,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                warning.action,
+                                style: TextStyle(
+                                  fontSize: 13.5,
+                                  height: 1.5,
+                                  fontWeight: FontWeight.w600,
+                                  color: style.colour,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ],
             ),
-          ],
+          ),
         ),
       ),
     );

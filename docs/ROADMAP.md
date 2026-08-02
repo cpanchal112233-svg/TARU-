@@ -23,7 +23,7 @@ The clinical context every later feature reads from.
   drug allergies can be checked in code. Anaphylaxis or a life-threatening
   severity flags the record as an emergency risk. "No known allergies" is
   stored explicitly, because it is a different answer from not asked yet.
-- **2d — Medications ✅** 50 common generic ingredients searchable by brand
+- **2d — Medications ✅** 56 common generic ingredients searchable by brand
   ("Dolo", "Augmentin"), with form, dose, frequency, times of day, food timing,
   reason and start date. Free text is still accepted, because an unrecognised
   medicine on the list beats a missing one. Recognised ingredients carry the

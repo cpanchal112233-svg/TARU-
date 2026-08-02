@@ -119,6 +119,40 @@ void main() {
       expect(warnings.highestSeverity, MedicineWarningSeverity.serious);
     });
 
+    test('apixaban with ibuprofen is also serious bleeding risk', () {
+      expect(
+        codesOf(
+          checkOf([
+            MedicationIngredient.apixaban,
+            MedicationIngredient.ibuprofen,
+          ]),
+        ),
+        contains('anticoagulant+nsaid'),
+      );
+    });
+
+    test('INR antibiotic rules stay warfarin-only, not DOACs', () {
+      expect(
+        codesOf(
+          checkOf([
+            MedicationIngredient.apixaban,
+            MedicationIngredient.cotrimoxazole,
+          ]),
+        ),
+        isNot(contains('warfarin+sulfonamide')),
+      );
+
+      expect(
+        codesOf(
+          checkOf([
+            MedicationIngredient.warfarin,
+            MedicationIngredient.cotrimoxazole,
+          ]),
+        ),
+        contains('warfarin+sulfonamide'),
+      );
+    });
+
     test('warfarin with clopidogrel flags two blood thinners', () {
       expect(
         codesOf(
@@ -228,6 +262,19 @@ void main() {
       expect(codes, contains('triple-whammy'));
       expect(codes, isNot(contains('nsaid+ace')));
       expect(codes, isNot(contains('nsaid+diuretic')));
+    });
+
+    test('a thiazide also completes the triple whammy', () {
+      expect(
+        codesOf(
+          checkOf([
+            MedicationIngredient.telmisartan,
+            MedicationIngredient.hydrochlorothiazide,
+            MedicationIngredient.naproxen,
+          ]),
+        ),
+        contains('triple-whammy'),
+      );
     });
 
     test('the triple whammy names all three medicines', () {
