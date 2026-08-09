@@ -3,16 +3,31 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../application/reports_providers.dart';
 import '../../domain/medical_report.dart';
+import '../../domain/reports_query.dart';
 import '../widgets/report_widgets.dart';
 import 'report_detail_screen.dart';
 import 'report_upload_sheet.dart';
 
 /// Lists the user's uploaded medical documents and starts new uploads.
-class ReportsScreen extends ConsumerWidget {
+class ReportsScreen extends ConsumerStatefulWidget {
   const ReportsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ReportsScreen> createState() => _ReportsScreenState();
+}
+
+class _ReportsScreenState extends ConsumerState<ReportsScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  ReportCategory? _categoryFilter;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final AsyncValue<List<MedicalReport>> reports = ref.watch(reportsProvider);
 
     return Scaffold(
@@ -42,7 +57,15 @@ class ReportsScreen extends ConsumerWidget {
         ),
         data: (List<MedicalReport> items) => items.isEmpty
             ? _EmptyState(onAdd: () => _upload(context))
-            : _ReportsList(reports: items),
+            : _ReportsListBody(
+                reports: items,
+                searchController: _searchController,
+                categoryFilter: _categoryFilter,
+                onCategoryChanged: (ReportCategory? value) {
+                  setState(() => _categoryFilter = value);
+                },
+                onSearchChanged: (_) => setState(() {}),
+              ),
       ),
     );
   }
@@ -106,18 +129,76 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
-class _ReportsList extends StatelessWidget {
-  const _ReportsList({required this.reports});
+class _ReportsListBody extends StatelessWidget {
+  const _ReportsListBody({
+    required this.reports,
+    required this.searchController,
+    required this.categoryFilter,
+    required this.onCategoryChanged,
+    required this.onSearchChanged,
+  });
 
   final List<MedicalReport> reports;
+  final TextEditingController searchController;
+  final ReportCategory? categoryFilter;
+  final ValueChanged<ReportCategory?> onCategoryChanged;
+  final ValueChanged<String> onSearchChanged;
 
   @override
   Widget build(BuildContext context) {
+    final List<MedicalReport> filtered = filterReports(
+      reports,
+      query: searchController.text,
+      category: categoryFilter,
+    );
+
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
       children: [
+        TextField(
+          controller: searchController,
+          onChanged: onSearchChanged,
+          textInputAction: TextInputAction.search,
+          decoration: InputDecoration(
+            hintText: 'Search title or notes',
+            prefixIcon: const Icon(Icons.search),
+            filled: true,
+            fillColor: Colors.white,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+            isDense: true,
+          ),
+        ),
+        const SizedBox(height: 12),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              FilterChip(
+                label: const Text('All'),
+                selected: categoryFilter == null,
+                onSelected: (_) => onCategoryChanged(null),
+              ),
+              const SizedBox(width: 8),
+              for (final ReportCategory category in ReportCategory.values) ...[
+                FilterChip(
+                  label: Text(category.label),
+                  selected: categoryFilter == category,
+                  onSelected: (_) => onCategoryChanged(
+                    categoryFilter == category ? null : category,
+                  ),
+                ),
+                const SizedBox(width: 8),
+              ],
+            ],
+          ),
+        ),
+        const SizedBox(height: 14),
         Text(
-          '${reports.length} ${reports.length == 1 ? 'report' : 'reports'}',
+          filtered.isEmpty
+              ? 'No matching reports'
+              : '${filtered.length} ${filtered.length == 1 ? 'report' : 'reports'}',
           style: TextStyle(
             fontSize: 12.5,
             fontWeight: FontWeight.w600,
@@ -125,15 +206,24 @@ class _ReportsList extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
-        for (final MedicalReport report in reports)
-          _ReportCard(
-            report: report,
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => ReportDetailScreen(report: report),
+        if (filtered.isEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 24),
+            child: Text(
+              'Try a different search or category.',
+              style: TextStyle(color: Colors.grey.shade600),
+            ),
+          )
+        else
+          for (final MedicalReport report in filtered)
+            _ReportCard(
+              report: report,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => ReportDetailScreen(report: report),
+                ),
               ),
             ),
-          ),
       ],
     );
   }

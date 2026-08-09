@@ -87,9 +87,16 @@
 - **Medical reports**: upload a PDF or photo of a lab result, scan,
   prescription or discharge letter. Files go to Firebase Storage under the
   user's own path; metadata lives in Firestore so the list stays fast. Images
-  open in-app, PDFs in the device viewer. Delete removes both the file and the
-  metadata. Owner-only Storage rules, 20 MB cap. Plain-language explanation of
-  what a report means waits for the AI phase.
+  open in-app, PDFs in the device viewer. Edit title, category, dated-on and
+  notes. Search the already-loaded list by title/notes and filter by category.
+  For digital PDFs, selectable text can be extracted on-device, reviewed and
+  edited, then saved as a derived UTF-8 sidecar with provenance
+  (`method: pdf_text`). Scanned/image-only PDFs get an honest no-selectable-text
+  state — no OCR. Delete removes derived text, the source file, extraction
+  metadata and the report document. Owner-only Storage rules separate source
+  (PDF/image, 20 MB) from derived text (`text/plain`, 256 KiB). Reviewed
+  extracted text is not clinical truth. Plain-language AI explanation of what
+  a report means waits for a later phase.
 
 - **Wider daily routine**: Routine tab includes a lifestyle checklist beside
   medicines — diet, exercise, sleep and mindfulness (eight short defaults),
