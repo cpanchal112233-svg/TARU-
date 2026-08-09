@@ -5,6 +5,7 @@ import 'package:archive/archive_io.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
@@ -100,7 +101,12 @@ class HealthExportService {
       await _writeJson(
         staging,
         'measurements/weight.json',
-        await _allMeasurements(uid),
+        await _allWeightMeasurements(uid),
+      );
+      await _writeJson(
+        staging,
+        'measurements/blood_pressure.json',
+        await _allBloodPressureMeasurements(uid),
       );
 
       onProgress?.call('Collecting reports…');
@@ -194,7 +200,7 @@ class HealthExportService {
         .toList();
   }
 
-  Future<List<Map<String, dynamic>>> _allMeasurements(String uid) async {
+  Future<List<Map<String, dynamic>>> _allWeightMeasurements(String uid) async {
     final QuerySnapshot<Map<String, dynamic>> snap = await _firestore
         .collection('users')
         .doc(uid)
@@ -202,15 +208,66 @@ class HealthExportService {
         .where('type', isEqualTo: 'weight')
         .get();
     return snap.docs.map((QueryDocumentSnapshot<Map<String, dynamic>> doc) {
-      final Map<String, dynamic> data = _normalizeTimestamps(doc.data());
-      return <String, dynamic>{
-        'id': doc.id,
-        'type': data['type'],
-        'valueKg': data['valueKg'],
-        'source': data['source'],
-        'recordedAt': _iso(data['recordedAt']),
-      };
+      return serializeWeightExportRow(doc.id, doc.data());
     }).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> _allBloodPressureMeasurements(
+    String uid,
+  ) async {
+    final QuerySnapshot<Map<String, dynamic>> snap = await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('measurements')
+        .where('type', isEqualTo: 'blood_pressure')
+        .get();
+    return snap.docs.map((QueryDocumentSnapshot<Map<String, dynamic>> doc) {
+      return serializeBloodPressureExportRow(doc.id, doc.data());
+    }).toList();
+  }
+
+  /// Phase 10 weight export row shape (preserved in Phase 11).
+  @visibleForTesting
+  static Map<String, dynamic> serializeWeightExportRow(
+    String id,
+    Map<String, dynamic> raw,
+  ) {
+    return <String, dynamic>{
+      'id': id,
+      'type': raw['type'],
+      'valueKg': raw['valueKg'],
+      'source': raw['source'],
+      'recordedAt': exportIsoTimestamp(raw['recordedAt']),
+    };
+  }
+
+  /// Blood-pressure export row — canonical mmHg, no clinical fields.
+  @visibleForTesting
+  static Map<String, dynamic> serializeBloodPressureExportRow(
+    String id,
+    Map<String, dynamic> raw,
+  ) {
+    return <String, dynamic>{
+      'id': id,
+      'type': raw['type'],
+      'systolicMmHg': raw['systolicMmHg'],
+      'diastolicMmHg': raw['diastolicMmHg'],
+      'source': raw['source'],
+      'recordedAt': exportIsoTimestamp(raw['recordedAt']),
+    };
+  }
+
+  /// ISO-8601 UTC timestamp helper for export rows (testable without Firebase).
+  @visibleForTesting
+  static String? exportIsoTimestamp(Object? value) {
+    if (value == null) return null;
+    if (value is Timestamp) return value.toDate().toUtc().toIso8601String();
+    if (value is DateTime) return value.toUtc().toIso8601String();
+    if (value is String) {
+      final DateTime? parsed = DateTime.tryParse(value);
+      return parsed?.toUtc().toIso8601String() ?? value;
+    }
+    return value.toString();
   }
 
   Future<List<Map<String, dynamic>>> _exportReports(

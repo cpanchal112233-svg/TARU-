@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
-/// Discriminator for documents in `users/{uid}/measurements`.
+/// Discriminator for weight documents in `users/{uid}/measurements`.
 ///
-/// Phase 8 ships weight only. Other types may be added later as sibling
-/// document shapes — not as an untyped values bag.
+/// Sibling typed documents (e.g. blood pressure) share the collection but
+/// use their own shapes — not an untyped values bag.
 const String measurementTypeWeight = 'weight';
 
 /// How a measurement entered TARU. Phase 8 only writes [manual].

@@ -352,4 +352,257 @@ void main() {
       }
     });
   });
+
+  group('Phase 11 weight backdating and mirror', () {
+    late FakeFirebaseFirestore firestore;
+    late MeasurementsRepository repository;
+    const String uid = 'backdate-user';
+
+    setUp(() {
+      firestore = FakeFirebaseFirestore();
+      repository = MeasurementsRepository(firestore);
+    });
+
+    Future<Map<String, dynamic>?> profileMap() async {
+      final DocumentSnapshot<Map<String, dynamic>> snap = await firestore
+          .collection('users')
+          .doc(uid)
+          .collection('health')
+          .doc('profile')
+          .get();
+      return snap.data();
+    }
+
+    test('historical insert creates doc and does not change mirror', () async {
+      final DateTime now = DateTime.utc(2026, 8, 9, 12);
+      await repository.recordWeight(
+        uid,
+        80,
+        recordedAt: now,
+        now: now,
+      );
+
+      await repository.recordWeight(
+        uid,
+        70,
+        recordedAt: now.subtract(const Duration(days: 30)),
+        now: now,
+      );
+
+      final List<WeightMeasurement> history = await repository
+          .fetchLatestWeights(uid, limit: 10);
+      expect(history, hasLength(2));
+      expect(history.map((WeightMeasurement m) => m.valueKg), containsAll(<double>[
+        80,
+        70,
+      ]));
+      expect((await profileMap())?['weightKg'], 80);
+    });
+
+    test('newer insert updates mirror', () async {
+      final DateTime now = DateTime.utc(2026, 8, 9, 12);
+      await repository.recordWeight(
+        uid,
+        70,
+        recordedAt: now.subtract(const Duration(days: 2)),
+        now: now,
+      );
+      await repository.recordWeight(
+        uid,
+        72,
+        recordedAt: now,
+        now: now,
+      );
+      expect((await profileMap())?['weightKg'], 72);
+    });
+
+    test('first tracked measurement updates mirror', () async {
+      await firestore
+          .collection('users')
+          .doc(uid)
+          .collection('health')
+          .doc('profile')
+          .set(<String, dynamic>{'weightKg': 90.0});
+
+      await repository.recordWeight(
+        uid,
+        88,
+        recordedAt: DateTime.utc(2026, 8, 9),
+        now: DateTime.utc(2026, 8, 9),
+      );
+
+      expect(await repository.hasWeightHistory(uid), isTrue);
+      expect((await profileMap())?['weightKg'], 88);
+    });
+
+    test('equal recordedAt uses document-ID DESC in latest query', () async {
+      final DateTime at = DateTime.utc(2026, 8, 1, 10);
+      await firestore
+          .collection('users')
+          .doc(uid)
+          .collection('measurements')
+          .doc('aaa')
+          .set(<String, dynamic>{
+            'type': measurementTypeWeight,
+            'valueKg': 60.0,
+            'source': measurementSourceManual,
+            'recordedAt': Timestamp.fromDate(at),
+          });
+      await firestore
+          .collection('users')
+          .doc(uid)
+          .collection('measurements')
+          .doc('zzz')
+          .set(<String, dynamic>{
+            'type': measurementTypeWeight,
+            'valueKg': 65.0,
+            'source': measurementSourceManual,
+            'recordedAt': Timestamp.fromDate(at),
+          });
+
+      final List<WeightMeasurement> latest = await repository
+          .fetchLatestWeights(uid, limit: 2);
+      expect(latest.map((WeightMeasurement m) => m.id).toList(), <String>[
+        'zzz',
+        'aaa',
+      ]);
+      expect(latest.first.valueKg, 65);
+    });
+
+    test(
+      'equal-time recordWeight keeps mirror aligned with query winner',
+      () async {
+        final DateTime at = DateTime.utc(2026, 8, 1, 10);
+        final DateTime now = DateTime.utc(2026, 8, 9);
+        await repository.recordWeight(uid, 70, recordedAt: at, now: now);
+        await repository.recordWeight(uid, 71, recordedAt: at, now: now);
+
+        final WeightMeasurement latest =
+            (await repository.fetchLatestWeights(uid, limit: 1)).first;
+        expect((await profileMap())?['weightKg'], latest.valueKg);
+        expect(latest.valueKg, anyOf(70, 71));
+      },
+    );
+
+    test('delete non-latest leaves mirror; delete latest promotes', () async {
+      final DateTime now = DateTime.utc(2026, 8, 9);
+      await repository.recordWeight(
+        uid,
+        70,
+        recordedAt: now.subtract(const Duration(days: 2)),
+        now: now,
+      );
+      await repository.recordWeight(
+        uid,
+        72,
+        recordedAt: now,
+        now: now,
+      );
+      final List<WeightMeasurement> both = await repository.fetchLatestWeights(
+        uid,
+        limit: 2,
+      );
+      final String olderId = both.last.id;
+      final String latestId = both.first.id;
+
+      await repository.deleteWeightMeasurement(uid, olderId);
+      expect((await profileMap())?['weightKg'], 72);
+
+      await repository.deleteWeightMeasurement(uid, latestId);
+      expect((await profileMap())?['weightKg'], isNull);
+    });
+
+    test('delete latest with remaining history promotes next', () async {
+      final DateTime now = DateTime.utc(2026, 8, 9);
+      await repository.recordWeight(
+        uid,
+        70,
+        recordedAt: now.subtract(const Duration(days: 2)),
+        now: now,
+      );
+      await repository.recordWeight(
+        uid,
+        71,
+        recordedAt: now.subtract(const Duration(days: 1)),
+        now: now,
+      );
+      await repository.recordWeight(uid, 72, recordedAt: now, now: now);
+
+      final String latestId =
+          (await repository.fetchLatestWeights(uid, limit: 1)).first.id;
+      await repository.deleteWeightMeasurement(uid, latestId);
+      expect((await profileMap())?['weightKg'], 71);
+    });
+
+    test('legacy snapshot remains non-history until first tracked', () async {
+      await firestore
+          .collection('users')
+          .doc(uid)
+          .collection('health')
+          .doc('profile')
+          .set(<String, dynamic>{'weightKg': 77.0});
+
+      expect(await repository.hasWeightHistory(uid), isFalse);
+      expect((await profileMap())?['weightKg'], 77);
+
+      await repository.recordWeight(
+        uid,
+        77,
+        recordedAt: DateTime.utc(2026, 8, 9),
+        now: DateTime.utc(2026, 8, 9),
+      );
+      expect(await repository.hasWeightHistory(uid), isTrue);
+      expect((await profileMap())?['weightKg'], 77);
+    });
+
+    test('future >2 minutes rejected; past accepted', () async {
+      final DateTime now = DateTime.utc(2026, 8, 9, 12);
+      expect(
+        () => repository.recordWeight(
+          uid,
+          70,
+          recordedAt: now.add(const Duration(minutes: 3)),
+          now: now,
+        ),
+        throwsArgumentError,
+      );
+
+      await repository.recordWeight(
+        uid,
+        70,
+        recordedAt: now.subtract(const Duration(hours: 5)),
+        now: now,
+      );
+      expect((await profileMap())?['weightKg'], 70);
+    });
+
+    test('preferred unit conversion still canonicalizes to kg', () {
+      final double kg = HealthUnits.poundsToKilograms(154.3);
+      expect(isPlausibleWeightKg(kg), isTrue);
+    });
+
+    test('health profile weight save uses mirror gate at now', () async {
+      final DateTime now = DateTime.utc(2026, 8, 9, 12);
+      await repository.recordWeight(
+        uid,
+        70,
+        recordedAt: now,
+        now: now,
+      );
+
+      await repository.saveHealthProfileWithWeightTracking(
+        uid: uid,
+        previous: const HealthProfile(weightKg: 70),
+        next: const HealthProfile(weightKg: 71),
+        hasWeightHistory: true,
+        now: now.add(const Duration(minutes: 1)),
+      );
+
+      expect((await profileMap())?['weightKg'], 71);
+      expect(
+        (await repository.fetchLatestWeights(uid, limit: 1)).first.valueKg,
+        71,
+      );
+    });
+  });
 }

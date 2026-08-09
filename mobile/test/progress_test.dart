@@ -477,4 +477,44 @@ void main() {
       expect(error.showLifestyle, isFalse);
     });
   });
+
+  group('Phase 11 Measurements independence', () {
+    test('medicine and lifestyle adherence ignore measurements', () {
+      final AdherenceSummary medicine = AdherenceSummary.fromLogs(
+        logs: const <DailyDoseLog>[],
+        dosesPerDay: 2,
+        windowDays: 7,
+      );
+      final HabitAdherenceSummary lifestyle = HabitAdherenceSummary.fromLogs(
+        logs: const <DailyHabitLog>[],
+        activeHabits: defaultHabits,
+        windowDays: 7,
+      );
+
+      expect(medicine.hasData, isFalse);
+      expect(lifestyle.hasData, isFalse);
+      // No combined score field exists on ProgressView / summaries.
+      expect(medicine.percent, 0);
+      expect(lifestyle.percent, 0);
+    });
+
+    test('empty medicine/lifestyle does not invent measurement score', () {
+      final List<ProgressObservation> items = buildProgressObservations(
+        medicine: null,
+        lifestyle: null,
+        habitLogDaysInWindow: 0,
+      );
+      expect(items, isEmpty);
+    });
+
+    test('ProgressView empty flag is independent of measurements UI', () {
+      // Measurements render beside Last 7 Days; ProgressView emptiness only
+      // reflects medicine/lifestyle/habit state. Loading→error paths already
+      // prove Measurements are not part of ProgressView fields.
+      final ProgressView error = ProgressView.error(Exception('offline'));
+      expect(error.showMedicine, isFalse);
+      expect(error.showLifestyle, isFalse);
+      expect(error.observations, isEmpty);
+    });
+  });
 }

@@ -109,30 +109,46 @@
   The week card breaks lifestyle completion down by the four pillars.
 
 - **Progress (logging review)**: Progress tab shows the last 7 days of
-  recorded medicine and lifestyle activity as two independent sections.
-  Medicine summary reuses `AdherenceSummary` (self-reported; expected doses
-  estimated from the current medicine schedule). Lifestyle summary reuses
+  recorded medicine and lifestyle activity as two independent sections,
+  plus a separate Measurements area. Medicine summary reuses
+  `AdherenceSummary` (self-reported; expected doses estimated from the
+  current medicine schedule). Lifestyle summary reuses
   `HabitAdherenceSummary` with Diet / Exercise / Sleep / Mindfulness for
   currently enabled habits. Optional 0–2 template observations only.
   Compact record/no-record day indicators may appear when history exists.
-  No overall health score, streaks, charting library, or AI. No new
-  Firestore collections — Progress derives from `doseLogs`, `habitLogs`,
-  and habit preferences.
+  Measurements (latest weight and blood pressure) are independent of Last
+  7 Days percentages and are not scored together. No overall health score,
+  streaks, or AI. Progress Last 7 Days still derives from `doseLogs`,
+  `habitLogs`, and habit preferences; measurements use
+  `users/{uid}/measurements`.
 
 - **Weight history**: intentional weight recordings live under
-  `users/{uid}/measurements` (`type: weight`, canonical `valueKg`). Once
+  `users/{uid}/measurements` (`type: weight`, canonical `valueKg`,
+  `recordedAt` = when measured). Users choose measurement date/time when
+  adding (past allowed; future beyond a small skew rejected). Once
   tracking begins, history is authoritative and `health/profile.weightKg`
-  mirrors the latest entry. Health Profile saves that change weight also
-  record history atomically with other profile fields. Legacy snapshot
-  weights are not auto-migrated; users can explicitly start tracking with
-  their current weight. Progress shows latest weight outside the Last 7
-  days logging review. No charts, deltas, BP, HealthKit/Health Connect,
-  or AI interpretation.
+  mirrors only the authoritative latest (`recordedAt` DESC, document ID
+  DESC) — backdated inserts do not overwrite a newer mirror. Health
+  Profile saves that change weight use the same mirror gate. Legacy
+  snapshot weights are not auto-migrated. Recent history shows a raw
+  (uncurved) chart of actual points plus an exact list (UI capped at 50;
+  export is uncapped). No weight goals, BMI bands, deltas, HealthKit/
+  Health Connect, OCR, or AI interpretation.
+
+- **Blood pressure**: sibling documents in the same measurements
+  collection (`type: blood_pressure`, `systolicMmHg`, `diastolicMmHg`,
+  `source: manual`, `recordedAt`). Systolic/diastolic only — no pulse,
+  categories, alerts, or clinical bands. Technical input shape is whole
+  numbers 1–999; unusual pairings are not medically rejected. Dedicated
+  history screen with dated add, dual raw chart, recent list, and delete.
+  No Health Profile BP field and no profile mirror. Progress Measurements
+  shows the latest pair when present.
 
 - **Privacy & data**: Profile → Privacy & data. Export builds a complete
   local ZIP (account, health profile, conditions/allergies/medications,
-  dose/habit logs, preferences, all weight measurements, report sources,
-  and reviewed extracted text when present) then opens the OS share sheet.
+  dose/habit logs, preferences, all weight measurements, all blood
+  pressure measurements, report sources, and reviewed extracted text when
+  present) then opens the OS share sheet.
   TARU does not email exports or keep a cloud copy. Delete my health data
   removes health/history/reports while keeping login and name/email.
   Delete TARU account removes data then the Firebase Auth identity after

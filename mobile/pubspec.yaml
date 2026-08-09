@@ -52,6 +52,7 @@ dependencies:
   share_plus: 12.0.2
   archive: 4.0.9
   pdf_manipulator: 4.1.0
+  fl_chart: 1.2.0
 
 dev_dependencies:
   flutter_test:

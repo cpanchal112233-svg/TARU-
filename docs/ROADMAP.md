@@ -132,3 +132,17 @@ Delete User Data extension is a backstop after Auth deletion only. Export
 is a snapshot assembled during the operation (not a database transaction);
 purge is idempotent/retry-aware, not atomic. No OCR, AI, FHIR, HealthKit,
 emailed export, or cloud export history.
+
+## Phase 11 — Measurements / Progress maturity ✅
+Matures longitudinal measurements without clinical interpretation.
+Weight recording gains user-selectable `recordedAt`, a raw recent chart
+(`fl_chart` 1.2.0), and mirror-safe backdating so `profile.weightKg`
+tracks only the authoritative latest. Adds blood pressure as typed
+sibling measurements (systolic/diastolic mmHg only), with dated add,
+dual raw chart, history list, and delete. Progress gains a separate
+Measurements section (latest weight + BP) that stays outside Last 7 Days
+medicine/lifestyle adherence. Local export adds
+`measurements/blood_pressure.json` alongside uncapped weight history.
+No pulse, BP categories/alerts, weight goals, HealthKit/Health Connect,
+OCR, AI, combined scores, or measurement edit-in-place. No Firebase
+Functions/rules/index deploy required for this phase.

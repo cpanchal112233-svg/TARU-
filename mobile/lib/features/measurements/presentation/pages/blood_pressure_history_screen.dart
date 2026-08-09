@@ -2,37 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../health_profile/application/health_profile_providers.dart';
-import '../../../health_profile/domain/health_profile.dart';
-import '../../../health_profile/domain/health_units.dart';
 import '../../application/measurements_providers.dart';
+import '../../domain/blood_pressure_measurement.dart';
 import '../../domain/measurement_chart_points.dart';
-import '../../domain/weight_measurement.dart';
 import '../widgets/raw_measurement_chart.dart';
 
-/// Neutral list of intentional weight recordings.
-class WeightHistoryScreen extends ConsumerWidget {
-  const WeightHistoryScreen({super.key});
+/// Dedicated blood-pressure history: add, recent raw chart, recent list.
+class BloodPressureHistoryScreen extends ConsumerWidget {
+  const BloodPressureHistoryScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final AsyncValue<List<WeightMeasurement>> history = ref.watch(
-      weightHistoryProvider,
+    final AsyncValue<List<BloodPressureMeasurement>> history = ref.watch(
+      bloodPressureHistoryProvider,
     );
-    final HealthProfile profile =
-        ref.watch(healthProfileProvider).value ?? HealthProfile.empty;
 
     return Scaffold(
       backgroundColor: const Color(0xffF8FAFC),
       appBar: AppBar(
-        title: const Text('Weight history'),
+        title: const Text('Blood pressure'),
         backgroundColor: Colors.white,
         elevation: 0,
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _openAddWeight(context, ref, profile.preferredUnits),
+        onPressed: () => _openAdd(context, ref),
         icon: const Icon(Icons.add),
-        label: const Text('Add weight'),
+        label: const Text('Add reading'),
       ),
       body: history.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -43,42 +38,24 @@ class WeightHistoryScreen extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Could not load weight history.\n$error',
+                  'Could not load blood pressure history.\n$error',
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
                 FilledButton(
-                  onPressed: () => ref.invalidate(weightHistoryProvider),
+                  onPressed: () => ref.invalidate(bloodPressureHistoryProvider),
                   child: const Text('Retry'),
                 ),
               ],
             ),
           ),
         ),
-        data: (List<WeightMeasurement> items) {
+        data: (List<BloodPressureMeasurement> items) {
           if (items.isEmpty) {
-            return _EmptyHistory(
-              legacyWeightKg: profile.weightKg,
-              units: profile.preferredUnits,
-              onStartTracking: profile.weightKg == null
-                  ? null
-                  : () => _startTracking(context, ref, profile.weightKg!),
-              onAdd: () =>
-                  _openAddWeight(context, ref, profile.preferredUnits),
-            );
+            return _EmptyHistory(onAdd: () => _openAdd(context, ref));
           }
 
-          final List<MeasurementChartPoint> chartPoints = weightChartPoints(
-            items,
-          );
-          final List<MeasurementChartPoint> displayPoints = chartPoints
-              .map(
-                (MeasurementChartPoint p) => MeasurementChartPoint(
-                  recordedAt: p.recordedAt,
-                  value: _displayValue(p.value, profile.preferredUnits),
-                ),
-              )
-              .toList();
+          final BloodPressureChartSeries chart = bloodPressureChartSeries(items);
 
           return ListView.separated(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
@@ -99,8 +76,8 @@ class WeightHistoryScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Recorded weights. TARU stores what you enter — it does '
-                      'not interpret your body.',
+                      'Recorded readings only. TARU does not classify blood '
+                      'pressure values.',
                       style: TextStyle(
                         fontSize: 13.5,
                         height: 1.4,
@@ -110,11 +87,19 @@ class WeightHistoryScreen extends ConsumerWidget {
                     if (items.length >= 2) ...[
                       const SizedBox(height: 16),
                       RawMeasurementChart(
-                        semanticsLabel: 'Recent weight chart',
+                        semanticsLabel:
+                            'Recent blood pressure chart with systolic and '
+                            'diastolic series',
                         series: [
                           RawChartSeries(
+                            label: 'Systolic',
                             color: const Color(0xff1D4ED8),
-                            points: displayPoints,
+                            points: chart.systolic,
+                          ),
+                          RawChartSeries(
+                            label: 'Diastolic',
+                            color: const Color(0xff0F766E),
+                            points: chart.diastolic,
                           ),
                         ],
                       ),
@@ -130,10 +115,9 @@ class WeightHistoryScreen extends ConsumerWidget {
                 );
               }
 
-              final WeightMeasurement item = items[index - 2];
-              return _WeightTile(
+              final BloodPressureMeasurement item = items[index - 2];
+              return _BpTile(
                 measurement: item,
-                units: profile.preferredUnits,
                 isLatest: index == 2,
                 onDelete: () => _confirmDelete(context, ref, item),
               );
@@ -144,11 +128,7 @@ class WeightHistoryScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _openAddWeight(
-    BuildContext context,
-    WidgetRef ref,
-    UnitSystem units,
-  ) async {
+  Future<void> _openAdd(BuildContext context, WidgetRef ref) async {
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -161,42 +141,23 @@ class WeightHistoryScreen extends ConsumerWidget {
           padding: EdgeInsets.only(
             bottom: MediaQuery.viewInsetsOf(sheetContext).bottom,
           ),
-          child: _AddWeightSheet(units: units),
+          child: const _AddBloodPressureSheet(),
         );
       },
     );
   }
 
-  Future<void> _startTracking(
-    BuildContext context,
-    WidgetRef ref,
-    double weightKg,
-  ) async {
-    try {
-      await ref.read(recordWeightProvider)(weightKg);
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Weight tracking started.')),
-      );
-    } catch (error) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not start tracking: $error')),
-      );
-    }
-  }
-
   Future<void> _confirmDelete(
     BuildContext context,
     WidgetRef ref,
-    WeightMeasurement measurement,
+    BloodPressureMeasurement measurement,
   ) async {
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext dialogContext) => AlertDialog(
-        title: const Text('Delete this weight?'),
+        title: const Text('Delete this reading?'),
         content: const Text(
-          'This removes the recorded entry. You can add a new weight '
+          'This removes the recorded entry. You can add a new reading '
           'afterwards if you need to correct it.',
         ),
         actions: [
@@ -215,31 +176,23 @@ class WeightHistoryScreen extends ConsumerWidget {
     if (confirmed != true || !context.mounted) return;
 
     try {
-      await ref.read(deleteWeightMeasurementProvider)(measurement.id);
+      await ref.read(deleteBloodPressureMeasurementProvider)(measurement.id);
       if (!context.mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Weight deleted.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Blood pressure reading deleted.')),
+      );
     } catch (error) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not delete weight: $error')),
+        SnackBar(content: Text('Could not delete reading: $error')),
       );
     }
   }
 }
 
 class _EmptyHistory extends StatelessWidget {
-  const _EmptyHistory({
-    required this.legacyWeightKg,
-    required this.units,
-    required this.onStartTracking,
-    required this.onAdd,
-  });
+  const _EmptyHistory({required this.onAdd});
 
-  final double? legacyWeightKg;
-  final UnitSystem units;
-  final VoidCallback? onStartTracking;
   final VoidCallback onAdd;
 
   @override
@@ -249,10 +202,10 @@ class _EmptyHistory extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.monitor_weight_outlined, size: 48, color: Colors.grey.shade400),
+          Icon(Icons.favorite_border, size: 48, color: Colors.grey.shade400),
           const SizedBox(height: 16),
           Text(
-            'No weight history yet',
+            'No blood pressure readings recorded yet.',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 18,
@@ -262,9 +215,8 @@ class _EmptyHistory extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            'When you record a weight, TARU keeps a history. Existing Health '
-            'Profile weights are not turned into history until you choose to '
-            'start tracking.',
+            'When you add a reading, TARU keeps systolic and diastolic values '
+            'with the time you choose.',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
@@ -272,34 +224,22 @@ class _EmptyHistory extends StatelessWidget {
               color: Colors.grey.shade600,
             ),
           ),
-          if (legacyWeightKg != null && onStartTracking != null) ...[
-            const SizedBox(height: 24),
-            FilledButton(
-              onPressed: onStartTracking,
-              child: Text(
-                'Start tracking with your current weight '
-                '(${_formatWeight(legacyWeightKg!, units)})',
-              ),
-            ),
-          ],
-          const SizedBox(height: 12),
-          TextButton(onPressed: onAdd, child: const Text('Add weight')),
+          const SizedBox(height: 24),
+          FilledButton(onPressed: onAdd, child: const Text('Add reading')),
         ],
       ),
     );
   }
 }
 
-class _WeightTile extends StatelessWidget {
-  const _WeightTile({
+class _BpTile extends StatelessWidget {
+  const _BpTile({
     required this.measurement,
-    required this.units,
     required this.isLatest,
     required this.onDelete,
   });
 
-  final WeightMeasurement measurement;
-  final UnitSystem units;
+  final BloodPressureMeasurement measurement;
   final bool isLatest;
   final VoidCallback onDelete;
 
@@ -321,7 +261,7 @@ class _WeightTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  _formatWeight(measurement.valueKg, units),
+                  '${measurement.systolicMmHg} / ${measurement.diastolicMmHg} mmHg',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
@@ -347,17 +287,18 @@ class _WeightTile extends StatelessWidget {
   }
 }
 
-class _AddWeightSheet extends ConsumerStatefulWidget {
-  const _AddWeightSheet({required this.units});
-
-  final UnitSystem units;
+class _AddBloodPressureSheet extends ConsumerStatefulWidget {
+  const _AddBloodPressureSheet();
 
   @override
-  ConsumerState<_AddWeightSheet> createState() => _AddWeightSheetState();
+  ConsumerState<_AddBloodPressureSheet> createState() =>
+      _AddBloodPressureSheetState();
 }
 
-class _AddWeightSheetState extends ConsumerState<_AddWeightSheet> {
-  final TextEditingController _controller = TextEditingController();
+class _AddBloodPressureSheetState
+    extends ConsumerState<_AddBloodPressureSheet> {
+  final TextEditingController _systolic = TextEditingController();
+  final TextEditingController _diastolic = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   late DateTime _recordedAt;
   bool _saving = false;
@@ -370,7 +311,8 @@ class _AddWeightSheetState extends ConsumerState<_AddWeightSheet> {
 
   @override
   void dispose() {
-    _controller.dispose();
+    _systolic.dispose();
+    _diastolic.dispose();
     super.dispose();
   }
 
@@ -386,7 +328,7 @@ class _AddWeightSheetState extends ConsumerState<_AddWeightSheet> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Add weight',
+                'Add reading',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
@@ -395,28 +337,60 @@ class _AddWeightSheetState extends ConsumerState<_AddWeightSheet> {
               ),
               const SizedBox(height: 6),
               Text(
-                'Choose the weight and when it was measured.',
+                'Enter systolic and diastolic values in mmHg.',
                 style: TextStyle(fontSize: 13.5, color: Colors.grey.shade600),
               ),
               const SizedBox(height: 16),
-              TextFormField(
-                controller: _controller,
-                autofocus: true,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                inputFormatters: <TextInputFormatter>[
-                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
-                ],
-                decoration: InputDecoration(
-                  labelText: 'Weight (${widget.units.weightUnit})',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _systolic,
+                      autofocus: true,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: <TextInputFormatter>[
+                        // Digits only — do not truncate. Validation rejects >3 digits.
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
+                      decoration: InputDecoration(
+                        labelText: 'Systolic',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      validator: (String? value) {
+                        if (!isTechnicallyValidBpMmHgInput(value)) {
+                          return 'Enter a valid systolic value.';
+                        }
+                        return null;
+                      },
+                    ),
                   ),
-                ),
-                validator: _validate,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _diastolic,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: <TextInputFormatter>[
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
+                      decoration: InputDecoration(
+                        labelText: 'Diastolic',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      validator: (String? value) {
+                        if (!isTechnicallyValidBpMmHgInput(value)) {
+                          return 'Enter a valid diastolic value.';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 title: const Text('Measurement date & time'),
@@ -451,21 +425,6 @@ class _AddWeightSheetState extends ConsumerState<_AddWeightSheet> {
     );
   }
 
-  String? _validate(String? value) {
-    final String text = value?.trim() ?? '';
-    if (text.isEmpty) return 'Enter a weight';
-    final double? entered = double.tryParse(text);
-    if (entered == null) return 'Enter a number';
-    final double kg = switch (widget.units) {
-      UnitSystem.metric => entered,
-      UnitSystem.imperial => HealthUnits.poundsToKilograms(entered),
-    };
-    if (!isPlausibleWeightKg(kg)) {
-      return 'Enter a weight in ${widget.units.weightUnit}';
-    }
-    return null;
-  }
-
   Future<void> _pickDateTime() async {
     final DateTime now = DateTime.now();
     final DateTime? date = await showDatePicker(
@@ -495,44 +454,27 @@ class _AddWeightSheetState extends ConsumerState<_AddWeightSheet> {
 
   Future<void> _save() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
-    final double entered = double.parse(_controller.text.trim());
-    final double kg = switch (widget.units) {
-      UnitSystem.metric => entered,
-      UnitSystem.imperial => HealthUnits.poundsToKilograms(entered),
-    };
 
     setState(() => _saving = true);
     try {
-      await ref.read(recordWeightProvider)(kg, recordedAt: _recordedAt);
+      await ref.read(recordBloodPressureProvider)(
+        systolicMmHg: int.parse(_systolic.text.trim()),
+        diastolicMmHg: int.parse(_diastolic.text.trim()),
+        recordedAt: _recordedAt,
+      );
       if (!mounted) return;
       Navigator.of(context).pop();
     } catch (error) {
       if (!mounted) return;
       final String message = error is ArgumentError && error.message != null
           ? error.message.toString()
-          : 'Could not save weight: $error';
+          : 'Could not save reading: $error';
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(message)));
     } finally {
       if (mounted) setState(() => _saving = false);
     }
-  }
-}
-
-double _displayValue(double valueKg, UnitSystem units) {
-  return switch (units) {
-    UnitSystem.metric => valueKg,
-    UnitSystem.imperial => HealthUnits.kilogramsToPounds(valueKg),
-  };
-}
-
-String _formatWeight(double valueKg, UnitSystem units) {
-  switch (units) {
-    case UnitSystem.metric:
-      return '${_trim(valueKg)} kg';
-    case UnitSystem.imperial:
-      return '${_trim(HealthUnits.kilogramsToPounds(valueKg))} lb';
   }
 }
 
@@ -563,9 +505,4 @@ String _monthName(int month) {
     'Dec',
   ];
   return names[month - 1];
-}
-
-String _trim(double value) {
-  final String fixed = value.toStringAsFixed(1);
-  return fixed.endsWith('.0') ? fixed.substring(0, fixed.length - 2) : fixed;
 }
