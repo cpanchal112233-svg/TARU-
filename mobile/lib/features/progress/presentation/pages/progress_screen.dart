@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../health_profile/application/medications_providers.dart';
-import '../../../measurements/presentation/widgets/latest_weight_card.dart';
+import '../../../measurements/presentation/widgets/progress_measurements_section.dart';
 import '../../../routine/application/habit_providers.dart';
 import '../../../routine/application/routine_providers.dart';
 import '../../../routine/domain/dose_schedule.dart';
@@ -11,7 +11,8 @@ import '../../../routine/presentation/widgets/habit_section.dart';
 import '../../application/progress_providers.dart';
 import '../../domain/progress_observations.dart';
 
-/// Reviews the last 7 days of recorded medicine and lifestyle activity.
+/// Reviews the last 7 days of recorded medicine and lifestyle activity,
+/// plus a separate Measurements section.
 ///
 /// Composes existing adherence providers — does not invent a health score or
 /// a second adherence formula.
@@ -66,7 +67,7 @@ class ProgressScreen extends ConsumerWidget {
           ),
           const Padding(
             padding: EdgeInsets.fromLTRB(20, 0, 20, 24),
-            child: LatestWeightCard(),
+            child: ProgressMeasurementsSection(),
           ),
         ],
       );
@@ -82,7 +83,7 @@ class ProgressScreen extends ConsumerWidget {
           ),
           const Padding(
             padding: EdgeInsets.fromLTRB(20, 0, 20, 24),
-            child: LatestWeightCard(),
+            child: ProgressMeasurementsSection(),
           ),
         ],
       );
@@ -135,7 +136,7 @@ class ProgressScreen extends ConsumerWidget {
           _ObservationsSection(observations: view.observations),
           const SizedBox(height: 16),
         ],
-        const LatestWeightCard(),
+        const ProgressMeasurementsSection(),
         const SizedBox(height: 16),
         TextButton(
           onPressed: () => onSelectTab?.call(routineTabIndex),

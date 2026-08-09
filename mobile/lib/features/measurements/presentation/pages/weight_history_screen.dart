@@ -6,7 +6,9 @@ import '../../../health_profile/application/health_profile_providers.dart';
 import '../../../health_profile/domain/health_profile.dart';
 import '../../../health_profile/domain/health_units.dart';
 import '../../application/measurements_providers.dart';
+import '../../domain/measurement_chart_points.dart';
 import '../../domain/weight_measurement.dart';
+import '../widgets/raw_measurement_chart.dart';
 
 /// Neutral list of intentional weight recordings.
 class WeightHistoryScreen extends ConsumerWidget {
@@ -66,28 +68,73 @@ class WeightHistoryScreen extends ConsumerWidget {
             );
           }
 
+          final List<MeasurementChartPoint> chartPoints = weightChartPoints(
+            items,
+          );
+          final List<MeasurementChartPoint> displayPoints = chartPoints
+              .map(
+                (MeasurementChartPoint p) => MeasurementChartPoint(
+                  recordedAt: p.recordedAt,
+                  value: _displayValue(p.value, profile.preferredUnits),
+                ),
+              )
+              .toList();
+
           return ListView.separated(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
-            itemCount: items.length + 1,
+            itemCount: items.length + 2,
             separatorBuilder: (_, _) => const SizedBox(height: 10),
             itemBuilder: (BuildContext context, int index) {
               if (index == 0) {
-                return Text(
-                  'Recorded weights. TARU stores what you enter — it does '
-                  'not interpret your body.',
-                  style: TextStyle(
-                    fontSize: 13.5,
-                    height: 1.4,
-                    color: Colors.grey.shade600,
-                  ),
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Recent history',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.grey.shade900,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Recorded weights. TARU stores what you enter — it does '
+                      'not interpret your body.',
+                      style: TextStyle(
+                        fontSize: 13.5,
+                        height: 1.4,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    if (items.length >= 2) ...[
+                      const SizedBox(height: 16),
+                      RawMeasurementChart(
+                        semanticsLabel: 'Recent weight chart',
+                        series: [
+                          RawChartSeries(
+                            color: const Color(0xff1D4ED8),
+                            points: displayPoints,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ],
                 );
               }
 
-              final WeightMeasurement item = items[index - 1];
+              if (index == 1) {
+                return Text(
+                  'Exact values are listed below.',
+                  style: TextStyle(fontSize: 12.5, color: Colors.grey.shade600),
+                );
+              }
+
+              final WeightMeasurement item = items[index - 2];
               return _WeightTile(
                 measurement: item,
                 units: profile.preferredUnits,
-                isLatest: index == 1,
+                isLatest: index == 2,
                 onDelete: () => _confirmDelete(context, ref, item),
               );
             },
@@ -312,7 +359,14 @@ class _AddWeightSheet extends ConsumerStatefulWidget {
 class _AddWeightSheetState extends ConsumerState<_AddWeightSheet> {
   final TextEditingController _controller = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  late DateTime _recordedAt;
   bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _recordedAt = DateTime.now();
+  }
 
   @override
   void dispose() {
@@ -341,7 +395,7 @@ class _AddWeightSheetState extends ConsumerState<_AddWeightSheet> {
               ),
               const SizedBox(height: 6),
               Text(
-                'Records your current weight now.',
+                'Choose the weight and when it was measured.',
                 style: TextStyle(fontSize: 13.5, color: Colors.grey.shade600),
               ),
               const SizedBox(height: 16),
@@ -362,7 +416,15 @@ class _AddWeightSheetState extends ConsumerState<_AddWeightSheet> {
                 ),
                 validator: _validate,
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 12),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Measurement date & time'),
+                subtitle: Text(_formatRecordedAt(_recordedAt)),
+                trailing: const Icon(Icons.edit_calendar_outlined),
+                onTap: _pickDateTime,
+              ),
+              const SizedBox(height: 12),
               Row(
                 children: [
                   Expanded(
@@ -404,6 +466,33 @@ class _AddWeightSheetState extends ConsumerState<_AddWeightSheet> {
     return null;
   }
 
+  Future<void> _pickDateTime() async {
+    final DateTime now = DateTime.now();
+    final DateTime? date = await showDatePicker(
+      context: context,
+      initialDate: _recordedAt,
+      firstDate: DateTime(now.year - 20),
+      lastDate: now.add(const Duration(days: 1)),
+    );
+    if (date == null || !mounted) return;
+
+    final TimeOfDay? time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(_recordedAt),
+    );
+    if (time == null || !mounted) return;
+
+    setState(() {
+      _recordedAt = DateTime(
+        date.year,
+        date.month,
+        date.day,
+        time.hour,
+        time.minute,
+      );
+    });
+  }
+
   Future<void> _save() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     final double entered = double.parse(_controller.text.trim());
@@ -414,18 +503,28 @@ class _AddWeightSheetState extends ConsumerState<_AddWeightSheet> {
 
     setState(() => _saving = true);
     try {
-      await ref.read(recordWeightProvider)(kg);
+      await ref.read(recordWeightProvider)(kg, recordedAt: _recordedAt);
       if (!mounted) return;
       Navigator.of(context).pop();
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not save weight: $error')),
-      );
+      final String message = error is ArgumentError && error.message != null
+          ? error.message.toString()
+          : 'Could not save weight: $error';
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
     } finally {
       if (mounted) setState(() => _saving = false);
     }
   }
+}
+
+double _displayValue(double valueKg, UnitSystem units) {
+  return switch (units) {
+    UnitSystem.metric => valueKg,
+    UnitSystem.imperial => HealthUnits.kilogramsToPounds(valueKg),
+  };
 }
 
 String _formatWeight(double valueKg, UnitSystem units) {
