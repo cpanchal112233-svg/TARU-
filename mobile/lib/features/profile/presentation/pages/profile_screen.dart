@@ -9,6 +9,7 @@ import '../../../health_profile/presentation/pages/conditions_screen.dart';
 import '../../../health_profile/presentation/pages/health_profile_screen.dart';
 import '../../../health_profile/presentation/pages/medications_screen.dart';
 import '../../../interactions/presentation/pages/medicine_safety_screen.dart';
+import '../../../privacy/presentation/pages/privacy_data_screen.dart';
 import 'reauthentication_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -537,6 +538,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   subtitle: phone,
 
                   onTap: isChangingPhone ? () {} : changePhoneNumber,
+                ),
+
+                const SizedBox(height: 15),
+
+                // PRIVACY & DATA
+                _buildProfileOption(
+                  icon: Icons.privacy_tip_outlined,
+                  title: 'Privacy & data',
+                  subtitle: 'Export or delete your TARU health data',
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (_) => const PrivacyDataScreen(),
+                    ),
+                  ),
                 ),
 
                 const SizedBox(height: 15),

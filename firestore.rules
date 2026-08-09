@@ -7,17 +7,55 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid == userId;
     }
 
-    // Everything under a user document is personal health information. There is
-    // no legitimate cross-user or public read, so ownership is the only rule.
-    match /users/{userId} {
-      allow read, write: if isOwner(userId);
-
-      // Covers health/profile today, plus reports and medications later.
-      match /{documents=**} {
-        allow read, write: if isOwner(userId);
-      }
+    function accountPath(userId) {
+      return /databases/$(database)/documents/users/$(userId);
     }
 
-    // Anything not matched above is denied.
+    function accountExists(userId) {
+      return exists(accountPath(userId));
+    }
+
+    function accountData(userId) {
+      return get(accountPath(userId)).data;
+    }
+
+    function deletionActive(userId) {
+      return accountExists(userId)
+             && accountData(userId).keys().hasAny(['deletionInProgress'])
+             && accountData(userId).deletionInProgress in ['health', 'account'];
+    }
+
+    function signupAccountKeysOnly() {
+      return request.resource.data.keys().hasOnly(['name', 'email', 'createdAt']);
+    }
+
+    // After write, the account document may only contain identity fields.
+    // Server-owned deletion guard fields are therefore impossible for clients.
+    function accountDocIdentityShapeOnly() {
+      return request.resource.data.keys().hasOnly(['name', 'email', 'createdAt']);
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+
+      allow create: if isOwner(userId)
+                    && signupAccountKeysOnly();
+
+      allow update: if isOwner(userId)
+                    && !deletionActive(userId)
+                    && accountDocIdentityShapeOnly();
+
+      allow delete: if false;
+
+      // Require at least one collection segment so this does NOT match the
+      // account root document (recursive ** can match an empty remainder).
+      match /{collectionId}/{document=**} {
+        allow read: if isOwner(userId);
+
+        allow write: if isOwner(userId)
+                     && accountExists(userId)
+                     && !deletionActive(userId);
+      }
+    }
   }
 }

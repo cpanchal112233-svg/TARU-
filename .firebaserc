@@ -1,0 +1,13 @@
+{
+  "projects": {
+    "default": "taru-673bb"
+  },
+  "targets": {},
+  "etags": {
+    "taru-673bb": {
+      "extensionInstances": {
+        "delete-user-data": "8f151323ead2e51aec7460dfe96a29a16a5db9f6ee945ee98975c4ced47691c0"
+      }
+    }
+  }
+}

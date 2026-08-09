@@ -118,3 +118,17 @@ reviewed extracted text is stored as derived content with provenance and
 is not treated as clinical truth. No OCR for scanned/image reports, AI
 explanation, lab interpretation, cross-report trends, or diagnosis are
 included.
+
+## Phase 10 — Privacy & account health-data controls ✅
+Gives users control over TARU health data before any cloud OCR or
+grounded AI work. Ships a complete local ZIP export (share/save only; no
+TARU cloud export copy), delete-health-data while retaining login, and
+full account deletion. Destructive cleanup uses a trusted callable
+(`purgeUserData` in `europe-west2`) with recent-auth enforcement, recursive
+Firestore deletion, Storage prefix orphan cleanup, and a server-owned
+`deletionInProgress` write guard enforced in client Firestore/Storage
+rules. Auth identity is deleted last for account removal. The official
+Delete User Data extension is a backstop after Auth deletion only. Export
+is a snapshot assembled during the operation (not a database transaction);
+purge is idempotent/retry-aware, not atomic. No OCR, AI, FHIR, HealthKit,
+emailed export, or cloud export history.

@@ -3,31 +3,54 @@ rules_version = '2';
 // Medical reports are personal. Only the owner of users/{userId}/… may read or
 // write those objects.
 //
-// Phase 9: source report files and reviewed extracted text are separate paths
-// with separate MIME/size rules. Overlapping Firebase Storage allows are
-// additive, so there is intentionally no broad catch-all write rule.
+// Phase 9: source vs derived MIME/size separation.
+// Phase 10: client Storage WRITES require a living Firestore account root that
+// is not in deletionInProgress. Cross-service firestore.exists/get against the
+// default database is the source of truth (not Auth custom claims).
 service firebase.storage {
   match /b/{bucket}/o {
     function isOwner(userId) {
       return request.auth != null && request.auth.uid == userId;
     }
 
-    // SOURCE report object — one path segment under the report id.
-    // Does not match nested …/derived/extracted.txt.
+    // Cross-service prerequisite (project IAM, not in Git): the Firebase
+    // Storage service agent
+    // service-<PROJECT_NUMBER>@gcp-sa-firebasestorage.iam.gserviceaccount.com
+    // must hold roles/firebaserules.firestoreServiceAgent so firestore.get /
+    // firestore.exists can evaluate. Without it, lookups fail closed (deny).
+    function accountPath(userId) {
+      return /databases/(default)/documents/users/$(userId);
+    }
+
+    function accountExists(userId) {
+      return firestore.exists(accountPath(userId));
+    }
+
+    function deletionActive(userId) {
+      return accountExists(userId)
+             && firestore.get(accountPath(userId)).data.keys().hasAny(['deletionInProgress'])
+             && firestore.get(accountPath(userId)).data.deletionInProgress in ['health', 'account'];
+    }
+
+    function canWriteReports(userId) {
+      return isOwner(userId)
+             && accountExists(userId)
+             && !deletionActive(userId);
+    }
+
     match /users/{userId}/reports/{reportId}/{sourceFileName} {
       allow read, delete: if isOwner(userId);
 
-      allow create, update: if isOwner(userId)
+      allow create, update: if canWriteReports(userId)
                             && request.resource.size < 20 * 1024 * 1024
                             && request.resource.contentType.matches(
                                  'image/.*|application/pdf');
     }
 
-    // DERIVED reviewed text — exact path only, text/plain, 256 KiB cap.
     match /users/{userId}/reports/{reportId}/derived/extracted.txt {
       allow read, delete: if isOwner(userId);
 
-      allow create, update: if isOwner(userId)
+      allow create, update: if canWriteReports(userId)
                             && request.resource.size <= 256 * 1024
                             && request.resource.contentType == 'text/plain';
     }

@@ -1,0 +1,27 @@
+{
+  "name": "taru-functions",
+  "private": true,
+  "main": "lib/src/index.js",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint --ext .ts src test",
+    "test": "npm run build && node --test lib/test/*.test.js",
+    "build:watch": "tsc -w",
+    "serve": "npm run build && firebase emulators:start --only functions,firestore,storage,auth",
+    "deploy": "firebase deploy --only functions"
+  },
+  "dependencies": {
+    "firebase-admin": "14.2.0",
+    "firebase-functions": "7.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.13.10",
+    "@typescript-eslint/eslint-plugin": "8.26.1",
+    "@typescript-eslint/parser": "8.26.1",
+    "eslint": "9.22.0",
+    "typescript": "5.8.2"
+  }
+}

@@ -25,20 +25,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  Future<void> createMissingUserProfile(User user) async {
-    final userDocument = _firestore.collection('users').doc(user.uid);
-
-    final snapshot = await userDocument.get();
-
-    if (!snapshot.exists) {
-      await userDocument.set({
-        'name': user.displayName ?? 'User',
-        'email': user.email ?? '',
-        'createdAt': FieldValue.serverTimestamp(),
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final User? currentUser = _auth.currentUser;
@@ -80,27 +66,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           }
 
           if (!snapshot.hasData || !snapshot.data!.exists) {
-            return FutureBuilder(
-              future: createMissingUserProfile(currentUser),
-
-              builder: (context, profileSnapshot) {
-                if (profileSnapshot.connectionState ==
-                    ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                if (profileSnapshot.hasError) {
-                  return Center(
-                    child: Text(
-                      'Could not create user profile:\n'
-                      '${profileSnapshot.error}',
-                      textAlign: TextAlign.center,
-                    ),
-                  );
-                }
-
-                return const Center(child: CircularProgressIndicator());
-              },
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Text(
+                  'Your account data is unavailable.\n'
+                  'If you just deleted your TARU account, sign out and sign in '
+                  'again only if you create a new account.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.grey.shade700, height: 1.4),
+                ),
+              ),
             );
           }
 
