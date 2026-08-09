@@ -129,5 +129,17 @@
   days logging review. No charts, deltas, BP, HealthKit/Health Connect,
   or AI interpretation.
 
+- **Privacy & data**: Profile → Privacy & data. Export builds a complete
+  local ZIP (account, health profile, conditions/allergies/medications,
+  dose/habit logs, preferences, all weight measurements, report sources,
+  and reviewed extracted text when present) then opens the OS share sheet.
+  TARU does not email exports or keep a cloud copy. Delete my health data
+  removes health/history/reports while keeping login and name/email.
+  Delete TARU account removes data then the Firebase Auth identity after
+  password reauthentication. Server purge uses a trusted callable with a
+  short recent-auth window; client writes are blocked while
+  `deletionInProgress` is set. Reminders are cancelled and TARU temp
+  files cleared. No OCR, AI, FHIR, or HealthKit in this control surface.
+
 ## Placeholders
 - AI health chat

@@ -78,3 +78,13 @@ out/
 .svn/
 .swiftpm/
 migrate_working_dir/
+
+# Firebase Functions
+functions/lib/
+functions/.runtimeconfig.json
+*.local
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+pubsub-debug.log
+storage-debug.log
