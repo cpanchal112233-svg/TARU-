@@ -7,6 +7,7 @@ import '../../../measurements/domain/weight_measurement.dart';
 import '../../../measurements/presentation/pages/weight_history_screen.dart';
 import '../../application/health_profile_providers.dart';
 import '../../domain/health_profile.dart';
+import '../../domain/health_profile_weight_draft.dart';
 import '../../domain/health_units.dart';
 import '../widgets/bmi_card.dart';
 
@@ -88,6 +89,13 @@ class _HealthProfileFormState extends ConsumerState<_HealthProfileForm> {
   double? _heightCm;
   double? _weightKg;
 
+  /// True once the user edits the weight field in this form session.
+  ///
+  /// Weight History can update `profile.weightKg` while this screen stays
+  /// mounted underneath. Without this flag, Save would treat the stale draft
+  /// weight as an intentional change and overwrite the fresher snapshot.
+  bool _weightDirty = false;
+
   bool _isSaving = false;
 
   @override
@@ -109,6 +117,24 @@ class _HealthProfileFormState extends ConsumerState<_HealthProfileForm> {
     _contactPhoneController.text = profile.emergencyContactPhone ?? '';
 
     _syncMeasurementFields();
+  }
+
+  @override
+  void didUpdateWidget(covariant _HealthProfileForm oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    final double? resolved = resolveHealthProfileDraftWeightKg(
+      draftWeightKg: _weightKg,
+      liveWeightKg: widget.initialProfile.weightKg,
+      weightDirty: _weightDirty,
+    );
+
+    if (!sameWeightKg(_weightKg, resolved)) {
+      setState(() {
+        _weightKg = resolved;
+        _syncMeasurementFields();
+      });
+    }
   }
 
   @override
@@ -183,6 +209,7 @@ class _HealthProfileFormState extends ConsumerState<_HealthProfileForm> {
     final double? entered = double.tryParse(_weightController.text.trim());
 
     setState(() {
+      _weightDirty = true;
       _weightKg = switch (_units) {
         UnitSystem.metric => entered,
         UnitSystem.imperial =>
@@ -252,6 +279,23 @@ class _HealthProfileFormState extends ConsumerState<_HealthProfileForm> {
   Future<void> _save() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
+    // Prefer the live profile so Weight History writes made while this form
+    // stayed mounted are the baseline for intentional-change detection.
+    final HealthProfile liveProfile =
+        ref.read(healthProfileProvider).value ?? widget.initialProfile;
+
+    final double? resolvedWeight = resolveHealthProfileDraftWeightKg(
+      draftWeightKg: _weightKg,
+      liveWeightKg: liveProfile.weightKg,
+      weightDirty: _weightDirty,
+    );
+    if (!sameWeightKg(_weightKg, resolvedWeight)) {
+      setState(() {
+        _weightKg = resolvedWeight;
+        _syncMeasurementFields();
+      });
+    }
+
     final bool hasWeightHistory = ref.read(hasWeightHistoryProvider);
     if (hasWeightHistory && _weightKg == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -269,11 +313,15 @@ class _HealthProfileFormState extends ConsumerState<_HealthProfileForm> {
 
     try {
       await ref.read(saveHealthProfileWithWeightTrackingProvider)(
-        previous: widget.initialProfile,
+        previous: liveProfile,
         next: _draftProfile,
       );
 
       if (!mounted) return;
+
+      // Form is about to pop; clear dirty so a failed pop cannot reuse a
+      // stale intentional-edit flag against a newer live profile.
+      _weightDirty = false;
 
       ScaffoldMessenger.of(
         context,
