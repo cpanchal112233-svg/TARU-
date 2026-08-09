@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../health_profile/application/medications_providers.dart';
+import '../../../measurements/presentation/widgets/latest_weight_card.dart';
 import '../../../routine/application/habit_providers.dart';
 import '../../../routine/application/routine_providers.dart';
 import '../../../routine/domain/dose_schedule.dart';
@@ -56,12 +57,34 @@ class ProgressScreen extends ConsumerWidget {
     }
 
     if (view.isEmpty) {
-      return _EmptyState(onOpenRoutine: () => onSelectTab?.call(routineTabIndex));
+      return Column(
+        children: [
+          Expanded(
+            child: _EmptyState(
+              onOpenRoutine: () => onSelectTab?.call(routineTabIndex),
+            ),
+          ),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(20, 0, 20, 24),
+            child: LatestWeightCard(),
+          ),
+        ],
+      );
     }
 
     if (view.showInactiveHabitsHint) {
-      return _InactiveHabitsState(
-        onOpenRoutine: () => onSelectTab?.call(routineTabIndex),
+      return Column(
+        children: [
+          Expanded(
+            child: _InactiveHabitsState(
+              onOpenRoutine: () => onSelectTab?.call(routineTabIndex),
+            ),
+          ),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(20, 0, 20, 24),
+            child: LatestWeightCard(),
+          ),
+        ],
       );
     }
 
@@ -112,6 +135,8 @@ class ProgressScreen extends ConsumerWidget {
           _ObservationsSection(observations: view.observations),
           const SizedBox(height: 16),
         ],
+        const LatestWeightCard(),
+        const SizedBox(height: 16),
         TextButton(
           onPressed: () => onSelectTab?.call(routineTabIndex),
           child: const Text('Open Routine'),

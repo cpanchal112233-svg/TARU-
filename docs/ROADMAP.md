@@ -99,3 +99,13 @@ with optional short factual observations. Progress reports recorded
 activity rather than clinical outcomes. Expected medicine doses are
 estimated from the current medication schedule. No new Firestore schema,
 charting library, streaks, badges, or AI are included.
+
+## Phase 8 — Weight history foundation ✅
+Adds intentional longitudinal weight tracking using a shared
+measurements collection. Weight history becomes authoritative once
+tracking begins, while health/profile.weightKg remains the mirrored
+latest-value snapshot for existing TARU features. Users can add/delete
+weight records, view neutral history, and see their latest recorded
+weight from Progress. Existing profile weights are not automatically
+fabricated into history. No blood pressure, HealthKit/Health Connect,
+AI interpretation, charts, or weight-change judgments are included.
