@@ -79,3 +79,50 @@ class RemindersController extends AsyncNotifier<bool> {
 
 final remindersControllerProvider =
     AsyncNotifierProvider<RemindersController, bool>(RemindersController.new);
+
+/// One optional evening nudge for lifestyle habits. Device-local, like
+/// medicine reminders — not a second notification management system.
+class LifestyleRemindersController extends AsyncNotifier<bool> {
+  static const String _key = 'lifestyle_reminders_enabled';
+
+  @override
+  Future<bool> build() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final bool enabled = prefs.getBool(_key) ?? false;
+
+    if (enabled) {
+      await ref.read(reminderServiceProvider).scheduleLifestyleReminder();
+    }
+
+    return enabled;
+  }
+
+  Future<bool> enable() async {
+    final bool granted = await ref
+        .read(reminderServiceProvider)
+        .requestPermission();
+
+    if (!granted) return false;
+
+    await _persist(true);
+    await ref.read(reminderServiceProvider).scheduleLifestyleReminder();
+    state = const AsyncValue.data(true);
+    return true;
+  }
+
+  Future<void> disable() async {
+    await _persist(false);
+    await ref.read(reminderServiceProvider).cancelLifestyleReminder();
+    state = const AsyncValue.data(false);
+  }
+
+  Future<void> _persist(bool enabled) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_key, enabled);
+  }
+}
+
+final lifestyleRemindersControllerProvider =
+    AsyncNotifierProvider<LifestyleRemindersController, bool>(
+      LifestyleRemindersController.new,
+    );

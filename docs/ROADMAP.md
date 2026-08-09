@@ -82,9 +82,13 @@ through the Phase 3 safety layer:
 - Possible causes and "see a doctor if…" thresholds, never firm diagnoses
 - Visible disclaimer plus recorded consent
 
-## Phase 6 — Daily routine (wider)
-Diet, exercise, sleep and mindfulness checklist, on top of the medicine
-reminders already in place.
+## Phase 6 — Daily routine (wider) ✅
+Diet, exercise, sleep and mindfulness checklist on the Routine tab, on top of
+the medicine reminders already in place. Eight default habits across four
+pillars, organised morning / day / evening; per-habit on/off preferences;
+done/skipped logging (`habitLogs`); optional evening lifestyle reminder;
+Home “Today’s routine” summary; seven-day lifestyle summary with a light
+per-pillar split.
 
 ## Phase 7 — Progress & insights
 Charts, streaks, and personalized health insights.

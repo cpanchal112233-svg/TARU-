@@ -20,10 +20,19 @@ class ReminderService {
   final FlutterLocalNotificationsPlugin _plugin;
 
   static const String _channelId = 'medication_reminders';
+  static const String _lifestyleChannelId = 'lifestyle_reminders';
 
   /// Notification IDs are derived from the time of day, so rescheduling
   /// replaces the previous reminder instead of stacking another one.
   static const int _idBase = 5000;
+
+  /// One evening nudge for lifestyle habits — kept separate from medicine IDs
+  /// so cancelling either set never wipes the other.
+  static const int lifestyleReminderId = 6000;
+
+  /// Early evening: late enough that day habits should have happened, early
+  /// enough that sleep habits are still ahead.
+  static const int lifestyleReminderHour = 19;
 
   bool _isReady = false;
 
@@ -53,18 +62,28 @@ class ReminderService {
       ),
     );
 
-    await _plugin
+    final AndroidFlutterLocalNotificationsPlugin? android = _plugin
         .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin
-        >()
-        ?.createNotificationChannel(
-          const AndroidNotificationChannel(
-            _channelId,
-            'Medication reminders',
-            description: 'Reminds you when a dose is due.',
-            importance: Importance.high,
-          ),
-        );
+        >();
+
+    await android?.createNotificationChannel(
+      const AndroidNotificationChannel(
+        _channelId,
+        'Medication reminders',
+        description: 'Reminds you when a dose is due.',
+        importance: Importance.high,
+      ),
+    );
+
+    await android?.createNotificationChannel(
+      const AndroidNotificationChannel(
+        _lifestyleChannelId,
+        'Lifestyle reminders',
+        description: 'A gentle evening nudge for today\'s habits.',
+        importance: Importance.defaultImportance,
+      ),
+    );
 
     _isReady = true;
   }
@@ -99,12 +118,35 @@ class ReminderService {
     return granted;
   }
 
+  /// Cancels medicine reminders only — never the lifestyle nudge.
   Future<void> cancelAll() async {
     await _ensureReady();
 
     for (final DoseTime time in DoseTime.values) {
       await _plugin.cancel(id: _idBase + time.index);
     }
+  }
+
+  Future<void> cancelLifestyleReminder() async {
+    await _ensureReady();
+    await _plugin.cancel(id: lifestyleReminderId);
+  }
+
+  /// Schedules the single optional evening lifestyle reminder.
+  Future<void> scheduleLifestyleReminder() async {
+    await _ensureReady();
+    await cancelLifestyleReminder();
+
+    await _scheduleDaily(
+      id: lifestyleReminderId,
+      hour: lifestyleReminderHour,
+      title: 'How is today\'s routine going?',
+      body: 'Open Routine to tick off any habits still left for today.',
+      channelId: _lifestyleChannelId,
+      channelName: 'Lifestyle reminders',
+      channelDescription: 'A gentle evening nudge for today\'s habits.',
+      highPriority: false,
+    );
   }
 
   /// Replaces all reminders with one per time of day that has doses due.
@@ -122,6 +164,10 @@ class ReminderService {
         hour: time.hour,
         title: 'Time for your ${time.label.toLowerCase()} medicine',
         body: _bodyFor(doses),
+        channelId: _channelId,
+        channelName: 'Medication reminders',
+        channelDescription: 'Reminds you when a dose is due.',
+        highPriority: true,
       );
     }
   }
@@ -144,6 +190,10 @@ class ReminderService {
     required int hour,
     required String title,
     required String body,
+    required String channelId,
+    required String channelName,
+    required String channelDescription,
+    required bool highPriority,
   }) async {
     final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
 
@@ -157,15 +207,20 @@ class ReminderService {
 
     if (!next.isAfter(now)) next = next.add(const Duration(days: 1));
 
-    const NotificationDetails details = NotificationDetails(
+    final Importance importance =
+        highPriority ? Importance.high : Importance.defaultImportance;
+    final Priority priority =
+        highPriority ? Priority.high : Priority.defaultPriority;
+
+    final NotificationDetails details = NotificationDetails(
       android: AndroidNotificationDetails(
-        _channelId,
-        'Medication reminders',
-        channelDescription: 'Reminds you when a dose is due.',
-        importance: Importance.high,
-        priority: Priority.high,
+        channelId,
+        channelName,
+        channelDescription: channelDescription,
+        importance: importance,
+        priority: priority,
       ),
-      iOS: DarwinNotificationDetails(),
+      iOS: const DarwinNotificationDetails(),
     );
 
     try {

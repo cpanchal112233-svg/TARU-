@@ -8,6 +8,7 @@ import '../../../health_profile/presentation/widgets/health_profile_completeness
 import '../../../interactions/presentation/pages/medicine_safety_screen.dart';
 import '../../../interactions/presentation/widgets/medicine_safety_banner.dart';
 import '../../../triage/presentation/pages/symptom_check_screen.dart';
+import '../widgets/today_routine_card.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key, this.onSelectTab});
@@ -180,6 +181,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 const SizedBox(height: 20),
 
                 const HealthProfileCompletenessCard(),
+
+                const SizedBox(height: 15),
+
+                TodayRoutineCard(
+                  onOpenRoutine: () => widget.onSelectTab?.call(2),
+                ),
 
                 const SizedBox(height: 15),
 

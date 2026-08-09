@@ -91,7 +91,16 @@
   metadata. Owner-only Storage rules, 20 MB cap. Plain-language explanation of
   what a report means waits for the AI phase.
 
-## In progress / placeholders
-- Progress
-- AI health chat — the safety layer it must route through now exists
-- Wider daily routine (diet, exercise, sleep, mindfulness)
+- **Wider daily routine**: Routine tab includes a lifestyle checklist beside
+  medicines — diet, exercise, sleep and mindfulness (eight short defaults),
+  grouped into morning / day / evening. Users can turn individual habits on
+  or off (`users/{uid}/routine/habitPreferences`); disabled habits do not
+  count toward progress. Tap to mark done, Skip when it does not apply. Logs
+  live under `users/{uid}/habitLogs/{yyyy-MM-dd}`. An optional evening
+  lifestyle reminder uses the same local-notification stack as medicines.
+  Home shows a compact “Today’s routine” summary that opens the Routine tab.
+  The week card breaks lifestyle completion down by the four pillars.
+
+## Placeholders
+- Progress (Phase 7)
+- AI health chat

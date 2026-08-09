@@ -3,28 +3,39 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../health_profile/domain/medication.dart';
 import '../../../health_profile/presentation/pages/medications_screen.dart';
+import '../../application/habit_providers.dart';
 import '../../application/reminder_providers.dart';
 import '../../application/routine_providers.dart';
 import '../../domain/dose_schedule.dart';
+import '../../domain/habit.dart';
 import '../widgets/adherence_card.dart';
+import '../widgets/habit_adherence_card.dart';
+import '../widgets/habit_section.dart';
+import '../widgets/lifestyle_reminders_tile.dart';
+import '../widgets/manage_habits_sheet.dart';
 import '../widgets/reminders_tile.dart';
 
-/// Today's medicines, as a checklist.
+/// Today's medicines and lifestyle checklist.
 ///
-/// The list is derived from the medications the user already recorded, so there
-/// is nothing separate to set up: choosing "twice a day, morning and bedtime"
-/// on a medicine is what puts it here.
+/// Medicines still come from the health profile schedule. Diet, exercise,
+/// sleep and mindfulness are a short daily checklist on top of that, grouped
+/// by morning / day / evening.
 class RoutineScreen extends ConsumerWidget {
   const RoutineScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Touch the reminders controller so its schedule listener is alive for the
-    // whole session, not only after the user first flips the switch.
+    // Keep both reminder controllers alive for the session.
     ref.watch(remindersControllerProvider);
+    ref.watch(lifestyleRemindersControllerProvider);
 
     final DailySchedule schedule = ref.watch(dailyScheduleProvider);
-    final AsyncValue<DailyDoseLog> log = ref.watch(todayDoseLogProvider);
+    final AsyncValue<DailyDoseLog> doseLog = ref.watch(todayDoseLogProvider);
+    final AsyncValue<DailyHabitLog> habitLog = ref.watch(todayHabitLogProvider);
+    final TodayRoutineProgress progress = ref.watch(
+      todayRoutineProgressProvider,
+    );
+    final List<HabitItem> activeHabits = ref.watch(activeHabitsProvider);
 
     return Scaffold(
       backgroundColor: const Color(0xffF8FAFC),
@@ -34,51 +45,123 @@ class RoutineScreen extends ConsumerWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         automaticallyImplyLeading: false,
+        actions: [
+          TextButton(
+            onPressed: () => showManageHabitsSheet(context),
+            child: const Text('Habits'),
+          ),
+        ],
       ),
-      body: schedule.isEmpty
-          ? const _NothingScheduled()
-          : _buildList(context, ref, schedule, log.value),
+      body: _RoutineBody(
+        schedule: schedule,
+        doseLog: doseLog.value,
+        habitLog: habitLog.value,
+        progress: progress,
+        activeHabits: activeHabits,
+      ),
     );
   }
+}
 
-  Widget _buildList(
-    BuildContext context,
-    WidgetRef ref,
-    DailySchedule schedule,
-    DailyDoseLog? log,
-  ) {
-    final int taken = schedule.doses
-        .where(
-          (ScheduledDose dose) => log?.statusOf(dose.key) == DoseStatus.taken,
-        )
-        .length;
+class _RoutineBody extends ConsumerWidget {
+  const _RoutineBody({
+    required this.schedule,
+    required this.doseLog,
+    required this.habitLog,
+    required this.progress,
+    required this.activeHabits,
+  });
 
+  final DailySchedule schedule;
+  final DailyDoseLog? doseLog;
+  final DailyHabitLog? habitLog;
+  final TodayRoutineProgress progress;
+  final List<HabitItem> activeHabits;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
       children: [
+        _TodayHeader(progress: progress),
+        const SizedBox(height: 12),
+
+        if (schedule.doses.isNotEmpty)
+          RemindersTile(times: schedule.activeTimes)
+        else
+          const _AddMedicinesCard(),
+
+        const SizedBox(height: 10),
+        const LifestyleRemindersTile(),
+
         if (schedule.doses.isNotEmpty) ...[
-          _TodayHeader(taken: taken, total: schedule.doses.length),
-          const SizedBox(height: 12),
-          RemindersTile(times: schedule.activeTimes),
+          const SizedBox(height: 22),
+          _SectionTitle(
+            title: 'Medicines',
+            detail:
+                '${progress.dosesTaken} of ${progress.dosesTotal} taken',
+          ),
+          for (final DoseTime time in schedule.activeTimes) ...[
+            const SizedBox(height: 14),
+            _TimeLabel(time: time),
+            const SizedBox(height: 8),
+            for (final ScheduledDose dose in schedule.at(time))
+              _DoseRow(
+                dose: dose,
+                status: doseLog?.statusOf(dose.key),
+                onSetStatus: (DoseStatus? status) =>
+                    ref.read(setDoseStatusProvider)(dose.key, status),
+              ),
+          ],
         ],
 
-        for (final DoseTime time in schedule.activeTimes) ...[
-          const SizedBox(height: 18),
-          _TimeLabel(time: time),
-          const SizedBox(height: 8),
-          for (final ScheduledDose dose in schedule.at(time))
-            _DoseRow(
-              dose: dose,
-              status: log?.statusOf(dose.key),
-              onSetStatus: (DoseStatus? status) =>
-                  ref.read(setDoseStatusProvider)(dose.key, status),
+        const SizedBox(height: 26),
+        _SectionTitle(
+          title: 'Daily habits',
+          detail: activeHabits.isEmpty
+              ? 'None selected'
+              : '${progress.habitsDone} of ${progress.habitsTotal} done',
+        ),
+        const SizedBox(height: 6),
+        Text(
+          'Morning, day and evening — only the habits you keep on.',
+          style: TextStyle(
+            fontSize: 13.5,
+            height: 1.4,
+            color: Colors.grey.shade600,
+          ),
+        ),
+        const SizedBox(height: 10),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            onPressed: () => showManageHabitsSheet(context),
+            icon: const Icon(Icons.tune, size: 18),
+            label: const Text('Choose habits'),
+          ),
+        ),
+
+        if (activeHabits.isEmpty)
+          _EmptyHabitsCard(onManage: () => showManageHabitsSheet(context))
+        else ...[
+          for (final HabitSlot slot in HabitSlot.values) ...[
+            const SizedBox(height: 10),
+            HabitSlotSection(
+              slot: slot,
+              habits: habitsInSlot(slot, activeHabits),
+              log: habitLog,
+              onSetStatus: (String habitId, HabitStatus? status) =>
+                  ref.read(setHabitStatusProvider)(habitId, status),
             ),
+          ],
         ],
 
         if (schedule.doses.isNotEmpty) ...[
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
           const AdherenceCard(),
         ],
+        const SizedBox(height: 12),
+        const HabitAdherenceCard(),
 
         if (schedule.needTimes.isNotEmpty) ...[
           const SizedBox(height: 24),
@@ -95,14 +178,14 @@ class RoutineScreen extends ConsumerWidget {
 }
 
 class _TodayHeader extends StatelessWidget {
-  const _TodayHeader({required this.taken, required this.total});
+  const _TodayHeader({required this.progress});
 
-  final int taken;
-  final int total;
+  final TodayRoutineProgress progress;
 
   @override
   Widget build(BuildContext context) {
-    final bool allDone = taken == total;
+    final bool allDone =
+        progress.hasAnything && progress.completed == progress.total;
 
     return Container(
       width: double.infinity,
@@ -115,7 +198,7 @@ class _TodayHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            allDone ? 'All done for today' : 'Today\'s medicines',
+            allDone ? 'All done for today' : 'Today\'s routine',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 20,
@@ -125,19 +208,130 @@ class _TodayHeader extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             allDone
-                ? 'Every dose is ticked off. Nicely kept.'
-                : '$taken of $total doses taken so far.',
+                ? 'Medicines and habits are ticked off. Nicely kept.'
+                : progress.summaryLine,
             style: const TextStyle(color: Colors.white, fontSize: 14.5),
           ),
           const SizedBox(height: 14),
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: LinearProgressIndicator(
-              value: total == 0 ? 0 : taken / total,
+              value: progress.total == 0
+                  ? 0
+                  : progress.completed / progress.total,
               minHeight: 8,
               backgroundColor: Colors.white.withValues(alpha: 0.3),
               valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+}
+
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle({required this.title, required this.detail});
+
+  final String title;
+  final String detail;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text(
+          title,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+        ),
+        const Spacer(),
+        Text(
+          detail,
+          style: TextStyle(fontSize: 12.5, color: Colors.grey.shade600),
+        ),
+      ],
+    );
+  }
+}
+
+class _EmptyHabitsCard extends StatelessWidget {
+  const _EmptyHabitsCard({required this.onManage});
+
+  final VoidCallback onManage;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'No lifestyle habits selected',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: Colors.grey.shade900,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Turn a few back on to keep diet, movement, sleep or calm on '
+            'today\'s list.',
+            style: TextStyle(
+              fontSize: 13.5,
+              height: 1.4,
+              color: Colors.grey.shade700,
+            ),
+          ),
+          TextButton(onPressed: onManage, child: const Text('Choose habits')),
+        ],
+      ),
+    );
+  }
+}
+
+class _AddMedicinesCard extends StatelessWidget {
+  const _AddMedicinesCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.medication_outlined, color: Colors.blue.shade400),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'Add medicines to track today\'s doses alongside these habits.',
+              style: TextStyle(
+                fontSize: 13.5,
+                height: 1.35,
+                color: Colors.grey.shade800,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const MedicationsScreen(),
+              ),
+            ),
+            child: const Text('Add'),
           ),
         ],
       ),
@@ -263,7 +457,7 @@ class _MedicinesNeedingTimes extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _InfoPanel(
+    return _InfoBox(
       icon: Icons.schedule,
       accent: const Color(0xffB45309),
       title: 'Waiting on times',
@@ -290,7 +484,7 @@ class _NotDailyList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _InfoPanel(
+    return _InfoBox(
       icon: Icons.event_repeat,
       accent: Colors.blueGrey,
       title: 'Not on a daily schedule',
@@ -305,8 +499,8 @@ class _NotDailyList extends StatelessWidget {
   }
 }
 
-class _InfoPanel extends StatelessWidget {
-  const _InfoPanel({
+class _InfoBox extends StatelessWidget {
+  const _InfoBox({
     required this.icon,
     required this.accent,
     required this.title,
@@ -363,63 +557,6 @@ class _InfoPanel extends StatelessWidget {
             TextButton(onPressed: onAction, child: Text(actionLabel!)),
           ],
         ],
-      ),
-    );
-  }
-}
-
-class _NothingScheduled extends StatelessWidget {
-  const _NothingScheduled();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(28),
-              decoration: BoxDecoration(
-                color: Colors.blue.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.medication_outlined,
-                size: 48,
-                color: Colors.blue,
-              ),
-            ),
-            const SizedBox(height: 28),
-            const Text(
-              'No medicines to track yet',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Add what you take and when, and today\'s doses will appear '
-              'here as a checklist you can tick off.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 15.5,
-                height: 1.45,
-                color: Colors.grey.shade700,
-              ),
-            ),
-            const SizedBox(height: 24),
-            FilledButton.icon(
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const MedicationsScreen(),
-                ),
-              ),
-              icon: const Icon(Icons.add),
-              label: const Text('Add your medicines'),
-            ),
-          ],
-        ),
       ),
     );
   }
