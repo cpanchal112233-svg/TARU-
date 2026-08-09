@@ -112,5 +112,15 @@
   Firestore collections — Progress derives from `doseLogs`, `habitLogs`,
   and habit preferences.
 
+- **Weight history**: intentional weight recordings live under
+  `users/{uid}/measurements` (`type: weight`, canonical `valueKg`). Once
+  tracking begins, history is authoritative and `health/profile.weightKg`
+  mirrors the latest entry. Health Profile saves that change weight also
+  record history atomically with other profile fields. Legacy snapshot
+  weights are not auto-migrated; users can explicitly start tracking with
+  their current weight. Progress shows latest weight outside the Last 7
+  days logging review. No charts, deltas, BP, HealthKit/Health Connect,
+  or AI interpretation.
+
 ## Placeholders
 - AI health chat

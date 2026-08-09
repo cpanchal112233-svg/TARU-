@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../measurements/application/measurements_providers.dart';
+import '../../../measurements/domain/weight_measurement.dart';
+import '../../../measurements/presentation/pages/weight_history_screen.dart';
 import '../../application/health_profile_providers.dart';
 import '../../domain/health_profile.dart';
 import '../../domain/health_units.dart';
@@ -249,10 +252,26 @@ class _HealthProfileFormState extends ConsumerState<_HealthProfileForm> {
   Future<void> _save() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
+    final bool hasWeightHistory = ref.read(hasWeightHistoryProvider);
+    if (hasWeightHistory && _weightKg == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Tracked weights are managed in Weight history. Delete entries '
+            'there to clear your latest weight.',
+          ),
+        ),
+      );
+      return;
+    }
+
     setState(() => _isSaving = true);
 
     try {
-      await ref.read(saveHealthProfileProvider)(_draftProfile);
+      await ref.read(saveHealthProfileWithWeightTrackingProvider)(
+        previous: widget.initialProfile,
+        next: _draftProfile,
+      );
 
       if (!mounted) return;
 
@@ -446,14 +465,40 @@ class _HealthProfileFormState extends ConsumerState<_HealthProfileForm> {
 
           TextFormField(
             controller: _weightController,
-            keyboardType: TextInputType.number,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: [_decimalInputFormatter],
             decoration: _fieldDecoration('Weight (${_units.weightUnit})'),
             validator: _validateWeight,
             onChanged: (_) => _onWeightChanged(),
           ),
+          const SizedBox(height: 8),
+          Text(
+            ref.watch(hasWeightHistoryProvider)
+                ? 'Saving a new weight also adds it to Weight history. '
+                    'Clearing weight here is disabled while history exists.'
+                : 'Saving a new weight starts Weight history. Unchanged '
+                    'legacy weights stay as a snapshot until you track them.',
+            style: TextStyle(
+              fontSize: 12.5,
+              height: 1.35,
+              color: Colors.grey.shade600,
+            ),
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const WeightHistoryScreen(),
+                  ),
+                );
+              },
+              child: const Text('Weight history'),
+            ),
+          ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
 
           BmiCard(
             bmi: draft.bmi,
@@ -558,7 +603,12 @@ class _HealthProfileFormState extends ConsumerState<_HealthProfileForm> {
   String? _validateWeight(String? value) {
     final String text = value?.trim() ?? '';
 
-    if (text.isEmpty) return null;
+    if (text.isEmpty) {
+      if (ref.read(hasWeightHistoryProvider)) {
+        return 'Managed in Weight history while tracking is active';
+      }
+      return null;
+    }
 
     final double? entered = double.tryParse(text);
 
@@ -569,7 +619,7 @@ class _HealthProfileFormState extends ConsumerState<_HealthProfileForm> {
       UnitSystem.imperial => HealthUnits.poundsToKilograms(entered),
     };
 
-    if (kilograms < 2 || kilograms > 400) {
+    if (!isPlausibleWeightKg(kilograms)) {
       return 'Enter a weight in ${_units.weightUnit}';
     }
 
