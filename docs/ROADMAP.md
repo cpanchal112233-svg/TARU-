@@ -109,3 +109,12 @@ weight records, view neutral history, and see their latest recorded
 weight from Progress. Existing profile weights are not automatically
 fabricated into history. No blood pressure, HealthKit/Health Connect,
 AI interpretation, charts, or weight-change judgments are included.
+
+## Phase 9 — Report intelligence (source text) ✅
+Makes stored medical reports easier to organize and, for supported
+digital PDFs, extracts selectable text locally for user review before
+saving. The original uploaded report remains the source artifact;
+reviewed extracted text is stored as derived content with provenance and
+is not treated as clinical truth. No OCR for scanned/image reports, AI
+explanation, lab interpretation, cross-report trends, or diagnosis are
+included.
