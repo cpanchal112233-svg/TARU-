@@ -90,5 +90,12 @@ done/skipped logging (`habitLogs`); optional evening lifestyle reminder;
 Home “Today’s routine” summary; seven-day lifestyle summary with a light
 per-pillar split.
 
-## Phase 7 — Progress & insights
-Charts, streaks, and personalized health insights.
+## Phase 7 — Progress (logging review) ✅
+Progress tab reviews the last 7 days of recorded medicine dose logs and
+lifestyle habit logs as two separate sections. It reuses the existing
+medicine and lifestyle adherence calculations, with no combined health
+score. The UI uses simple summaries and compact activity indicators,
+with optional short factual observations. Progress reports recorded
+activity rather than clinical outcomes. Expected medicine doses are
+estimated from the current medication schedule. No new Firestore schema,
+charting library, streaks, badges, or AI are included.

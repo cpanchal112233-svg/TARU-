@@ -101,6 +101,16 @@
   Home shows a compact “Today’s routine” summary that opens the Routine tab.
   The week card breaks lifestyle completion down by the four pillars.
 
+- **Progress (logging review)**: Progress tab shows the last 7 days of
+  recorded medicine and lifestyle activity as two independent sections.
+  Medicine summary reuses `AdherenceSummary` (self-reported; expected doses
+  estimated from the current medicine schedule). Lifestyle summary reuses
+  `HabitAdherenceSummary` with Diet / Exercise / Sleep / Mindfulness for
+  currently enabled habits. Optional 0–2 template observations only.
+  Compact record/no-record day indicators may appear when history exists.
+  No overall health score, streaks, charting library, or AI. No new
+  Firestore collections — Progress derives from `doseLogs`, `habitLogs`,
+  and habit preferences.
+
 ## Placeholders
-- Progress (Phase 7)
 - AI health chat
