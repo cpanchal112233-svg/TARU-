@@ -41,7 +41,7 @@ class _MainShellState extends State<MainShell> {
           HomeScreen(onSelectTab: _onTabSelected),
           const ReportsScreen(),
           const RoutineScreen(),
-          const ProgressScreen(),
+          ProgressScreen(onSelectTab: _onTabSelected),
           const ProfileScreen(),
         ],
       ),
