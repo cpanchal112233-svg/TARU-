@@ -135,7 +135,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       SizedBox(height: 15),
 
                       Text(
-                        'Your Health Journey Starts Here',
+                        'Your health information, in one place',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 22,
@@ -146,8 +146,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       SizedBox(height: 8),
 
                       Text(
-                        'TARU is here to help you understand '
-                        'and improve your health.',
+                        'Organize what you record, stay on top of routines, '
+                        'and review your Progress and reports.',
                         style: TextStyle(color: Colors.white, fontSize: 15),
                       ),
                     ],

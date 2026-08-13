@@ -44,17 +44,6 @@ enum PregnancyStatus {
   final String label;
 }
 
-enum BmiCategory {
-  underweight('Underweight'),
-  healthy('Healthy weight'),
-  overweight('Overweight'),
-  obese('Obese');
-
-  const BmiCategory(this.label);
-
-  final String label;
-}
-
 /// The clinical basics every later feature reads from.
 ///
 /// Every field is optional: a partly filled profile is still useful, and
@@ -117,18 +106,6 @@ class HealthProfile {
     final double heightInMetres = height / 100;
 
     return weight / (heightInMetres * heightInMetres);
-  }
-
-  BmiCategory? get bmiCategory {
-    final double? value = bmi;
-
-    if (value == null) return null;
-
-    if (value < 18.5) return BmiCategory.underweight;
-    if (value < 25) return BmiCategory.healthy;
-    if (value < 30) return BmiCategory.overweight;
-
-    return BmiCategory.obese;
   }
 
   /// BMI is a crude screen that does not hold up during pregnancy or while

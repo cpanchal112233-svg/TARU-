@@ -10,6 +10,7 @@ import '../../../health_profile/presentation/pages/health_profile_screen.dart';
 import '../../../health_profile/presentation/pages/medications_screen.dart';
 import '../../../interactions/presentation/pages/medicine_safety_screen.dart';
 import '../../../privacy/presentation/pages/privacy_data_screen.dart';
+import 'help_support_screen.dart';
 import 'reauthentication_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -25,7 +26,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool isChangingName = false;
   bool isChangingPassword = false;
   bool isChangingEmail = false;
-  bool isChangingPhone = false;
 
   // ============================================================
   // LOGOUT
@@ -291,21 +291,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  Future<void> changePhoneNumber() async {
-    final bool verified = await verifyIdentity('change your phone number');
-
-    if (!mounted) return;
-
-    if (!verified) {
-      return;
-    }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Phone verification will be implemented next.'),
-      ),
-    );
-  }
   // ============================================================
   // BUILD
   // ============================================================
@@ -351,8 +336,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           final String name = data['name'] ?? 'User';
 
           final String email = data['email'] ?? user.email ?? '';
-
-          final String phone = data['phone'] ?? 'No phone number added';
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(24),
@@ -531,13 +514,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                 const SizedBox(height: 15),
 
-                // CHANGE PHONE NUMBER
+                // HELP & SUPPORT
                 _buildProfileOption(
-                  icon: Icons.phone_outlined,
-                  title: 'Phone Number',
-                  subtitle: phone,
-
-                  onTap: isChangingPhone ? () {} : changePhoneNumber,
+                  icon: Icons.help_outline,
+                  title: 'Help & support',
+                  subtitle: 'Boundaries, privacy controls, and contact',
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (_) => const HelpSupportScreen(),
+                    ),
+                  ),
                 ),
 
                 const SizedBox(height: 15),

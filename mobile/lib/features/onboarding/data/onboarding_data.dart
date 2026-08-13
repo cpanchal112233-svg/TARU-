@@ -12,30 +12,33 @@ class OnboardingModel {
 
 const List<OnboardingModel> onboardingPages = [
   OnboardingModel(
-    title: "Welcome to TARU",
+    title: 'Keep your health information together',
     description:
-        "Your AI-powered health companion that helps you understand and improve your health journey.",
-    image: "assets/images/onboarding1.png",
+        'Store your profile, conditions, allergies, and medicines in one '
+        'place — recorded by you, for you.',
+    image: 'assets/images/onboarding1.png',
   ),
-
   OnboardingModel(
-    title: "Understand Your Reports",
+    title: 'Stay on top of medicines and routines',
     description:
-        "Upload medical reports and receive clear explanations with personalized insights.",
-    image: "assets/images/onboarding2.png",
+        'Track today’s doses, optional reminders, and a simple lifestyle '
+        'checklist for diet, movement, sleep, and calm.',
+    image: 'assets/images/onboarding2.png',
   ),
-
   OnboardingModel(
-    title: "Daily Health Routine",
+    title: 'Track measurements and keep reports',
     description:
-        "Receive personalized medication reminders, diet plans, exercise, sleep, and mindfulness guidance.",
-    image: "assets/images/onboarding3.png",
+        'Record weight and blood pressure, store medical reports, and '
+        'extract text on this device for you to review before saving.',
+    image: 'assets/images/onboarding3.png',
   ),
-
   OnboardingModel(
-    title: "Track Your Progress",
+    title: 'You control your data',
     description:
-        "Monitor improvements and build healthy habits with AI-powered recommendations.",
-    image: "assets/images/onboarding4.png",
+        'Export a TARU archive, delete your health data, or delete your '
+        'account. TARU helps you organize and review information you '
+        'record. It does not diagnose conditions or replace professional '
+        'medical care.',
+    image: 'assets/images/onboarding4.png',
   ),
 ];

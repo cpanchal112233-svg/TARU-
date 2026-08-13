@@ -6,7 +6,6 @@ import '../../data/auth_service.dart';
 import '../widgets/auth_button.dart';
 import '../widgets/auth_header.dart';
 import '../widgets/auth_textfield.dart';
-import '../widgets/social_login_button.dart';
 import 'forgot_password_screen.dart';
 import 'signup_screen.dart';
 
@@ -149,7 +148,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const AuthHeader(
                   title: 'Welcome Back',
-                  subtitle: 'Sign in to continue your health journey.',
+                  subtitle: 'Sign in to your TARU health organizer.',
                 ),
 
                 const SizedBox(height: 40),
@@ -216,9 +215,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: () {
                       Navigator.push(
                         context,
-
                         MaterialPageRoute(
-                          builder: (_) => const ForgotPasswordScreen(),
+                          builder: (_) => ForgotPasswordScreen(
+                            initialEmail: emailController.text.trim(),
+                          ),
                         ),
                       );
                     },
@@ -233,48 +233,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   text: isLoading ? 'Logging in...' : AppStrings.login,
 
                   onPressed: isLoading ? () {} : loginUser,
-                ),
-
-                const SizedBox(height: 30),
-
-                Row(
-                  children: [
-                    const Expanded(child: Divider()),
-
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-
-                      child: Text(
-                        'OR',
-
-                        style: TextStyle(color: Colors.grey.shade600),
-                      ),
-                    ),
-
-                    const Expanded(child: Divider()),
-                  ],
-                ),
-
-                const SizedBox(height: 25),
-
-                SocialLoginButton(
-                  icon: Icons.g_mobiledata,
-                  text: 'Continue with Google',
-
-                  onPressed: () {
-                    // Google login will be implemented next.
-                  },
-                ),
-
-                const SizedBox(height: 15),
-
-                SocialLoginButton(
-                  icon: Icons.apple,
-                  text: 'Continue with Apple',
-
-                  onPressed: () {
-                    // Apple login will be implemented next.
-                  },
                 ),
 
                 const SizedBox(height: 20),

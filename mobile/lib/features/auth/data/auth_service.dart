@@ -2,8 +2,19 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  AuthService({
+    FirebaseAuth? auth,
+    FirebaseFirestore? firestore,
+  }) : _authOverride = auth,
+       _firestoreOverride = firestore;
+
+  final FirebaseAuth? _authOverride;
+  final FirebaseFirestore? _firestoreOverride;
+
+  FirebaseAuth get _auth => _authOverride ?? FirebaseAuth.instance;
+
+  FirebaseFirestore get _firestore =>
+      _firestoreOverride ?? FirebaseFirestore.instance;
 
   Future<UserCredential> signUp({
     required String email,
@@ -35,6 +46,14 @@ class AuthService {
     required String password,
   }) {
     return _auth.signInWithEmailAndPassword(email: email, password: password);
+  }
+
+  /// Sends Firebase Auth password-reset email for [email] (trimmed).
+  ///
+  /// Uses the project’s Firebase Auth email template. Does not confirm whether
+  /// an account exists — callers should use privacy-safe success copy.
+  Future<void> sendPasswordResetEmail(String email) {
+    return _auth.sendPasswordResetEmail(email: email.trim());
   }
 
   Future<void> logout() {

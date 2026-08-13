@@ -129,12 +129,13 @@ class HealthProfileCompletenessCard extends ConsumerWidget {
     }
 
     if (completeness.criticalGap != null) {
-      return 'Until you answer this, TARU cannot rule out a reaction to '
-          'anything it suggests. It takes a moment.';
+      return 'Answering this helps TARU’s medicine and symptom checks use '
+          'the allergies you record. It takes a moment.';
     }
 
     if (completeness.completion == 0) {
-      return 'TARU needs a few basics before it can give advice that fits you.';
+      return 'Add a few basics so TARU can show your health record and '
+          'use it as context for the checks already in the app.';
     }
 
     if (missing.length <= 2) {

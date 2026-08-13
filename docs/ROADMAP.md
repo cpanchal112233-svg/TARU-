@@ -75,9 +75,9 @@ Storage, with metadata in Firestore under `users/{uid}/reports`. Owner-only
 Storage rules, 20 MB cap. List, open (image in-app, PDF externally), and
 delete. Plain-language explanation of what a report means waits for Phase 5.
 
-## Phase 5 — AI assistant
+## Phase 5 — AI assistant (future — not started)
 Report explanations and health chat, built on the health profile and routed
-through the Phase 3 safety layer:
+through the Phase 3 safety layer when ready:
 - Triage runs first; the model never gets to talk someone out of an ambulance
 - Possible causes and "see a doctor if…" thresholds, never firm diagnoses
 - Visible disclaimer plus recorded consent
@@ -164,3 +164,30 @@ project-wide because the ML Kit Flutter bridge is not compatible with
 TARU’s prior SwiftPM-only plugin setup — monitor future bridge/SPM
 compatibility; this is not claimed as permanent architecture. No
 Firebase rules/index/Functions deploy required for this phase.
+
+## Trust & Launch Integrity ✅ (local implementation)
+Aligns present-tense product claims and judgment-heavy presentation with
+the shipped organizer + companion. Truthful onboarding/signup/Home/
+completeness/reports copy; BMI number-only (no clinical categories);
+neutral adherence presentation (Phase 7 math unchanged); working
+Firebase Auth password reset; nonfunctional Google/Apple/phone stubs
+removed from V1 UI; Help & support with medical boundary and conditional
+privacy/terms/support links; VISION split into current vs long-term.
+No AI, HealthKit/Health Connect, Crashlytics, localization, triage
+clinical rewrite, Firebase rules/Functions changes, or redesign.
+
+### Public-release blockers (unresolved)
+- **Founder:** first launch country; real support email
+- **Legal:** Privacy Policy; Terms; jurisdiction/product disclaimer;
+  Firebase/ML Kit/data-processing disclosure; store claim review
+- **Clinical:** triage diagnosis-named guidance; self-care
+  false-reassurance review; medicine Pause/Stop skim-risk wording;
+  future clinical thresholds
+- **Platform:** physical iPhone Phase 12 OCR smoke before
+  TestFlight/public release
+- **Reliability (recommended):** crash observability before public
+  release
+
+## Phase 5 — AI assistant (future)
+Report explanations and health chat remain deferred until grounded
+safety, consent, and evidence design are ready. Not started.

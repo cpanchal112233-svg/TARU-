@@ -410,7 +410,7 @@ class _DayStrip extends StatelessWidget {
                         height: 10,
                         decoration: BoxDecoration(
                           color: day.hasRecord
-                              ? const Color(0xff16A34A).withValues(alpha: 0.85)
+                              ? const Color(0xff2563EB).withValues(alpha: 0.75)
                               : Colors.grey.shade200,
                           borderRadius: BorderRadius.circular(4),
                         ),
@@ -624,7 +624,6 @@ class _ErrorState extends StatelessWidget {
 }
 
 Color _accentFor(int percent) {
-  if (percent >= 80) return const Color(0xff16A34A);
-  if (percent >= 50) return const Color(0xffD97706);
-  return const Color(0xffB3261E);
+  // Factual percent display — no green/amber/red adherence grading.
+  return const Color(0xff2563EB);
 }
