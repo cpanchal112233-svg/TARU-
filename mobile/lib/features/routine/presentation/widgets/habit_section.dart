@@ -47,12 +47,14 @@ class HabitSlotSection extends StatelessWidget {
     required this.habits,
     required this.log,
     required this.onSetStatus,
+    this.busyIds = const <String>{},
   });
 
   final HabitSlot slot;
   final List<HabitItem> habits;
   final DailyHabitLog? log;
   final void Function(String habitId, HabitStatus? status) onSetStatus;
+  final Set<String> busyIds;
 
   @override
   Widget build(BuildContext context) {
@@ -96,6 +98,7 @@ class HabitSlotSection extends StatelessWidget {
             habit: habit,
             status: log?.statusOf(habit.id),
             accent: habitPillarColor(habit.pillar),
+            busy: busyIds.contains('habit:${habit.id}'),
             onSetStatus: (HabitStatus? status) => onSetStatus(habit.id, status),
           ),
       ],
@@ -110,12 +113,14 @@ class HabitRow extends StatelessWidget {
     required this.status,
     required this.accent,
     required this.onSetStatus,
+    this.busy = false,
   });
 
   final HabitItem habit;
   final HabitStatus? status;
   final Color accent;
   final ValueChanged<HabitStatus?> onSetStatus;
+  final bool busy;
 
   @override
   Widget build(BuildContext context) {
@@ -135,7 +140,7 @@ class HabitRow extends StatelessWidget {
         type: MaterialType.transparency,
         child: ListTile(
           contentPadding: const EdgeInsets.fromLTRB(12, 4, 8, 4),
-          onTap: () => onSetStatus(isDone ? null : HabitStatus.done),
+          onTap: busy ? null : () => onSetStatus(isDone ? null : HabitStatus.done),
           leading: Icon(
             isDone
                 ? Icons.check_circle
@@ -162,11 +167,17 @@ class HabitRow extends StatelessWidget {
             '${habit.pillar.label} · ${habit.detail}',
             style: TextStyle(fontSize: 12.5, color: Colors.grey.shade700),
           ),
-          trailing: TextButton(
-            onPressed: () =>
-                onSetStatus(isSkipped ? null : HabitStatus.skipped),
-            child: Text(isSkipped ? 'Skipped' : 'Skip'),
-          ),
+          trailing: busy
+              ? const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : TextButton(
+                  onPressed: () =>
+                      onSetStatus(isSkipped ? null : HabitStatus.skipped),
+                  child: Text(isSkipped ? 'Skipped' : 'Skip'),
+                ),
         ),
       ),
     );

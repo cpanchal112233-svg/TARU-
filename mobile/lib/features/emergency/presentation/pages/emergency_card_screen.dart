@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../core/reliability/user_facing_error.dart';
 import '../../../health_profile/application/allergies_providers.dart';
 import '../../../health_profile/application/conditions_providers.dart';
 import '../../../health_profile/application/health_profile_providers.dart';
@@ -444,7 +445,7 @@ class _EmergencyContact extends StatelessWidget {
 
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Could not start a call: $error')));
+      ).showSnackBar(SnackBar(content: Text(userFacingErrorMessage(error))));
     }
   }
 

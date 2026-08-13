@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../../account/application/account_providers.dart';
+import '../../account/data/account_root_repository.dart';
+
 class AuthService {
   AuthService({
     FirebaseAuth? auth,
@@ -32,11 +35,14 @@ class AuthService {
       throw Exception('User account was not created.');
     }
 
-    await _firestore.collection('users').doc(user.uid).set({
-      'name': name,
-      'email': email,
-      'createdAt': FieldValue.serverTimestamp(),
-    });
+    try {
+      await AccountRootRepository(
+        firestore: _firestore,
+        currentUid: () => user.uid,
+      ).createIdentityRoot(name: name, email: email);
+    } catch (_) {
+      throw const AccountRootSetupException();
+    }
 
     return userCredential;
   }

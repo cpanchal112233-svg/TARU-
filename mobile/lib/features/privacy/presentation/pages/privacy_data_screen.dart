@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../../core/reliability/reliability_providers.dart';
+import '../../../../core/reliability/user_facing_error.dart';
 import '../../application/privacy_controller.dart';
 import '../../application/privacy_providers.dart';
 import '../../domain/purge_mode.dart';
@@ -55,7 +57,8 @@ class _PrivacyDataScreenState extends ConsumerState<PrivacyDataScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Export failed. No complete archive was produced.\n$error',
+            'Export failed. No complete archive was produced. '
+            '${userFacingErrorMessage(error)}',
           ),
         ),
       );
@@ -153,7 +156,11 @@ class _PrivacyDataScreenState extends ConsumerState<PrivacyDataScreen> {
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not delete health data.\n$error')),
+        SnackBar(
+          content: Text(
+            'Could not delete health data. ${userFacingErrorMessage(error)}',
+          ),
+        ),
       );
     } finally {
       if (mounted) {
@@ -280,7 +287,11 @@ class _PrivacyDataScreenState extends ConsumerState<PrivacyDataScreen> {
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not delete account.\n$error')),
+        SnackBar(
+          content: Text(
+            'Could not delete account. ${userFacingErrorMessage(error)}',
+          ),
+        ),
       );
     } finally {
       if (mounted) {
@@ -346,6 +357,8 @@ class _PrivacyDataScreenState extends ConsumerState<PrivacyDataScreen> {
                 ),
               ],
               const SizedBox(height: 24),
+              _CrashDiagnosticsTile(),
+              const SizedBox(height: 12),
               _ActionCard(
                 title: 'Export my health data',
                 subtitle:
@@ -393,6 +406,37 @@ class _PrivacyDataScreenState extends ConsumerState<PrivacyDataScreen> {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+class _CrashDiagnosticsTile extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final bool enabled =
+        ref.watch(crashDiagnosticsControllerProvider).value ?? false;
+
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      child: SwitchListTile(
+        value: enabled,
+        onChanged: (bool value) {
+          ref.read(crashDiagnosticsControllerProvider.notifier).setEnabled(value);
+        },
+        title: const Text(
+          'Share crash diagnostics',
+          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+        ),
+        subtitle: Text(
+          'Allow TARU to send technical crash information to help diagnose '
+          'app failures. TARU does not intentionally attach health '
+          'information. Native collection follows this choice from the next '
+          'launch.',
+          style: TextStyle(color: Colors.grey.shade700, height: 1.35),
+        ),
+        contentPadding: const EdgeInsets.fromLTRB(20, 8, 12, 16),
       ),
     );
   }

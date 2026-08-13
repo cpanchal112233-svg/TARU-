@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/reliability/user_facing_error.dart';
 import '../../application/allergies_providers.dart';
 import '../../domain/allergy.dart';
 import '../widgets/health_form_widgets.dart';
@@ -36,7 +37,7 @@ class AllergiesScreen extends ConsumerWidget {
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Text(
-            'Could not load your allergies.\n${record.error}',
+            'Could not load your allergies. ${userFacingErrorMessage(record.error!)}',
             textAlign: TextAlign.center,
           ),
         ),
@@ -148,7 +149,11 @@ class _AllergiesEditorState extends ConsumerState<_AllergiesEditor> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not save your allergies: $error')),
+        SnackBar(
+          content: Text(
+            'Could not save your allergies. ${userFacingErrorMessage(error)}',
+          ),
+        ),
       );
     } finally {
       if (mounted) setState(() => _isSaving = false);

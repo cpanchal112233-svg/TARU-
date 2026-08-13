@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/reliability/user_facing_error.dart';
 import '../../../health_profile/application/health_profile_providers.dart';
 import '../../../health_profile/domain/health_profile.dart';
 import '../../../health_profile/domain/health_units.dart';
@@ -11,11 +12,20 @@ import '../../domain/weight_measurement.dart';
 import '../widgets/raw_measurement_chart.dart';
 
 /// Neutral list of intentional weight recordings.
-class WeightHistoryScreen extends ConsumerWidget {
+class WeightHistoryScreen extends ConsumerStatefulWidget {
   const WeightHistoryScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<WeightHistoryScreen> createState() =>
+      _WeightHistoryScreenState();
+}
+
+class _WeightHistoryScreenState extends ConsumerState<WeightHistoryScreen> {
+  bool _starting = false;
+  final Set<String> _deleting = <String>{};
+
+  @override
+  Widget build(BuildContext context) {
     final AsyncValue<List<WeightMeasurement>> history = ref.watch(
       weightHistoryProvider,
     );
@@ -43,7 +53,7 @@ class WeightHistoryScreen extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Could not load weight history.\n$error',
+                  'Could not load weight history. ${userFacingErrorMessage(error)}',
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
@@ -63,6 +73,7 @@ class WeightHistoryScreen extends ConsumerWidget {
               onStartTracking: profile.weightKg == null
                   ? null
                   : () => _startTracking(context, ref, profile.weightKg!),
+              starting: _starting,
               onAdd: () =>
                   _openAddWeight(context, ref, profile.preferredUnits),
             );
@@ -135,7 +146,9 @@ class WeightHistoryScreen extends ConsumerWidget {
                 measurement: item,
                 units: profile.preferredUnits,
                 isLatest: index == 2,
-                onDelete: () => _confirmDelete(context, ref, item),
+                onDelete: _deleting.contains(item.id)
+                    ? null
+                    : () => _confirmDelete(context, ref, item),
               );
             },
           );
@@ -172,6 +185,8 @@ class WeightHistoryScreen extends ConsumerWidget {
     WidgetRef ref,
     double weightKg,
   ) async {
+    if (_starting) return;
+    setState(() => _starting = true);
     try {
       await ref.read(recordWeightProvider)(weightKg);
       if (!context.mounted) return;
@@ -181,8 +196,14 @@ class WeightHistoryScreen extends ConsumerWidget {
     } catch (error) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not start tracking: $error')),
+        SnackBar(
+          content: Text(
+            'Could not start tracking. ${userFacingErrorMessage(error)}',
+          ),
+        ),
       );
+    } finally {
+      if (mounted) setState(() => _starting = false);
     }
   }
 
@@ -213,6 +234,8 @@ class WeightHistoryScreen extends ConsumerWidget {
     );
 
     if (confirmed != true || !context.mounted) return;
+    if (_deleting.contains(measurement.id)) return;
+    setState(() => _deleting.add(measurement.id));
 
     try {
       await ref.read(deleteWeightMeasurementProvider)(measurement.id);
@@ -223,8 +246,16 @@ class WeightHistoryScreen extends ConsumerWidget {
     } catch (error) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not delete weight: $error')),
+        SnackBar(
+          content: Text(
+            'Could not delete weight. ${userFacingErrorMessage(error)}',
+          ),
+        ),
       );
+    } finally {
+      if (mounted) {
+        setState(() => _deleting.remove(measurement.id));
+      }
     }
   }
 }
@@ -235,12 +266,14 @@ class _EmptyHistory extends StatelessWidget {
     required this.units,
     required this.onStartTracking,
     required this.onAdd,
+    this.starting = false,
   });
 
   final double? legacyWeightKg;
   final UnitSystem units;
   final VoidCallback? onStartTracking;
   final VoidCallback onAdd;
+  final bool starting;
 
   @override
   Widget build(BuildContext context) {
@@ -275,11 +308,17 @@ class _EmptyHistory extends StatelessWidget {
           if (legacyWeightKg != null && onStartTracking != null) ...[
             const SizedBox(height: 24),
             FilledButton(
-              onPressed: onStartTracking,
-              child: Text(
-                'Start tracking with your current weight '
-                '(${_formatWeight(legacyWeightKg!, units)})',
-              ),
+              onPressed: starting ? null : onStartTracking,
+              child: starting
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(
+                      'Start tracking with your current weight '
+                      '(${_formatWeight(legacyWeightKg!, units)})',
+                    ),
             ),
           ],
           const SizedBox(height: 12),
@@ -301,7 +340,7 @@ class _WeightTile extends StatelessWidget {
   final WeightMeasurement measurement;
   final UnitSystem units;
   final bool isLatest;
-  final VoidCallback onDelete;
+  final VoidCallback? onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -508,9 +547,9 @@ class _AddWeightSheetState extends ConsumerState<_AddWeightSheet> {
       Navigator.of(context).pop();
     } catch (error) {
       if (!mounted) return;
-      final String message = error is ArgumentError && error.message != null
-          ? error.message.toString()
-          : 'Could not save weight: $error';
+      final String message = error is ArgumentError
+          ? 'Check the values you entered and try again.'
+          : 'Could not save weight. ${userFacingErrorMessage(error)}';
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(message)));

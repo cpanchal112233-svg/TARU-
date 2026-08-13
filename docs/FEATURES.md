@@ -175,5 +175,14 @@ Present-tense claims match the shipped personal health organizer +
 companion. Password reset uses Firebase Auth. Help & support exposes the
 product medical boundary and Privacy & data; support email and legal
 document URLs appear only when configured. Public-release blockers
-(legal, clinical, founder inputs, physical iPhone OCR, crash
-observability) remain listed in `docs/ROADMAP.md`.
+(legal, clinical, founder inputs, physical iPhone OCR, Accessibility
+Phase B, Crashlytics Console enablement) remain listed in
+`docs/ROADMAP.md`.
+
+## Reliability Foundation
+Opt-in **Share crash diagnostics** under Profile → Privacy & data.
+Default off; native Crashlytics collection default off; no Analytics;
+TARU does not intentionally attach health information. This is not a
+zero-risk / no-data claim. A known `deletionInProgress` guard blocks MainShell and shows cleanup
+recovery that reuses the existing Phase 10 PrivacyController destructive
+paths. Clients never clear deletion guards.

@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../core/reliability/user_facing_error.dart';
+
 class ReauthenticationScreen extends StatefulWidget {
   final String action;
 
@@ -51,31 +53,11 @@ class _ReauthenticationScreenState extends State<ReauthenticationScreen> {
 
       Navigator.pop(context, true);
     } on FirebaseAuthException catch (e) {
-      String message;
-
-      switch (e.code) {
-        case 'wrong-password':
-        case 'invalid-credential':
-          message = 'The current password is incorrect.';
-          break;
-
-        case 'too-many-requests':
-          message = 'Too many attempts. Please try again later.';
-          break;
-
-        case 'user-mismatch':
-          message = 'Authentication failed for this account.';
-          break;
-
-        default:
-          message = e.message ?? 'Authentication failed.';
-      }
-
       if (!mounted) return;
 
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(message)));
+      ).showSnackBar(SnackBar(content: Text(userFacingErrorMessage(e))));
     } finally {
       if (mounted) {
         setState(() {

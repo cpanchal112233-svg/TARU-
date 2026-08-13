@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/reliability/user_facing_error.dart';
 import '../../../health_profile/domain/medication.dart';
 import '../../../health_profile/presentation/pages/medications_screen.dart';
 import '../../application/habit_providers.dart';
 import '../../application/reminder_providers.dart';
+import '../../application/routine_in_flight.dart';
 import '../../application/routine_providers.dart';
 import '../../domain/dose_schedule.dart';
 import '../../domain/habit.dart';
@@ -80,6 +82,8 @@ class _RoutineBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final Set<String> inFlight = ref.watch(routineInFlightProvider);
+
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
       children: [
@@ -109,8 +113,13 @@ class _RoutineBody extends ConsumerWidget {
               _DoseRow(
                 dose: dose,
                 status: doseLog?.statusOf(dose.key),
-                onSetStatus: (DoseStatus? status) =>
-                    ref.read(setDoseStatusProvider)(dose.key, status),
+                busy: inFlight.contains(RoutineInFlight.dose(dose.key)),
+                onSetStatus: (DoseStatus? status) => _setDose(
+                  context,
+                  ref,
+                  dose.key,
+                  status,
+                ),
               ),
           ],
         ],
@@ -150,8 +159,9 @@ class _RoutineBody extends ConsumerWidget {
               slot: slot,
               habits: habitsInSlot(slot, activeHabits),
               log: habitLog,
+              busyIds: inFlight,
               onSetStatus: (String habitId, HabitStatus? status) =>
-                  ref.read(setHabitStatusProvider)(habitId, status),
+                  _setHabit(context, ref, habitId, status),
             ),
           ],
         ],
@@ -173,6 +183,48 @@ class _RoutineBody extends ConsumerWidget {
           _NotDailyList(medications: schedule.notDaily),
         ],
       ],
+    );
+  }
+
+  Future<void> _setDose(
+    BuildContext context,
+    WidgetRef ref,
+    String doseKey,
+    DoseStatus? status,
+  ) async {
+    final String token = RoutineInFlight.dose(doseKey);
+    final RoutineInFlight guard = ref.read(routineInFlightProvider.notifier);
+    await performRoutineWrite(
+      guard: guard,
+      token: token,
+      action: () => ref.read(setDoseStatusProvider)(doseKey, status),
+      onError: (Object error) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(userFacingErrorMessage(error))),
+        );
+      },
+    );
+  }
+
+  Future<void> _setHabit(
+    BuildContext context,
+    WidgetRef ref,
+    String habitId,
+    HabitStatus? status,
+  ) async {
+    final String token = RoutineInFlight.habit(habitId);
+    final RoutineInFlight guard = ref.read(routineInFlightProvider.notifier);
+    await performRoutineWrite(
+      guard: guard,
+      token: token,
+      action: () => ref.read(setHabitStatusProvider)(habitId, status),
+      onError: (Object error) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(userFacingErrorMessage(error))),
+        );
+      },
     );
   }
 }
@@ -371,11 +423,13 @@ class _DoseRow extends StatelessWidget {
   const _DoseRow({
     required this.dose,
     required this.status,
+    required this.busy,
     required this.onSetStatus,
   });
 
   final ScheduledDose dose;
   final DoseStatus? status;
+  final bool busy;
   final ValueChanged<DoseStatus?> onSetStatus;
 
   @override
@@ -400,7 +454,7 @@ class _DoseRow extends StatelessWidget {
         type: MaterialType.transparency,
         child: ListTile(
           contentPadding: const EdgeInsets.fromLTRB(12, 4, 8, 4),
-          onTap: () => onSetStatus(isTaken ? null : DoseStatus.taken),
+          onTap: busy ? null : () => onSetStatus(isTaken ? null : DoseStatus.taken),
           leading: Icon(
             isTaken
                 ? Icons.check_circle
@@ -429,10 +483,17 @@ class _DoseRow extends StatelessWidget {
                   subtitle,
                   style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
                 ),
-          trailing: TextButton(
-            onPressed: () => onSetStatus(isSkipped ? null : DoseStatus.skipped),
-            child: Text(isSkipped ? 'Skipped' : 'Skip'),
-          ),
+          trailing: busy
+              ? const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : TextButton(
+                  onPressed: () =>
+                      onSetStatus(isSkipped ? null : DoseStatus.skipped),
+                  child: Text(isSkipped ? 'Skipped' : 'Skip'),
+                ),
         ),
       ),
     );

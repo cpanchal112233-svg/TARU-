@@ -1,23 +1,24 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/strings.dart';
-import '../../data/auth_service.dart';
+import '../../../../core/reliability/user_facing_error.dart';
+import '../../application/auth_providers.dart';
 import '../widgets/auth_button.dart';
 import '../widgets/auth_header.dart';
 import '../widgets/auth_textfield.dart';
 import 'forgot_password_screen.dart';
 import 'signup_screen.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
-  final AuthService _authService = AuthService();
+class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   final TextEditingController emailController = TextEditingController();
 
@@ -39,7 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      await _authService.login(
+      await ref.read(authServiceProvider).login(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
@@ -47,69 +48,16 @@ class _LoginScreenState extends State<LoginScreen> {
       // No navigation here: AuthGate listens to the auth state and swaps this
       // screen for the app shell as soon as the sign-in lands.
     } on FirebaseAuthException catch (e) {
-      debugPrint('Firebase Auth Error Code: ${e.code}');
-
-      debugPrint('Firebase Auth Error Message: ${e.message}');
-
-      String message;
-
-      switch (e.code) {
-        case 'user-not-found':
-          message = 'No account found with this email.';
-          break;
-
-        case 'wrong-password':
-          message = 'Incorrect password.';
-          break;
-
-        case 'invalid-credential':
-          message = 'Incorrect email or password.';
-          break;
-
-        case 'invalid-email':
-          message = 'Please enter a valid email address.';
-          break;
-
-        case 'user-disabled':
-          message = 'This account has been disabled.';
-          break;
-
-        case 'network-request-failed':
-          message = 'Network error. Check your connection and try again.';
-          break;
-
-        default:
-          message = e.message ?? 'Login failed.';
-      }
-
       if (!mounted) return;
 
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(message)));
-    } on FirebaseException catch (e) {
-      debugPrint('Firebase Error Code: ${e.code}');
-
-      debugPrint('Firebase Error Message: ${e.message}');
-
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Database error: ${e.message ?? "Something went wrong."}',
-          ),
-        ),
-      );
+      ).showSnackBar(SnackBar(content: Text(userFacingErrorMessage(e))));
     } catch (e) {
-      debugPrint('Unexpected error: $e');
-
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Something went wrong. Please try again.'),
-        ),
+        SnackBar(content: Text(userFacingErrorMessage(e))),
       );
     } finally {
       if (mounted) {
@@ -232,7 +180,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 AuthButton(
                   text: isLoading ? 'Logging in...' : AppStrings.login,
 
-                  onPressed: isLoading ? () {} : loginUser,
+                  onPressed: isLoading ? null : loginUser,
                 ),
 
                 const SizedBox(height: 20),
