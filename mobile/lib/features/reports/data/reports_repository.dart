@@ -156,6 +156,7 @@ class ReportsRepository {
     required String uid,
     required String reportId,
     required String reviewedText,
+    required ReportExtractionMethod method,
     String? previousReviewedText,
   }) async {
     final List<int> utf8Bytes = utf8.encode(reviewedText);
@@ -177,7 +178,7 @@ class ReportsRepository {
     );
 
     final ReportExtraction extraction = ReportExtraction(
-      method: ReportExtraction.pdfTextMethod,
+      method: method.storageValue,
       reviewedAt: DateTime.now(),
     );
 

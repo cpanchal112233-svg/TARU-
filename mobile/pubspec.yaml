@@ -52,6 +52,8 @@ dependencies:
   share_plus: 12.0.2
   archive: 4.0.9
   pdf_manipulator: 4.1.0
+  google_mlkit_text_recognition: 0.16.0
+  image: 4.5.4
   fl_chart: 1.2.0
 
 dev_dependencies:
@@ -76,6 +78,10 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+  # Phase 12: ML Kit Flutter bridge is CocoaPods-only; hybrid SPM+CocoaPods
+  # duplicates Google/Firebase symbols. Revisit when the bridge supports SPM.
+  config:
+    enable-swift-package-manager: false
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

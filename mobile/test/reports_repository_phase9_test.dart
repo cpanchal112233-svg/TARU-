@@ -101,6 +101,7 @@ void main() {
       uid: 'u1',
       reportId: 'r1',
       reviewedText: 'Hemoglobin 13.8',
+      method: ReportExtractionMethod.pdfText,
     );
 
     expect(saved.method, 'pdf_text');
@@ -132,6 +133,7 @@ void main() {
         uid: 'u1',
         reportId: 'r1',
         reviewedText: 'transient',
+        method: ReportExtractionMethod.pdfText,
       ),
       throwsA(isA<FirebaseException>()),
     );
@@ -147,6 +149,7 @@ void main() {
       uid: 'u1',
       reportId: 'r1',
       reviewedText: 'Platelets 250',
+      method: ReportExtractionMethod.pdfText,
     );
     expect(await repo.loadReviewedText('u1', 'r1'), 'Platelets 250');
   });
@@ -156,12 +159,14 @@ void main() {
       uid: 'u1',
       reportId: 'r1',
       reviewedText: 'old text',
+      method: ReportExtractionMethod.pdfText,
     );
     await repo.saveReviewedText(
       uid: 'u1',
       reportId: 'r1',
       reviewedText: 'new text',
       previousReviewedText: 'old text',
+      method: ReportExtractionMethod.pdfText,
     );
 
     final String path = reviewedExtractionStoragePath('u1', 'r1');
@@ -189,6 +194,7 @@ void main() {
         reportId: 'r1',
         reviewedText: 'new text',
         previousReviewedText: 'old text',
+        method: ReportExtractionMethod.pdfText,
       ),
       throwsA(isA<FirebaseException>()),
     );
@@ -204,6 +210,7 @@ void main() {
       uid: 'u1',
       reportId: 'r1',
       reviewedText: 'to remove',
+      method: ReportExtractionMethod.pdfText,
     );
     await repo.removeReviewedExtraction('u1', 'r1');
     expect(
@@ -229,7 +236,12 @@ void main() {
   test('size guard rejects oversized reviewed text', () async {
     final String huge = 'a' * (kMaxReviewedTextUtf8Bytes + 1);
     await expectLater(
-      repo.saveReviewedText(uid: 'u1', reportId: 'r1', reviewedText: huge),
+      repo.saveReviewedText(
+        uid: 'u1',
+        reportId: 'r1',
+        reviewedText: huge,
+        method: ReportExtractionMethod.pdfText,
+      ),
       throwsA(isA<StateError>()),
     );
     expect(objects.objects, isEmpty);
@@ -248,6 +260,7 @@ void main() {
       uid: 'u1',
       reportId: 'r1',
       reviewedText: 'derived',
+      method: ReportExtractionMethod.pdfText,
     );
 
     await repo.delete('u1', report);
