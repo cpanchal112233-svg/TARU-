@@ -324,8 +324,10 @@ class _PrivacyDataScreenState extends ConsumerState<PrivacyDataScreen> {
             children: <Widget>[
               Text(
                 'Control your TARU health data. Exports stay on this device '
-                'until you share or save them. TARU does not email exports or '
-                'keep a cloud copy of the archive.',
+                'until you share or save them. A TARU archive contains the '
+                'information you stored — it is not a certified medical '
+                'record. TARU does not email exports or keep a cloud copy of '
+                'the archive.',
                 style: TextStyle(color: Colors.grey.shade700, height: 1.4),
               ),
               if (guard.asData?.value == true) ...<Widget>[
@@ -347,8 +349,10 @@ class _PrivacyDataScreenState extends ConsumerState<PrivacyDataScreen> {
               _ActionCard(
                 title: 'Export my health data',
                 subtitle:
-                    'Create a ZIP with your profile, history, measurements, '
-                    'reports, and reviewed extracted text when present.',
+                    'Create a ZIP archive of the information you stored — '
+                    'profile, history, measurements, reports, and reviewed '
+                    'extracted text when present. Not a certified medical '
+                    'record.',
                 onTap: _busy ? null : _export,
               ),
               const SizedBox(height: 12),

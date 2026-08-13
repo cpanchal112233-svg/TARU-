@@ -1,28 +1,28 @@
 import 'package:flutter/material.dart';
 
-import '../../domain/health_profile.dart';
-
 /// Shows the BMI derived from the entered height and weight.
+///
+/// Displays the numeric ratio only — no clinical category labels or
+/// traffic-light classification.
 class BmiCard extends StatelessWidget {
   const BmiCard({
     super.key,
     required this.bmi,
-    required this.category,
     this.needsCaveat = false,
   });
 
   final double? bmi;
-  final BmiCategory? category;
 
   /// True when BMI is a poor guide for this person, e.g. during pregnancy.
   final bool needsCaveat;
 
+  static const Color _accent = Color(0xff2563EB);
+
   @override
   Widget build(BuildContext context) {
     final double? value = bmi;
-    final BmiCategory? bmiCategory = category;
 
-    if (value == null || bmiCategory == null) {
+    if (value == null) {
       return _Shell(
         child: Row(
           children: [
@@ -39,8 +39,6 @@ class BmiCard extends StatelessWidget {
       );
     }
 
-    final Color accent = _accentFor(bmiCategory);
-
     return _Shell(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -49,10 +47,10 @@ class BmiCard extends StatelessWidget {
             children: [
               Text(
                 value.toStringAsFixed(1),
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: accent,
+                  color: _accent,
                 ),
               ),
               const SizedBox(width: 10),
@@ -67,31 +65,19 @@ class BmiCard extends StatelessWidget {
                   ),
                 ),
               ),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: accent.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  bmiCategory.label,
-                  style: TextStyle(
-                    color: accent,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
             ],
           ),
-          const SizedBox(height: 14),
-          _BmiScale(category: bmiCategory),
+          const SizedBox(height: 10),
+          Text(
+            'BMI is a height-to-weight ratio and is not a diagnosis.',
+            style: TextStyle(
+              fontSize: 12.5,
+              height: 1.4,
+              color: Colors.grey.shade700,
+            ),
+          ),
           if (needsCaveat) ...[
-            const SizedBox(height: 14),
+            const SizedBox(height: 12),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -115,71 +101,6 @@ class BmiCard extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  static Color _accentFor(BmiCategory category) {
-    return switch (category) {
-      BmiCategory.underweight => const Color(0xffF59E0B),
-      BmiCategory.healthy => const Color(0xff16A34A),
-      BmiCategory.overweight => const Color(0xffF97316),
-      BmiCategory.obese => const Color(0xffDC2626),
-    };
-  }
-}
-
-class _BmiScale extends StatelessWidget {
-  const _BmiScale({required this.category});
-
-  final BmiCategory category;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        for (final BmiCategory segment in BmiCategory.values)
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(right: 4),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    height: 6,
-                    decoration: BoxDecoration(
-                      color: segment == category
-                          ? BmiCard._accentFor(segment)
-                          : Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(3),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    _shortLabel(segment),
-                    style: TextStyle(
-                      fontSize: 10.5,
-                      fontWeight: segment == category
-                          ? FontWeight.w700
-                          : FontWeight.w400,
-                      color: segment == category
-                          ? BmiCard._accentFor(segment)
-                          : Colors.grey.shade600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-
-  static String _shortLabel(BmiCategory category) {
-    return switch (category) {
-      BmiCategory.underweight => 'Under 18.5',
-      BmiCategory.healthy => '18.5–24.9',
-      BmiCategory.overweight => '25–29.9',
-      BmiCategory.obese => '30+',
-    };
   }
 }
 

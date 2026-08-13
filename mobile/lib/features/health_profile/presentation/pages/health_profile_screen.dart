@@ -550,7 +550,6 @@ class _HealthProfileFormState extends ConsumerState<_HealthProfileForm> {
 
           BmiCard(
             bmi: draft.bmi,
-            category: draft.bmiCategory,
             needsCaveat: draft.bmiNeedsCaveat,
           ),
 

@@ -139,8 +139,9 @@
   Profile saves that change weight use the same mirror gate. Legacy
   snapshot weights are not auto-migrated. Recent history shows a raw
   (uncurved) chart of actual points plus an exact list (UI capped at 50;
-  export is uncapped). No weight goals, BMI bands, deltas, HealthKit/
-  Health Connect, OCR, or AI interpretation.
+  export is uncapped). BMI on Health Profile is shown as a number only
+  (height-to-weight ratio; not a diagnosis; no clinical category labels).
+  No weight goals, HealthKit/Health Connect, OCR, or AI interpretation.
 
 - **Blood pressure**: sibling documents in the same measurements
   collection (`type: blood_pressure`, `systolicMmHg`, `diastolicMmHg`,
@@ -167,4 +168,12 @@
   same sidecar path as selectable PDF text.
 
 ## Placeholders
-- AI health chat
+- AI health chat (future — not shipped)
+
+## Trust & Launch Integrity
+Present-tense claims match the shipped personal health organizer +
+companion. Password reset uses Firebase Auth. Help & support exposes the
+product medical boundary and Privacy & data; support email and legal
+document URLs appear only when configured. Public-release blockers
+(legal, clinical, founder inputs, physical iPhone OCR, crash
+observability) remain listed in `docs/ROADMAP.md`.

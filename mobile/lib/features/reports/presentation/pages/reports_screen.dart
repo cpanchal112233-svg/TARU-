@@ -107,8 +107,8 @@ class _EmptyState extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               'Upload a lab result, scan, prescription or discharge letter. '
-              'TARU keeps it private to your account — explanations in plain '
-              'language come next.',
+              'TARU keeps it private to your account. You can extract text '
+              'on this device and review it before saving.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,

@@ -17,11 +17,7 @@ class HabitAdherenceCard extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
-    final Color colour = summary.percent >= 80
-        ? const Color(0xff16A34A)
-        : summary.percent >= 50
-        ? const Color(0xffD97706)
-        : const Color(0xffB3261E);
+    const Color colour = Color(0xff2563EB);
 
     return Container(
       width: double.infinity,

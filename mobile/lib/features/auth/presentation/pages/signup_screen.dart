@@ -136,7 +136,8 @@ class _SignupScreenState extends State<SignupScreen> {
                 const AuthHeader(
                   title: 'Create Account',
                   subtitle:
-                      'Join TARU and begin your AI-powered health journey.',
+                      'Join TARU to organize your health information and '
+                      'daily routines.',
                 ),
 
                 const SizedBox(height: 35),
