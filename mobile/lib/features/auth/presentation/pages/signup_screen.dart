@@ -1,18 +1,20 @@
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../data/auth_service.dart';
+import '../../../../core/reliability/user_facing_error.dart';
+import '../../../account/application/account_providers.dart';
+import '../../application/auth_providers.dart';
 import '../widgets/auth_header.dart';
 
-class SignupScreen extends StatefulWidget {
+class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
 
   @override
-  State<SignupScreen> createState() => _SignupScreenState();
+  ConsumerState<SignupScreen> createState() => _SignupScreenState();
 }
 
-class _SignupScreenState extends State<SignupScreen> {
-  final AuthService _authService = AuthService();
+class _SignupScreenState extends ConsumerState<SignupScreen> {
 
   final nameController = TextEditingController();
   final emailController = TextEditingController();
@@ -34,72 +36,43 @@ class _SignupScreenState extends State<SignupScreen> {
       isLoading = true;
     });
 
+    final String name = nameController.text.trim();
+    final String email = emailController.text.trim();
+    ref.read(pendingSignupIdentityProvider).remember(name: name, email: email);
+
     try {
-      await _authService.signUp(
-        email: emailController.text.trim(),
+      await ref.read(authServiceProvider).signUp(
+        email: email,
         password: passwordController.text.trim(),
-        name: nameController.text.trim(),
+        name: name,
       );
       if (!mounted) return;
 
+      ref.read(pendingSignupIdentityProvider).clear();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Account created successfully!')),
       );
 
       Navigator.pop(context);
-    } on FirebaseAuthException catch (e) {
-      debugPrint('Firebase Auth Error Code: ${e.code}');
-      debugPrint('Firebase Auth Error Message: ${e.message}');
-
-      String message;
-
-      switch (e.code) {
-        case 'email-already-in-use':
-          message = 'This email is already registered.';
-          break;
-        case 'invalid-email':
-          message = 'Please enter a valid email address.';
-          break;
-        case 'weak-password':
-          message = 'The password is too weak.';
-          break;
-        case 'operation-not-allowed':
-          message = 'Email/password sign-up is disabled in Firebase.';
-          break;
-        case 'network-request-failed':
-          message = 'Network error. Check your connection and try again.';
-          break;
-        default:
-          message = e.message ?? 'Authentication failed.';
-      }
-
+    } on AccountRootSetupException {
       if (!mounted) return;
-
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(message)));
-    } on FirebaseException catch (e) {
-      debugPrint('Firestore Error Code: ${e.code}');
-      debugPrint('Firestore Error Message: ${e.message}');
-
-      if (!mounted) return;
-
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text(
-            'Database error: ${e.message ?? "Something went wrong."}',
+            'Your login was created, but TARU could not finish the account '
+            'record. You can retry account setup next.',
           ),
         ),
       );
-    } catch (e) {
-      debugPrint('Unexpected error: $e');
-
+    } on FirebaseAuthException catch (e) {
       if (!mounted) return;
-
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(userFacingErrorMessage(e))));
+    } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Something went wrong. Please try again.'),
-        ),
+        SnackBar(content: Text(userFacingErrorMessage(e))),
       );
     } finally {
       if (mounted) {

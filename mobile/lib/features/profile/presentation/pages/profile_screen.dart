@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../core/reliability/user_facing_error.dart';
 import '../../../auth/data/auth_service.dart';
 import '../../../emergency/presentation/pages/emergency_card_screen.dart';
 import '../../../health_profile/presentation/pages/allergies_screen.dart';
@@ -39,7 +40,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message ?? 'Could not log out.')),
+        SnackBar(content: Text(userFacingErrorMessage(e))),
       );
     }
   }
@@ -136,7 +137,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message ?? 'Could not update your name.')),
+        SnackBar(content: Text(userFacingErrorMessage(e))),
       );
     } finally {
       if (mounted) {
@@ -184,9 +185,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.message ?? 'Could not send password reset email.'),
-        ),
+        SnackBar(content: Text(userFacingErrorMessage(e))),
       );
     } finally {
       if (mounted) {
@@ -280,7 +279,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message ?? 'Could not change email.')),
+        SnackBar(content: Text(userFacingErrorMessage(e))),
       );
     } finally {
       if (mounted) {

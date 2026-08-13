@@ -26,27 +26,47 @@ class RemindersController extends AsyncNotifier<bool> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     final bool enabled = prefs.getBool(_key) ?? false;
+    if (!enabled) return false;
 
-    if (enabled) await _applySchedule();
+    try {
+      final bool allowed = await ref
+          .read(reminderServiceProvider)
+          .notificationsCurrentlyAllowed();
+      if (!allowed) {
+        await ref.read(reminderServiceProvider).cancelAll();
+        return false;
+      }
 
-    return enabled;
+      await _applySchedule();
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   /// Returns false when the user declined the system permission, so the caller
   /// can explain why the switch stayed off.
   Future<bool> enable() async {
-    final bool granted = await ref
-        .read(reminderServiceProvider)
-        .requestPermission();
+    try {
+      final bool granted = await ref
+          .read(reminderServiceProvider)
+          .requestPermission();
+      if (!granted) return false;
 
-    if (!granted) return false;
+      final bool allowed = await ref
+          .read(reminderServiceProvider)
+          .notificationsCurrentlyAllowed();
+      if (!allowed) return false;
 
-    await _persist(true);
-    await _applySchedule();
+      await _persist(true);
+      await _applySchedule();
 
-    state = const AsyncValue.data(true);
+      state = const AsyncValue.data(true);
 
-    return true;
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   Future<void> disable() async {
@@ -89,25 +109,43 @@ class LifestyleRemindersController extends AsyncNotifier<bool> {
   Future<bool> build() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final bool enabled = prefs.getBool(_key) ?? false;
+    if (!enabled) return false;
 
-    if (enabled) {
+    try {
+      final bool allowed = await ref
+          .read(reminderServiceProvider)
+          .notificationsCurrentlyAllowed();
+      if (!allowed) {
+        await ref.read(reminderServiceProvider).cancelLifestyleReminder();
+        return false;
+      }
+
       await ref.read(reminderServiceProvider).scheduleLifestyleReminder();
+      return true;
+    } catch (_) {
+      return false;
     }
-
-    return enabled;
   }
 
   Future<bool> enable() async {
-    final bool granted = await ref
-        .read(reminderServiceProvider)
-        .requestPermission();
+    try {
+      final bool granted = await ref
+          .read(reminderServiceProvider)
+          .requestPermission();
+      if (!granted) return false;
 
-    if (!granted) return false;
+      final bool allowed = await ref
+          .read(reminderServiceProvider)
+          .notificationsCurrentlyAllowed();
+      if (!allowed) return false;
 
-    await _persist(true);
-    await ref.read(reminderServiceProvider).scheduleLifestyleReminder();
-    state = const AsyncValue.data(true);
-    return true;
+      await _persist(true);
+      await ref.read(reminderServiceProvider).scheduleLifestyleReminder();
+      state = const AsyncValue.data(true);
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   Future<void> disable() async {

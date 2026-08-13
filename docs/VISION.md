@@ -13,6 +13,7 @@ Today TARU helps people:
 - store medical reports and extract text on-device for personal review
 - export a TARU archive of stored information
 - delete health data or delete the account
+- optionally share technical crash diagnostics (off by default)
 - use bounded, rule-based caution and urgency tools where already shipped
 
 TARU does **not** currently diagnose conditions, interpret reports clinically,

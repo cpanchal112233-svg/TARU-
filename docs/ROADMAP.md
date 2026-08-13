@@ -176,17 +176,31 @@ privacy/terms/support links; VISION split into current vs long-term.
 No AI, HealthKit/Health Connect, Crashlytics, localization, triage
 clinical rewrite, Firebase rules/Functions changes, or redesign.
 
+## Reliability Foundation (source integration)
+Opt-in crash diagnostics via Firebase Crashlytics. Native automatic
+collection defaults OFF. Device-local preference
+`crash_diagnostics_enabled` (default false; not synced). No Firebase
+Analytics, no intentional health-data attachment, no `setUserIdentifier`.
+Dart reporting is sanitized (`UnexpectedFailure(<category>)`) and stops
+immediately on opt-out. Account-root integrity is fail-closed: Auth
+presence is not enough for MainShell; missing `users/{uid}` does not
+auto-bootstrap. Crashlytics is **not** marked publicly enabled until
+Firebase Console activation and a synthetic remote smoke are done
+separately. Accessibility Phase B is not started.
+
 ### Public-release blockers (unresolved)
 - **Founder:** first launch country; real support email
 - **Legal:** Privacy Policy; Terms; jurisdiction/product disclaimer;
-  Firebase/ML Kit/data-processing disclosure; store claim review
+  Firebase/ML Kit/data-processing disclosure; Crashlytics disclosure
+  before production use; store claim review
 - **Clinical:** triage diagnosis-named guidance; self-care
   false-reassurance review; medicine Pause/Stop skim-risk wording;
   future clinical thresholds
 - **Platform:** physical iPhone Phase 12 OCR smoke before
   TestFlight/public release
-- **Reliability (recommended):** crash observability before public
-  release
+- **Accessibility Phase B:** project-wide semantics and text scaling
+- **Crashlytics:** Firebase Console enablement and synthetic remote
+  smoke (source integration only so far)
 
 ## Phase 5 — AI assistant (future)
 Report explanations and health chat remain deferred until grounded

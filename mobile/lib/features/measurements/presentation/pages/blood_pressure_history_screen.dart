@@ -2,17 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/reliability/user_facing_error.dart';
 import '../../application/measurements_providers.dart';
 import '../../domain/blood_pressure_measurement.dart';
 import '../../domain/measurement_chart_points.dart';
 import '../widgets/raw_measurement_chart.dart';
 
 /// Dedicated blood-pressure history: add, recent raw chart, recent list.
-class BloodPressureHistoryScreen extends ConsumerWidget {
+class BloodPressureHistoryScreen extends ConsumerStatefulWidget {
   const BloodPressureHistoryScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<BloodPressureHistoryScreen> createState() =>
+      _BloodPressureHistoryScreenState();
+}
+
+class _BloodPressureHistoryScreenState
+    extends ConsumerState<BloodPressureHistoryScreen> {
+  final Set<String> _deleting = <String>{};
+
+  @override
+  Widget build(BuildContext context) {
     final AsyncValue<List<BloodPressureMeasurement>> history = ref.watch(
       bloodPressureHistoryProvider,
     );
@@ -38,7 +48,7 @@ class BloodPressureHistoryScreen extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Could not load blood pressure history.\n$error',
+                  'Could not load blood pressure history. ${userFacingErrorMessage(error)}',
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
@@ -119,7 +129,9 @@ class BloodPressureHistoryScreen extends ConsumerWidget {
               return _BpTile(
                 measurement: item,
                 isLatest: index == 2,
-                onDelete: () => _confirmDelete(context, ref, item),
+                onDelete: _deleting.contains(item.id)
+                    ? null
+                    : () => _confirmDelete(context, ref, item),
               );
             },
           );
@@ -174,6 +186,8 @@ class BloodPressureHistoryScreen extends ConsumerWidget {
     );
 
     if (confirmed != true || !context.mounted) return;
+    if (_deleting.contains(measurement.id)) return;
+    setState(() => _deleting.add(measurement.id));
 
     try {
       await ref.read(deleteBloodPressureMeasurementProvider)(measurement.id);
@@ -184,8 +198,16 @@ class BloodPressureHistoryScreen extends ConsumerWidget {
     } catch (error) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not delete reading: $error')),
+        SnackBar(
+          content: Text(
+            'Could not delete reading. ${userFacingErrorMessage(error)}',
+          ),
+        ),
       );
+    } finally {
+      if (mounted) {
+        setState(() => _deleting.remove(measurement.id));
+      }
     }
   }
 }
@@ -241,7 +263,7 @@ class _BpTile extends StatelessWidget {
 
   final BloodPressureMeasurement measurement;
   final bool isLatest;
-  final VoidCallback onDelete;
+  final VoidCallback? onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -466,9 +488,9 @@ class _AddBloodPressureSheetState
       Navigator.of(context).pop();
     } catch (error) {
       if (!mounted) return;
-      final String message = error is ArgumentError && error.message != null
-          ? error.message.toString()
-          : 'Could not save reading: $error';
+      final String message = error is ArgumentError
+          ? 'Check the values you entered and try again.'
+          : 'Could not save reading. ${userFacingErrorMessage(error)}';
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(message)));

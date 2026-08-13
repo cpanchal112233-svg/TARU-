@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/reliability/user_facing_error.dart';
 import '../../application/reports_providers.dart';
 import '../../domain/medical_report.dart';
 import '../../domain/reports_query.dart';
@@ -50,7 +51,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Text(
-              'Could not load your reports.\n$error',
+              'Could not load your reports. ${userFacingErrorMessage(error)}',
               textAlign: TextAlign.center,
             ),
           ),

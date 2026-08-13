@@ -14,10 +14,14 @@ import '../domain/dose_schedule.dart';
 /// someone taking four things at breakfast gets one reminder listing them
 /// instead of four buzzes in a row.
 class ReminderService {
-  ReminderService({FlutterLocalNotificationsPlugin? plugin})
-    : _plugin = plugin ?? FlutterLocalNotificationsPlugin();
+  ReminderService({
+    FlutterLocalNotificationsPlugin? plugin,
+    Future<bool> Function()? notificationsAllowed,
+  }) : _plugin = plugin ?? FlutterLocalNotificationsPlugin(),
+       _notificationsAllowedOverride = notificationsAllowed;
 
   final FlutterLocalNotificationsPlugin _plugin;
+  final Future<bool> Function()? _notificationsAllowedOverride;
 
   static const String _channelId = 'medication_reminders';
   static const String _lifestyleChannelId = 'lifestyle_reminders';
@@ -116,6 +120,38 @@ class ReminderService {
     if (granted) await android?.requestExactAlarmsPermission();
 
     return granted;
+  }
+
+  /// Current OS notification authorization, without prompting.
+  Future<bool> notificationsCurrentlyAllowed() async {
+    final Future<bool> Function()? allowedOverride =
+        _notificationsAllowedOverride;
+    if (allowedOverride != null) {
+      return allowedOverride();
+    }
+
+    await _ensureReady();
+
+    try {
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        final NotificationsEnabledOptions? options = await _plugin
+            .resolvePlatformSpecificImplementation<
+              IOSFlutterLocalNotificationsPlugin
+            >()
+            ?.checkPermissions();
+        if (options == null) return false;
+        return options.isEnabled || options.isProvisionalEnabled;
+      }
+
+      final bool? enabled = await _plugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >()
+          ?.areNotificationsEnabled();
+      return enabled ?? false;
+    } catch (_) {
+      return false;
+    }
   }
 
   /// Cancels medicine reminders only — never the lifestyle nudge.

@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/reliability/user_facing_error.dart';
 import '../../../interactions/domain/medicine_checker.dart';
 import '../../../interactions/domain/medicine_warning.dart';
 import '../../../interactions/presentation/widgets/medicine_warning_widgets.dart';
@@ -43,7 +44,7 @@ class MedicationsScreen extends ConsumerWidget {
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Text(
-            'Could not load your medications.\n${record.error}',
+            'Could not load your medications. ${userFacingErrorMessage(record.error!)}',
             textAlign: TextAlign.center,
           ),
         ),
@@ -164,7 +165,11 @@ class _MedicationsEditorState extends ConsumerState<_MedicationsEditor> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not save your medications: $error')),
+        SnackBar(
+          content: Text(
+            'Could not save your medications. ${userFacingErrorMessage(error)}',
+          ),
+        ),
       );
     } finally {
       if (mounted) setState(() => _isSaving = false);

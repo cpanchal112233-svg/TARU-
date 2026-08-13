@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/reliability/user_facing_error.dart';
 import '../../application/conditions_providers.dart';
 import '../../domain/medical_condition.dart';
 import '../widgets/health_form_widgets.dart';
@@ -37,7 +38,7 @@ class ConditionsScreen extends ConsumerWidget {
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Text(
-            'Could not load your conditions.\n${conditions.error}',
+            'Could not load your conditions. ${userFacingErrorMessage(conditions.error!)}',
             textAlign: TextAlign.center,
           ),
         ),
@@ -175,7 +176,11 @@ class _ConditionsEditorState extends ConsumerState<_ConditionsEditor> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not save your conditions: $error')),
+        SnackBar(
+          content: Text(
+            'Could not save your conditions. ${userFacingErrorMessage(error)}',
+          ),
+        ),
       );
     } finally {
       if (mounted) setState(() => _isSaving = false);

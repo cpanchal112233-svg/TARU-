@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/reliability/user_facing_error.dart';
 import '../../../measurements/application/measurements_providers.dart';
 import '../../../measurements/domain/weight_measurement.dart';
 import '../../../measurements/presentation/pages/weight_history_screen.dart';
@@ -39,7 +40,7 @@ class HealthProfileScreen extends ConsumerWidget {
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Text(
-            'Could not load your health profile.\n${profile.error}',
+            'Could not load your health profile. ${userFacingErrorMessage(profile.error!)}',
             textAlign: TextAlign.center,
           ),
         ),
@@ -334,7 +335,11 @@ class _HealthProfileFormState extends ConsumerState<_HealthProfileForm> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not save your profile: $error')),
+        SnackBar(
+          content: Text(
+            'Could not save your profile. ${userFacingErrorMessage(error)}',
+          ),
+        ),
       );
     } finally {
       if (mounted) setState(() => _isSaving = false);

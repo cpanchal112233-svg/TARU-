@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 
+import '../../../../core/reliability/user_facing_error.dart';
 import '../../application/reports_providers.dart';
 import '../../domain/medical_report.dart';
 import '../widgets/report_widgets.dart';
@@ -115,7 +116,7 @@ class _ReportUploadSheetState extends ConsumerState<_ReportUploadSheet> {
       });
     } catch (error) {
       if (!mounted) return;
-      setState(() => _error = 'Could not open the file picker: $error');
+      setState(() => _error = userFacingErrorMessage(error));
     } finally {
       if (mounted) setState(() => _picking = false);
     }
@@ -169,7 +170,7 @@ class _ReportUploadSheetState extends ConsumerState<_ReportUploadSheet> {
       if (!mounted) return;
       setState(() {
         _uploading = false;
-        _error = 'Upload failed: $error';
+        _error = 'Upload failed. ${userFacingErrorMessage(error)}';
       });
     }
   }
