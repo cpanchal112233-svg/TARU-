@@ -35,10 +35,32 @@ void main() {
       expect(ReportExtraction.fromMap(null), isNull);
     });
 
+    test('parses valid ocr metadata', () {
+      final DateTime reviewedAt = DateTime.utc(2026, 8, 9, 14);
+      final ReportExtraction? parsed = ReportExtraction.fromMap(
+        <String, dynamic>{
+          'method': 'ocr',
+          'reviewedAt': Timestamp.fromDate(reviewedAt),
+        },
+      );
+
+      expect(parsed, isNotNull);
+      expect(parsed!.method, ReportExtraction.ocrMethod);
+      expect(parsed.isOcr, isTrue);
+      expect(parsed.reviewedAt.toUtc(), reviewedAt);
+    });
+
     test('rejects unsupported method', () {
       expect(
         ReportExtraction.fromMap(<String, dynamic>{
-          'method': 'ocr',
+          'method': 'ai',
+          'reviewedAt': Timestamp.fromDate(DateTime.utc(2026, 8, 9)),
+        }),
+        isNull,
+      );
+      expect(
+        ReportExtraction.fromMap(<String, dynamic>{
+          'method': 'image_ocr',
           'reviewedAt': Timestamp.fromDate(DateTime.utc(2026, 8, 9)),
         }),
         isNull,

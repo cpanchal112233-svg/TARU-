@@ -8,17 +8,19 @@ import '../../application/reports_providers.dart';
 import '../../domain/medical_report.dart';
 import '../../domain/report_extraction.dart';
 
-/// Review/edit selectable PDF text before it is saved as derived content.
+/// Review/edit extracted report text before it is saved as derived content.
 class ReportTextReviewScreen extends ConsumerStatefulWidget {
   const ReportTextReviewScreen({
     super.key,
     required this.report,
     required this.initialText,
+    required this.method,
     this.previousReviewedText,
   });
 
   final MedicalReport report;
   final String initialText;
+  final ReportExtractionMethod method;
 
   /// When non-null, Save is a replace and prior bytes can be restored.
   final String? previousReviewedText;
@@ -53,6 +55,20 @@ class _ReportTextReviewScreenState
 
   bool get _overLimit => _utf8Bytes > kMaxReviewedTextUtf8Bytes;
 
+  String get _provenanceLabel => switch (widget.method) {
+    ReportExtractionMethod.pdfText => 'From PDF text',
+    ReportExtractionMethod.ocr => 'From on-device scan (OCR)',
+  };
+
+  String get _methodHint => switch (widget.method) {
+    ReportExtractionMethod.pdfText =>
+      'Machine-extracted from PDF selectable text. It may not be '
+          'exact — review before saving.',
+    ReportExtractionMethod.ocr =>
+      'Text was read from this report on your device. Review it carefully '
+          'before saving.',
+  };
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,8 +99,16 @@ class _ReportTextReviewScreenState
               ),
               const SizedBox(height: 8),
               Text(
-                'Machine-extracted from PDF selectable text. It may not be '
-                'exact — review before saving.',
+                _provenanceLabel,
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade800,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                _methodHint,
                 style: TextStyle(
                   fontSize: 12.5,
                   height: 1.4,
@@ -195,6 +219,7 @@ class _ReportTextReviewScreenState
             uid: user.uid,
             reportId: widget.report.id,
             reviewedText: text,
+            method: widget.method,
             previousReviewedText: widget.previousReviewedText,
           );
       ref.invalidate(reportExtractionProvider(widget.report.id));

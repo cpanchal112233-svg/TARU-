@@ -283,7 +283,15 @@ class _ExtractedTextSection extends ConsumerStatefulWidget {
 class _ExtractedTextSectionState
     extends ConsumerState<_ExtractedTextSection> {
   bool _busy = false;
+  bool _canceled = false;
+  bool _offerScannedPdfOcr = false;
+  bool _pendingReplace = false;
   String? _message;
+  String? _progress;
+  String? _replacePrevious;
+
+  bool get _supportsExtraction =>
+      widget.report.isPdf || widget.report.isImage;
 
   @override
   Widget build(BuildContext context) {
@@ -303,16 +311,16 @@ class _ExtractedTextSectionState
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 8),
-          if (!widget.report.isPdf) ...[
+          if (!_supportsExtraction)
             Text(
-              'Text extraction currently supports digital PDFs only.',
+              'Text extraction is not available for this file type.',
               style: TextStyle(
                 fontSize: 13.5,
                 height: 1.45,
                 color: Colors.grey.shade700,
               ),
-            ),
-          ] else
+            )
+          else
             widget.extraction.when(
               loading: () => const Padding(
                 padding: EdgeInsets.symmetric(vertical: 12),
@@ -324,88 +332,28 @@ class _ExtractedTextSectionState
               ),
               data: (ReportExtraction? extraction) {
                 if (extraction == null) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Pull selectable text from this PDF on your device, '
-                        'review it, then save if you want to keep it.',
-                        style: TextStyle(
-                          fontSize: 13.5,
-                          height: 1.45,
-                          color: Colors.grey.shade700,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      FilledButton.icon(
-                        onPressed: _busy ? null : () => _extract(replace: false),
-                        icon: _busy
-                            ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Icon(Icons.text_snippet_outlined),
-                        label: Text(_busy ? 'Extracting…' : 'Extract text'),
-                      ),
-                    ],
-                  );
+                  return _emptyActions();
                 }
-
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Machine-extracted from PDF text · reviewed by you',
-                      style: TextStyle(
-                        fontSize: 13,
-                        height: 1.4,
-                        color: Colors.grey.shade700,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Reviewed ${formatReportDate(extraction.reviewedAt)}',
-                      style: TextStyle(
-                        fontSize: 12.5,
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        FilledButton.tonal(
-                          onPressed: _busy ? null : _viewReviewed,
-                          child: const Text('View'),
-                        ),
-                        OutlinedButton(
-                          onPressed: _busy
-                              ? null
-                              : () => _extract(replace: true),
-                          child: const Text('Replace'),
-                        ),
-                        TextButton(
-                          onPressed: _busy ? null : _remove,
-                          child: const Text('Remove'),
-                        ),
-                      ],
-                    ),
-                  ],
-                );
+                return _savedActions(extraction);
               },
             ),
-          if (_message != null) ...[
+          if (_progress != null) ...[
+            const SizedBox(height: 12),
+            Text(
+              _progress!,
+              style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
+            ),
+          ],
+          if (_message != null && !_offerScannedPdfOcr) ...[
             const SizedBox(height: 12),
             Text(
               _message!,
               style: TextStyle(
                 fontSize: 13,
                 height: 1.4,
-                color: _message!.startsWith('Could')
+                color:
+                    _message!.startsWith('Could') ||
+                        _message!.startsWith('No readable')
                     ? const Color(0xffB3261E)
                     : Colors.grey.shade800,
               ),
@@ -416,89 +364,319 @@ class _ExtractedTextSectionState
     );
   }
 
-  Future<void> _extract({required bool replace}) async {
+  Widget _emptyActions() {
+    if (widget.report.isImage) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Read text from this image on your device, review it, then '
+            'save if you want to keep it.',
+            style: TextStyle(
+              fontSize: 13.5,
+              height: 1.45,
+              color: Colors.grey.shade700,
+            ),
+          ),
+          const SizedBox(height: 12),
+          FilledButton.icon(
+            onPressed: _busy ? null : () => _runImageOcr(replace: false),
+            icon: _busyIcon(Icons.document_scanner_outlined),
+            label: Text(_busy ? 'Reading text…' : 'Read text'),
+          ),
+          if (_busy) ...[
+            const SizedBox(height: 8),
+            TextButton(onPressed: _cancelBusy, child: const Text('Cancel')),
+          ],
+        ],
+      );
+    }
+
+    if (_offerScannedPdfOcr) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "This PDF doesn't appear to contain selectable text. "
+            'You can read text from its pages on this device.',
+            style: TextStyle(
+              fontSize: 13.5,
+              height: 1.45,
+              color: Colors.grey.shade700,
+            ),
+          ),
+          const SizedBox(height: 12),
+          FilledButton.icon(
+            onPressed: _busy
+                ? null
+                : () => _runPdfOcr(
+                      replace: _pendingReplace,
+                      previous: _replacePrevious,
+                      skipReplaceConfirm: true,
+                    ),
+            icon: _busyIcon(Icons.document_scanner_outlined),
+            label: Text(
+              _busy ? (_progress ?? 'Reading…') : 'Read text from pages',
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextButton(
+            onPressed: _busy
+                ? null
+                : () {
+                    setState(() {
+                      _offerScannedPdfOcr = false;
+                      _pendingReplace = false;
+                      _replacePrevious = null;
+                      _message = null;
+                    });
+                  },
+            child: const Text('Try selectable text again'),
+          ),
+          if (_busy) ...[
+            const SizedBox(height: 8),
+            TextButton(onPressed: _cancelBusy, child: const Text('Cancel')),
+          ],
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Pull selectable text from this PDF on your device, review it, '
+          'then save if you want to keep it.',
+          style: TextStyle(
+            fontSize: 13.5,
+            height: 1.45,
+            color: Colors.grey.shade700,
+          ),
+        ),
+        const SizedBox(height: 12),
+        FilledButton.icon(
+          onPressed: _busy ? null : () => _extractPdf(replace: false),
+          icon: _busyIcon(Icons.text_snippet_outlined),
+          label: Text(_busy ? (_progress ?? 'Extracting…') : 'Extract text'),
+        ),
+        if (_busy) ...[
+          const SizedBox(height: 8),
+          TextButton(onPressed: _cancelBusy, child: const Text('Cancel')),
+        ],
+      ],
+    );
+  }
+
+  Widget _savedActions(ReportExtraction extraction) {
+    final String provenance = extraction.isOcr
+        ? 'From on-device scan (OCR) · reviewed by you'
+        : 'From PDF text · reviewed by you';
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          provenance,
+          style: TextStyle(
+            fontSize: 13,
+            height: 1.4,
+            color: Colors.grey.shade700,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Reviewed ${formatReportDate(extraction.reviewedAt)}',
+          style: TextStyle(fontSize: 12.5, color: Colors.grey.shade600),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            FilledButton.tonal(
+              onPressed: _busy ? null : () => _viewReviewed(extraction),
+              child: const Text('View'),
+            ),
+            OutlinedButton(
+              onPressed: _busy
+                  ? null
+                  : () {
+                      if (widget.report.isImage || extraction.isOcr) {
+                        if (widget.report.isImage) {
+                          _runImageOcr(replace: true);
+                        } else {
+                          _runPdfOcr(replace: true);
+                        }
+                      } else {
+                        _extractPdf(replace: true);
+                      }
+                    },
+              child: const Text('Replace'),
+            ),
+            TextButton(
+              onPressed: _busy ? null : _remove,
+              child: const Text('Remove'),
+            ),
+          ],
+        ),
+        if (_offerScannedPdfOcr) ...[
+          const SizedBox(height: 16),
+          Text(
+            "This PDF doesn't appear to contain selectable text. "
+            'You can read text from its pages on this device.',
+            style: TextStyle(
+              fontSize: 13.5,
+              height: 1.45,
+              color: Colors.grey.shade700,
+            ),
+          ),
+          const SizedBox(height: 12),
+          FilledButton.icon(
+            onPressed: _busy
+                ? null
+                : () => _runPdfOcr(
+                      replace: _pendingReplace,
+                      previous: _replacePrevious,
+                      skipReplaceConfirm: true,
+                    ),
+            icon: _busyIcon(Icons.document_scanner_outlined),
+            label: Text(
+              _busy ? (_progress ?? 'Reading…') : 'Read text from pages',
+            ),
+          ),
+        ],
+        if (_busy) ...[
+          const SizedBox(height: 8),
+          TextButton(onPressed: _cancelBusy, child: const Text('Cancel')),
+        ],
+      ],
+    );
+  }
+
+  Widget _busyIcon(IconData idle) {
+    return _busy
+        ? const SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          )
+        : Icon(idle);
+  }
+
+  void _cancelBusy() {
+    _canceled = true;
+    if (mounted) {
+      setState(() {
+        _busy = false;
+        _progress = null;
+        _message = 'Text reading was canceled.';
+      });
+    }
+  }
+
+  /// [canceled] is true when the user dismisses the dialog.
+  /// When not canceled, [previous] may still be null if load failed.
+  Future<({bool canceled, String? previous})> _confirmReplace() async {
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext dialogContext) => AlertDialog(
+        title: const Text('Replace reviewed text?'),
+        content: const Text(
+          'The current reviewed text will be overwritten after you '
+          'confirm the new review.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Continue'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) {
+      return (canceled: true, previous: null);
+    }
+    try {
+      final String text = await ref.read(
+        loadReviewedTextProvider(widget.report.id).future,
+      );
+      return (canceled: false, previous: text);
+    } catch (error, stack) {
+      developer.log(
+        'load previous reviewed text failed',
+        name: 'reports.extract',
+        error: error,
+        stackTrace: stack,
+      );
+      return (canceled: false, previous: null);
+    }
+  }
+
+  Future<void> _extractPdf({required bool replace}) async {
     if (_busy) return;
 
     String? previous;
     if (replace) {
-      final bool? confirmed = await showDialog<bool>(
-        context: context,
-        builder: (BuildContext dialogContext) => AlertDialog(
-          title: const Text('Replace reviewed text?'),
-          content: const Text(
-            'The current reviewed text will be overwritten after you '
-            'confirm the new review.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: const Text('Continue'),
-            ),
-          ],
-        ),
-      );
-      if (confirmed != true || !mounted) return;
-
-      try {
-        previous = await ref.read(
-          loadReviewedTextProvider(widget.report.id).future,
-        );
-      } catch (error, stack) {
-        developer.log(
-          'load previous reviewed text failed',
-          name: 'reports.extract',
-          error: error,
-          stackTrace: stack,
-        );
-        previous = null;
-      }
+      final ({bool canceled, String? previous}) prep = await _confirmReplace();
+      if (prep.canceled || !mounted) return;
+      previous = prep.previous;
     }
 
+    _canceled = false;
     setState(() {
       _busy = true;
       _message = null;
+      _progress = 'Extracting…';
+      _offerScannedPdfOcr = false;
     });
 
     try {
       final File file = await ref
           .read(reportsRepositoryProvider)
           .downloadToTemp(widget.report);
+      if (_canceled || !mounted) return;
+
       final String text = await ref
           .read(pdfSelectableTextExtractorProvider)
           .extractFromFile(file);
-
-      if (!mounted) return;
+      if (_canceled || !mounted) return;
 
       if (text.trim().isEmpty) {
         setState(() {
           _busy = false;
-          _message =
-              "This report doesn't appear to contain selectable text. "
-              'Scanned or image-based report text extraction isn\'t '
-              'supported yet.';
+          _progress = null;
+          _offerScannedPdfOcr = true;
+          _pendingReplace = replace;
+          _replacePrevious = previous;
+          _message = null;
         });
         return;
       }
 
-      setState(() => _busy = false);
+      setState(() {
+        _busy = false;
+        _progress = null;
+      });
 
       final bool? saved = await Navigator.of(context).push<bool>(
         MaterialPageRoute<bool>(
           builder: (_) => ReportTextReviewScreen(
             report: widget.report,
             initialText: text,
+            method: ReportExtractionMethod.pdfText,
             previousReviewedText: previous,
           ),
         ),
       );
-
       if (!mounted) return;
       if (saved == true) {
-        setState(() => _message = 'Reviewed text saved.');
+        setState(() {
+          _offerScannedPdfOcr = false;
+          _message = 'Reviewed text saved.';
+        });
       }
     } catch (error, stack) {
       developer.log(
@@ -507,15 +685,175 @@ class _ExtractedTextSectionState
         error: error,
         stackTrace: stack,
       );
-      if (!mounted) return;
+      if (!mounted || _canceled) return;
       setState(() {
         _busy = false;
+        _progress = null;
         _message = 'Could not extract text from this PDF. Please try again.';
       });
     }
   }
 
-  Future<void> _viewReviewed() async {
+  Future<void> _runImageOcr({required bool replace}) async {
+    if (_busy) return;
+
+    String? previous;
+    if (replace) {
+      final ({bool canceled, String? previous}) prep = await _confirmReplace();
+      if (prep.canceled || !mounted) return;
+      previous = prep.previous;
+    }
+
+    _canceled = false;
+    setState(() {
+      _busy = true;
+      _message = null;
+      _progress = 'Reading text…';
+    });
+
+    try {
+      final File file = await ref
+          .read(reportsRepositoryProvider)
+          .downloadToTemp(widget.report);
+      if (_canceled || !mounted) return;
+
+      final String text = await ref
+          .read(localReportOcrProvider)
+          .recognizeImageFile(
+            source: file,
+            reportId: widget.report.id,
+            isCanceled: () => _canceled,
+          );
+      if (_canceled || !mounted) return;
+
+      setState(() {
+        _busy = false;
+        _progress = null;
+      });
+
+      final bool? saved = await Navigator.of(context).push<bool>(
+        MaterialPageRoute<bool>(
+          builder: (_) => ReportTextReviewScreen(
+            report: widget.report,
+            initialText: text,
+            method: ReportExtractionMethod.ocr,
+            previousReviewedText: previous,
+          ),
+        ),
+      );
+      if (!mounted) return;
+      if (saved == true) {
+        setState(() => _message = 'Reviewed text saved.');
+      }
+    } on ReportOcrException catch (error) {
+      if (!mounted || _canceled) return;
+      setState(() {
+        _busy = false;
+        _progress = null;
+        _message = error.userMessage;
+      });
+    } catch (error, stack) {
+      developer.log(
+        'image OCR failed',
+        name: 'reports.ocr',
+        error: error,
+        stackTrace: stack,
+      );
+      if (!mounted || _canceled) return;
+      setState(() {
+        _busy = false;
+        _progress = null;
+        _message = 'Could not read text from this report. Please try again.';
+      });
+    }
+  }
+
+  Future<void> _runPdfOcr({
+    required bool replace,
+    String? previous,
+    bool skipReplaceConfirm = false,
+  }) async {
+    if (_busy) return;
+
+    String? prior = previous;
+    if (replace && !skipReplaceConfirm) {
+      final ({bool canceled, String? previous}) prep = await _confirmReplace();
+      if (prep.canceled || !mounted) return;
+      prior = prep.previous;
+    }
+
+    _canceled = false;
+    setState(() {
+      _busy = true;
+      _message = null;
+      _progress = 'Reading pages…';
+    });
+
+    try {
+      final File file = await ref
+          .read(reportsRepositoryProvider)
+          .downloadToTemp(widget.report);
+      if (_canceled || !mounted) return;
+
+      final String text = await ref
+          .read(localReportOcrProvider)
+          .recognizeScannedPdfFile(
+            source: file,
+            reportId: widget.report.id,
+            isCanceled: () => _canceled,
+            onPageProgress: (int page, int total) {
+              if (!mounted || _canceled) return;
+              setState(() => _progress = 'Reading page $page of $total…');
+            },
+          );
+      if (_canceled || !mounted) return;
+
+      setState(() {
+        _busy = false;
+        _progress = null;
+        _offerScannedPdfOcr = false;
+        _pendingReplace = false;
+        _replacePrevious = null;
+      });
+
+      final bool? saved = await Navigator.of(context).push<bool>(
+        MaterialPageRoute<bool>(
+          builder: (_) => ReportTextReviewScreen(
+            report: widget.report,
+            initialText: text,
+            method: ReportExtractionMethod.ocr,
+            previousReviewedText: prior,
+          ),
+        ),
+      );
+      if (!mounted) return;
+      if (saved == true) {
+        setState(() => _message = 'Reviewed text saved.');
+      }
+    } on ReportOcrException catch (error) {
+      if (!mounted || _canceled) return;
+      setState(() {
+        _busy = false;
+        _progress = null;
+        _message = error.userMessage;
+      });
+    } catch (error, stack) {
+      developer.log(
+        'pdf OCR failed',
+        name: 'reports.ocr',
+        error: error,
+        stackTrace: stack,
+      );
+      if (!mounted || _canceled) return;
+      setState(() {
+        _busy = false;
+        _progress = null;
+        _message = 'Could not read text from this PDF. Please try again.';
+      });
+    }
+  }
+
+  Future<void> _viewReviewed(ReportExtraction extraction) async {
     setState(() {
       _busy = true;
       _message = null;
@@ -526,6 +864,9 @@ class _ExtractedTextSectionState
       );
       if (!mounted) return;
       setState(() => _busy = false);
+      final String provenance = extraction.isOcr
+          ? 'From on-device scan (OCR) · reviewed by you'
+          : 'From PDF text · reviewed by you';
       await showModalBottomSheet<void>(
         context: context,
         isScrollControlled: true,
@@ -551,7 +892,7 @@ class _ExtractedTextSectionState
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Machine-extracted from PDF text · reviewed by you',
+                      provenance,
                       style: TextStyle(
                         fontSize: 12.5,
                         color: Colors.grey.shade600,
@@ -629,6 +970,7 @@ class _ExtractedTextSectionState
       if (!mounted) return;
       setState(() {
         _busy = false;
+        _offerScannedPdfOcr = false;
         _message = 'Reviewed text removed.';
       });
     } catch (error, stack) {

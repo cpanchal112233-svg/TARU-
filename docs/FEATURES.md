@@ -88,15 +88,22 @@
   prescription or discharge letter. Files go to Firebase Storage under the
   user's own path; metadata lives in Firestore so the list stays fast. Images
   open in-app, PDFs in the device viewer. Edit title, category, dated-on and
-  notes. Search the already-loaded list by title/notes and filter by category.
-  For digital PDFs, selectable text can be extracted on-device, reviewed and
-  edited, then saved as a derived UTF-8 sidecar with provenance
-  (`method: pdf_text`). Scanned/image-only PDFs get an honest no-selectable-text
-  state — no OCR. Delete removes derived text, the source file, extraction
-  metadata and the report document. Owner-only Storage rules separate source
-  (PDF/image, 20 MB) from derived text (`text/plain`, 256 KiB). Reviewed
-  extracted text is not clinical truth. Plain-language AI explanation of what
-  a report means waits for a later phase.
+  notes. Search the already-loaded list by title/notes and filter by category
+  (not extracted-body text). For digital PDFs, selectable text is extracted
+  on-device first, reviewed, then saved as a derived UTF-8 sidecar with
+  provenance (`method: pdf_text`). Image reports and scanned PDFs (empty
+  selectable text) can use on-device Latin OCR after an explicit action;
+  raw OCR is never persisted — only user-confirmed text is saved
+  (`method: ocr`) to the same sidecar. Mixed digital+scanned PDFs still
+  follow document-level selectable text when any nonempty selectable text
+  exists (scanned pages in that case are not OCR’d in this phase).
+  Sideways images without usable orientation metadata may need a rotate
+  and retry; HEIC is supported with that limitation. Delete removes
+  derived text, the source file, extraction metadata and the report
+  document. Owner-only Storage rules separate source (PDF/image, 20 MB)
+  from derived text (`text/plain`, 256 KiB). Reviewed extracted text is
+  not clinical truth. No cloud OCR, structured lab parsing, or AI
+  explanation in this phase.
 
 - **Wider daily routine**: Routine tab includes a lifestyle checklist beside
   medicines — diet, exercise, sleep and mindfulness (eight short defaults),
@@ -155,7 +162,9 @@
   password reauthentication. Server purge uses a trusted callable with a
   short recent-auth window; client writes are blocked while
   `deletionInProgress` is set. Reminders are cancelled and TARU temp
-  files cleared. No OCR, AI, FHIR, or HealthKit in this control surface.
+  files cleared (including `taru_ocr_*` temp dirs). No AI, FHIR, or
+  HealthKit in this control surface. Reviewed OCR text exports via the
+  same sidecar path as selectable PDF text.
 
 ## Placeholders
 - AI health chat

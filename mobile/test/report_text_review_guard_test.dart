@@ -11,9 +11,10 @@ void main() {
     expect(utf8.encode(over).length > kMaxReviewedTextUtf8Bytes, isTrue);
   });
 
-  test('privacy/safety constants are local pdf_text only', () {
+  test('provenance methods are pdf_text or ocr only', () {
     expect(ReportExtraction.pdfTextMethod, 'pdf_text');
-    expect(ReportExtraction.pdfTextMethod.contains('ocr'), isFalse);
-    expect(ReportExtraction.pdfTextMethod.contains('ai'), isFalse);
+    expect(ReportExtraction.ocrMethod, 'ocr');
+    expect(ReportExtractionMethod.tryParse('ai'), isNull);
+    expect(ReportExtractionMethod.tryParse('image_ocr'), isNull);
   });
 }

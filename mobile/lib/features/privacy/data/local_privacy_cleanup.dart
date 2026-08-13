@@ -47,7 +47,8 @@ class LocalPrivacyCleanup {
             name.startsWith('taru_export_') ||
             (name.startsWith('taru_') &&
                 (name.contains('.') || name.startsWith('taru_export')));
-        // Match report downloads: taru_{reportId}_{fileName}
+        // Match report downloads (taru_{reportId}_{fileName}) and OCR work
+        // dirs (taru_ocr_{reportId}).
         final bool isReportTemp =
             name.startsWith('taru_') && !name.startsWith('taru_export_');
         if (!(isTaruTemp || isReportTemp)) continue;

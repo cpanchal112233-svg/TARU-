@@ -146,3 +146,21 @@ medicine/lifestyle adherence. Local export adds
 No pulse, BP categories/alerts, weight goals, HealthKit/Health Connect,
 OCR, AI, combined scores, or measurement edit-in-place. No Firebase
 Functions/rules/index deploy required for this phase.
+
+## Phase 12 — Local OCR for image reports and scanned PDFs ✅
+Adds on-device Latin-script OCR for image reports and for PDFs whose
+document-level selectable text is empty. Selectable digital PDF text
+remains first choice (`method: pdf_text`); scanned-page OCR runs only
+after an explicit “Read text from pages” action (`method: ocr`). Raw OCR
+is transient; reviewed text saves to the existing
+`derived/extracted.txt` sidecar after user confirmation. Same 256 KiB
+UTF-8 reviewed-text cap. No cloud OCR, structured labs, reference
+ranges, abnormal flags, extracted-body search, AI, handwriting
+guarantee, non-Latin models, or per-page mixed digital+scanned merge.
+Physically sideways images without usable orientation metadata may OCR
+poorly; HEIC is supported via the platform codec with that limitation.
+iOS currently uses CocoaPods with Flutter Swift Package Manager disabled
+project-wide because the ML Kit Flutter bridge is not compatible with
+TARU’s prior SwiftPM-only plugin setup — monitor future bridge/SPM
+compatibility; this is not claimed as permanent architecture. No
+Firebase rules/index/Functions deploy required for this phase.

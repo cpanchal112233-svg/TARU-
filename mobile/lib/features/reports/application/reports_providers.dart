@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers/firebase_providers.dart';
 import '../../auth/application/auth_providers.dart';
+import '../data/local_report_ocr.dart';
 import '../data/pdf_selectable_text_extractor.dart';
 import '../data/reports_repository.dart';
 import '../domain/medical_report.dart';
@@ -19,6 +20,10 @@ final reportsRepositoryProvider = Provider<ReportsRepository>(
 
 final pdfSelectableTextExtractorProvider = Provider<PdfSelectableTextExtractor>(
   (ref) => PdfSelectableTextExtractor(),
+);
+
+final localReportOcrProvider = Provider<LocalReportOcr>(
+  (ref) => LocalReportOcr(),
 );
 
 final reportsProvider = StreamProvider<List<MedicalReport>>((ref) {
