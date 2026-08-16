@@ -5,11 +5,9 @@ import '../../account/application/account_providers.dart';
 import '../../account/data/account_root_repository.dart';
 
 class AuthService {
-  AuthService({
-    FirebaseAuth? auth,
-    FirebaseFirestore? firestore,
-  }) : _authOverride = auth,
-       _firestoreOverride = firestore;
+  AuthService({FirebaseAuth? auth, FirebaseFirestore? firestore})
+    : _authOverride = auth,
+      _firestoreOverride = firestore;
 
   final FirebaseAuth? _authOverride;
   final FirebaseFirestore? _firestoreOverride;

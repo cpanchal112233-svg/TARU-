@@ -11,11 +11,11 @@ void main() {
   const String secret = 'WEIGHT_123_DO_NOT_SEND';
 
   test('network errors map to network copy', () {
-    expect(userFacingErrorMessage(const SocketException('failed')), kNetworkError);
     expect(
-      userFacingErrorMessage(TimeoutException('late')),
+      userFacingErrorMessage(const SocketException('failed')),
       kNetworkError,
     );
+    expect(userFacingErrorMessage(TimeoutException('late')), kNetworkError);
     expect(
       userFacingErrorMessage(
         FirebaseAuthException(code: 'network-request-failed', message: secret),
@@ -54,12 +54,18 @@ void main() {
   test('device storage exhaustion is recognized', () {
     expect(
       userFacingErrorMessage(
-        const FileSystemException('write failed', '/tmp/x', OSError('No space left on device', 28)),
+        const FileSystemException(
+          'write failed',
+          '/tmp/x',
+          OSError('No space left on device', 28),
+        ),
       ),
       kDeviceStorageError,
     );
     expect(
-      userFacingErrorMessage(const FileSystemException('denied', '/secret/path')),
+      userFacingErrorMessage(
+        const FileSystemException('denied', '/secret/path'),
+      ),
       kDeviceOperationError,
     );
   });
@@ -67,7 +73,11 @@ void main() {
   test('permission maps to permission copy', () {
     expect(
       userFacingErrorMessage(
-        FirebaseException(plugin: 'cloud_firestore', code: 'permission-denied', message: secret),
+        FirebaseException(
+          plugin: 'cloud_firestore',
+          code: 'permission-denied',
+          message: secret,
+        ),
       ),
       kPermissionError,
     );

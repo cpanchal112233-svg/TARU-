@@ -11,12 +11,10 @@ import 'crashlytics_backend.dart';
 /// instantaneous; the Dart reporter stops immediately on opt-out.
 class CrashReporter {
   CrashReporter({
-    required CrashDiagnosticsStore store,
-    required CrashlyticsBackend backend,
-    required bool allowRemoteReporting,
-  }) : _store = store,
-       _backend = backend,
-       _allowRemoteReporting = allowRemoteReporting;
+    required this._store,
+    required this._backend,
+    required this._allowRemoteReporting,
+  });
 
   final CrashDiagnosticsStore _store;
   final CrashlyticsBackend _backend;
@@ -28,8 +26,7 @@ class CrashReporter {
   bool get desiredEnabled => _desiredEnabled;
 
   /// Whether this process may send sanitized reports.
-  bool get sessionReportingEnabled =>
-      _desiredEnabled && _allowRemoteReporting;
+  bool get sessionReportingEnabled => _desiredEnabled && _allowRemoteReporting;
 
   Future<void> applyStartup() async {
     try {

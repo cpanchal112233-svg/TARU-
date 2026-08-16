@@ -20,7 +20,11 @@ class MeasurementsRepository {
       _firestore.collection('users').doc(uid).collection('measurements');
 
   DocumentReference<Map<String, dynamic>> _profileDocument(String uid) =>
-      _firestore.collection('users').doc(uid).collection('health').doc('profile');
+      _firestore
+          .collection('users')
+          .doc(uid)
+          .collection('health')
+          .doc('profile');
 
   Query<Map<String, dynamic>> _weightQuery(String uid) {
     return _measurements(uid)
@@ -37,7 +41,9 @@ class MeasurementsRepository {
   }
 
   Stream<List<WeightMeasurement>> watchWeightHistory(String uid) {
-    return _weightQuery(uid).limit(historyLimit).snapshots().map(_mapWeightDocs);
+    return _weightQuery(
+      uid,
+    ).limit(historyLimit).snapshots().map(_mapWeightDocs);
   }
 
   Stream<WeightMeasurement?> watchLatestWeight(String uid) {
@@ -48,16 +54,16 @@ class MeasurementsRepository {
   }
 
   Stream<List<BloodPressureMeasurement>> watchBloodPressureHistory(String uid) {
-    return _bloodPressureQuery(uid)
-        .limit(historyLimit)
-        .snapshots()
-        .map(_mapBloodPressureDocs);
+    return _bloodPressureQuery(
+      uid,
+    ).limit(historyLimit).snapshots().map(_mapBloodPressureDocs);
   }
 
   Stream<BloodPressureMeasurement?> watchLatestBloodPressure(String uid) {
     return _bloodPressureQuery(uid).limit(1).snapshots().map((snapshot) {
-      final List<BloodPressureMeasurement> items =
-          _mapBloodPressureDocs(snapshot);
+      final List<BloodPressureMeasurement> items = _mapBloodPressureDocs(
+        snapshot,
+      );
       return items.isEmpty ? null : items.first;
     });
   }

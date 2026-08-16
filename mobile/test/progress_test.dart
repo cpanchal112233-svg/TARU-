@@ -110,7 +110,9 @@ void main() {
       final DateTime today = DateTime.now();
       final List<DailyDoseLog> logs = <DailyDoseLog>[
         DailyDoseLog(
-          dateKey: DailyDoseLog.keyFor(today.subtract(const Duration(days: 20))),
+          dateKey: DailyDoseLog.keyFor(
+            today.subtract(const Duration(days: 20)),
+          ),
           statuses: const <String, DoseStatus>{'a': DoseStatus.taken},
         ),
         DailyDoseLog(
@@ -124,11 +126,9 @@ void main() {
           .where(
             (DailyDoseLog log) =>
                 log.dateKey.compareTo(
-                      DailyDoseLog.keyFor(
-                        today.subtract(const Duration(days: 6)),
-                      ),
-                    ) >=
-                    0,
+                  DailyDoseLog.keyFor(today.subtract(const Duration(days: 6))),
+                ) >=
+                0,
           )
           .toList();
 
@@ -147,9 +147,7 @@ void main() {
       final List<DailyDoseLog> logs = <DailyDoseLog>[
         DailyDoseLog(
           dateKey: today,
-          statuses: const <String, DoseStatus>{
-            'old_key': DoseStatus.taken,
-          },
+          statuses: const <String, DoseStatus>{'old_key': DoseStatus.taken},
         ),
       ];
 
@@ -248,9 +246,7 @@ void main() {
       final String today = DailyHabitLog.keyFor(DateTime.now());
       final DailyHabitLog preserved = DailyHabitLog(
         dateKey: today,
-        statuses: const <String, HabitStatus>{
-          'diet_water': HabitStatus.done,
-        },
+        statuses: const <String, HabitStatus>{'diet_water': HabitStatus.done},
       );
 
       final HabitAdherenceSummary disabled = HabitAdherenceSummary.fromLogs(
@@ -340,7 +336,11 @@ void main() {
   group('Progress observations', () {
     test('builds medicine and habit lines without medical claims', () {
       final List<ProgressObservation> items = buildProgressObservations(
-        medicine: const AdherenceSummary(taken: 12, expected: 14, daysCovered: 7),
+        medicine: const AdherenceSummary(
+          taken: 12,
+          expected: 14,
+          daysCovered: 7,
+        ),
         lifestyle: HabitAdherenceSummary.fromLogs(
           logs: <DailyHabitLog>[
             DailyHabitLog(
@@ -419,7 +419,9 @@ void main() {
         habitLogDaysInWindow: 7,
       );
 
-      final String joined = items.map((ProgressObservation o) => o.text).join(' ');
+      final String joined = items
+          .map((ProgressObservation o) => o.text)
+          .join(' ');
       final List<String> banned = <String>[
         'health is improving',
         'medication is working',

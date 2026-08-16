@@ -29,9 +29,7 @@ Future<void> main() async {
 
   runApp(
     ProviderScope(
-      overrides: [
-        crashReporterProvider.overrideWithValue(crashReporter),
-      ],
+      overrides: [crashReporterProvider.overrideWithValue(crashReporter)],
       child: const TaruApp(),
     ),
   );

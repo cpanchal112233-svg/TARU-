@@ -5,11 +5,7 @@ import 'package:flutter/material.dart';
 /// Displays the numeric ratio only — no clinical category labels or
 /// traffic-light classification.
 class BmiCard extends StatelessWidget {
-  const BmiCard({
-    super.key,
-    required this.bmi,
-    this.needsCaveat = false,
-  });
+  const BmiCard({super.key, required this.bmi, this.needsCaveat = false});
 
   final double? bmi;
 

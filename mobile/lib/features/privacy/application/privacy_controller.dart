@@ -98,7 +98,9 @@ class PrivacyController {
     }
   }
 
-  Future<AccountDeleteOutcome> retryAuthDelete({required String password}) async {
+  Future<AccountDeleteOutcome> retryAuthDelete({
+    required String password,
+  }) async {
     await reauthenticate(password);
     final User? user = _auth.currentUser;
     if (user == null) {
@@ -117,8 +119,4 @@ class PrivacyController {
   }
 }
 
-enum AccountDeleteOutcome {
-  deleted,
-  signedOutAlready,
-  dataPurgedAuthRemaining,
-}
+enum AccountDeleteOutcome { deleted, signedOutAlready, dataPurgedAuthRemaining }

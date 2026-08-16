@@ -70,36 +70,40 @@ void main() {
     );
   });
 
-  testWidgets('B auth succeeded but root failed is incomplete setup, not missing account', (
-    WidgetTester tester,
-  ) async {
-    final _FakeSignupAuth fake = _FakeSignupAuth(
-      const AccountRootSetupException(),
-    );
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          authServiceProvider.overrideWith((Ref ref) => fake),
-        ],
-        child: const MaterialApp(home: SignupScreen()),
-      ),
-    );
+  testWidgets(
+    'B auth succeeded but root failed is incomplete setup, not missing account',
+    (WidgetTester tester) async {
+      final _FakeSignupAuth fake = _FakeSignupAuth(
+        const AccountRootSetupException(),
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [authServiceProvider.overrideWith((Ref ref) => fake)],
+          child: const MaterialApp(home: SignupScreen()),
+        ),
+      );
 
-    await tester.enterText(find.byType(TextFormField).at(0), 'Ada');
-    await tester.enterText(find.byType(TextFormField).at(1), 'ada@example.com');
-    await tester.enterText(find.byType(TextFormField).at(2), 'password');
-    await tester.enterText(find.byType(TextFormField).at(3), 'password');
-    await tester.ensureVisible(find.widgetWithText(ElevatedButton, 'Create Account'));
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Create Account'));
-    await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextFormField).at(0), 'Ada');
+      await tester.enterText(
+        find.byType(TextFormField).at(1),
+        'ada@example.com',
+      );
+      await tester.enterText(find.byType(TextFormField).at(2), 'password');
+      await tester.enterText(find.byType(TextFormField).at(3), 'password');
+      await tester.ensureVisible(
+        find.widgetWithText(ElevatedButton, 'Create Account'),
+      );
+      await tester.tap(find.widgetWithText(ElevatedButton, 'Create Account'));
+      await tester.pumpAndSettle();
 
-    expect(
-      find.textContaining('login was created, but TARU could not finish'),
-      findsOneWidget,
-    );
-    expect(find.textContaining('account was not created'), findsNothing);
-    expect(find.textContaining('Account created successfully'), findsNothing);
-  });
+      expect(
+        find.textContaining('login was created, but TARU could not finish'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('account was not created'), findsNothing);
+      expect(find.textContaining('Account created successfully'), findsNothing);
+    },
+  );
 
   test('C explicit retry create succeeds when missing', () async {
     final FakeFirebaseFirestore firestore = FakeFirebaseFirestore();
@@ -210,60 +214,63 @@ void main() {
     expect(data['email'], 'ada@example.com');
   });
 
-  test('H deletionInProgress is not bootstrapped or cleared; no MainShell', () async {
-    final FakeFirebaseFirestore firestore = FakeFirebaseFirestore();
-    await firestore.collection('users').doc('u1').set(<String, dynamic>{
-      'name': 'Ada',
-      'email': 'ada@example.com',
-      'deletionInProgress': PurgeMode.account.wireValue,
-      'deletionStartedAt': 'server',
-    });
-    final AccountRootRepository repo = AccountRootRepository(
-      firestore: firestore,
-      currentUid: () => 'u1',
-    );
-    expect(
-      await repo.createIdentityRoot(name: 'Hack', email: 'hack@example.com'),
-      AccountRootCreateResult.alreadyExists,
-    );
-    final Map<String, dynamic> data =
-        (await firestore.collection('users').doc('u1').get()).data()!;
-    expect(data['deletionInProgress'], 'account');
-    expect(data['deletionStartedAt'], 'server');
-    expect(data['name'], 'Ada');
-    expect(
-      interpretAccountRoot(
-        exists: true,
-        isFromCache: false,
-        deletionInProgress: 'health',
-      ),
-      AccountIntegrity.deletionHealthInProgress,
-    );
-    expect(
-      resolveAuthGate(
-        splashPending: false,
-        onboardingPending: false,
-        onboardingComplete: true,
-        authPending: false,
-        signedIn: true,
-        integrityPending: false,
-        integrity: AccountIntegrity.deletionHealthInProgress,
-      ),
-      AuthGateDestination.recovery,
-    );
-    expect(
-      resolveAuthGate(
-        splashPending: false,
-        onboardingPending: false,
-        onboardingComplete: true,
-        authPending: false,
-        signedIn: true,
-        integrityPending: false,
-        integrity: AccountIntegrity.deletionAccountInProgress,
-      ),
-      AuthGateDestination.recovery,
-    );
-  });
+  test(
+    'H deletionInProgress is not bootstrapped or cleared; no MainShell',
+    () async {
+      final FakeFirebaseFirestore firestore = FakeFirebaseFirestore();
+      await firestore.collection('users').doc('u1').set(<String, dynamic>{
+        'name': 'Ada',
+        'email': 'ada@example.com',
+        'deletionInProgress': PurgeMode.account.wireValue,
+        'deletionStartedAt': 'server',
+      });
+      final AccountRootRepository repo = AccountRootRepository(
+        firestore: firestore,
+        currentUid: () => 'u1',
+      );
+      expect(
+        await repo.createIdentityRoot(name: 'Hack', email: 'hack@example.com'),
+        AccountRootCreateResult.alreadyExists,
+      );
+      final Map<String, dynamic> data =
+          (await firestore.collection('users').doc('u1').get()).data()!;
+      expect(data['deletionInProgress'], 'account');
+      expect(data['deletionStartedAt'], 'server');
+      expect(data['name'], 'Ada');
+      expect(
+        interpretAccountRoot(
+          exists: true,
+          isFromCache: false,
+          deletionInProgress: 'health',
+        ),
+        AccountIntegrity.deletionHealthInProgress,
+      );
+      expect(
+        resolveAuthGate(
+          splashPending: false,
+          onboardingPending: false,
+          onboardingComplete: true,
+          authPending: false,
+          signedIn: true,
+          integrityPending: false,
+          integrity: AccountIntegrity.deletionHealthInProgress,
+        ),
+        AuthGateDestination.recovery,
+      );
+      expect(
+        resolveAuthGate(
+          splashPending: false,
+          onboardingPending: false,
+          onboardingComplete: true,
+          authPending: false,
+          signedIn: true,
+          integrityPending: false,
+          integrity: AccountIntegrity.deletionAccountInProgress,
+        ),
+        AuthGateDestination.recovery,
+      );
+    },
+  );
 
   test('I account purge with leftover Auth does not recreate root', () async {
     final FakeFirebaseFirestore firestore = FakeFirebaseFirestore();
@@ -271,7 +278,10 @@ void main() {
       firestore: firestore,
       currentUid: () => 'u1',
     );
-    expect((await firestore.collection('users').doc('u1').get()).exists, isFalse);
+    expect(
+      (await firestore.collection('users').doc('u1').get()).exists,
+      isFalse,
+    );
     expect(
       interpretAccountRoot(
         exists: false,
@@ -292,7 +302,10 @@ void main() {
       ),
       AuthGateDestination.recovery,
     );
-    expect((await firestore.collection('users').doc('u1').get()).exists, isFalse);
+    expect(
+      (await firestore.collection('users').doc('u1').get()).exists,
+      isFalse,
+    );
     expect(repo, isNotNull);
   });
 
@@ -303,8 +316,14 @@ void main() {
       currentUid: () => 'alice',
     );
     await repo.createIdentityRoot(name: 'Alice', email: 'alice@example.com');
-    expect((await firestore.collection('users').doc('alice').get()).exists, isTrue);
-    expect((await firestore.collection('users').doc('bob').get()).exists, isFalse);
+    expect(
+      (await firestore.collection('users').doc('alice').get()).exists,
+      isTrue,
+    );
+    expect(
+      (await firestore.collection('users').doc('bob').get()).exists,
+      isFalse,
+    );
 
     expect(
       () => AccountRootRepository(
@@ -348,7 +367,8 @@ void main() {
             ),
           ),
           pendingSignupIdentityProvider.overrideWithValue(
-            PendingSignupIdentity()..remember(name: 'Ada', email: 'ada@example.com'),
+            PendingSignupIdentity()
+              ..remember(name: 'Ada', email: 'ada@example.com'),
           ),
           accountRootRepositoryProvider.overrideWith((Ref ref) {
             return AccountRootRepository(
@@ -372,70 +392,81 @@ void main() {
     await tester.tap(find.text('Finish account setup'));
     await tester.pumpAndSettle();
     expect(creates, greaterThan(0));
-    expect((await firestore.collection('users').doc('u1').get()).exists, isTrue);
+    expect(
+      (await firestore.collection('users').doc('u1').get()).exists,
+      isTrue,
+    );
   });
 
-  testWidgets('health deletion guard shows cleanup recovery, not MainShell or finish setup', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(
-      const ProviderScope(
-        child: MaterialApp(
-          home: AccountRecoveryScreen(
-            integrity: AccountIntegrity.deletionHealthInProgress,
+  testWidgets(
+    'health deletion guard shows cleanup recovery, not MainShell or finish setup',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: AccountRecoveryScreen(
+              integrity: AccountIntegrity.deletionHealthInProgress,
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(find.textContaining("couldn't finish removing your health data"), findsOneWidget);
-    expect(find.text('Continue health-data cleanup'), findsOneWidget);
-    expect(find.text('Sign out'), findsOneWidget);
-    expect(find.text('Finish account setup'), findsNothing);
-    expect(
-      resolveAuthGate(
-        splashPending: false,
-        onboardingPending: false,
-        onboardingComplete: true,
-        authPending: false,
-        signedIn: true,
-        integrityPending: false,
-        integrity: AccountIntegrity.deletionHealthInProgress,
-      ),
-      isNot(AuthGateDestination.mainShell),
-    );
-  });
+      expect(
+        find.textContaining("couldn't finish removing your health data"),
+        findsOneWidget,
+      );
+      expect(find.text('Continue health-data cleanup'), findsOneWidget);
+      expect(find.text('Sign out'), findsOneWidget);
+      expect(find.text('Finish account setup'), findsNothing);
+      expect(
+        resolveAuthGate(
+          splashPending: false,
+          onboardingPending: false,
+          onboardingComplete: true,
+          authPending: false,
+          signedIn: true,
+          integrityPending: false,
+          integrity: AccountIntegrity.deletionHealthInProgress,
+        ),
+        isNot(AuthGateDestination.mainShell),
+      );
+    },
+  );
 
-  testWidgets('account deletion guard shows cleanup recovery, not MainShell or finish setup', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(
-      const ProviderScope(
-        child: MaterialApp(
-          home: AccountRecoveryScreen(
-            integrity: AccountIntegrity.deletionAccountInProgress,
+  testWidgets(
+    'account deletion guard shows cleanup recovery, not MainShell or finish setup',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: AccountRecoveryScreen(
+              integrity: AccountIntegrity.deletionAccountInProgress,
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(find.textContaining("couldn't finish removing this account"), findsOneWidget);
-    expect(find.text('Continue account cleanup'), findsOneWidget);
-    expect(find.text('Sign out'), findsOneWidget);
-    expect(find.text('Finish account setup'), findsNothing);
-    expect(
-      resolveAuthGate(
-        splashPending: false,
-        onboardingPending: false,
-        onboardingComplete: true,
-        authPending: false,
-        signedIn: true,
-        integrityPending: false,
-        integrity: AccountIntegrity.deletionAccountInProgress,
-      ),
-      AuthGateDestination.recovery,
-    );
-  });
+      expect(
+        find.textContaining("couldn't finish removing this account"),
+        findsOneWidget,
+      );
+      expect(find.text('Continue account cleanup'), findsOneWidget);
+      expect(find.text('Sign out'), findsOneWidget);
+      expect(find.text('Finish account setup'), findsNothing);
+      expect(
+        resolveAuthGate(
+          splashPending: false,
+          onboardingPending: false,
+          onboardingComplete: true,
+          authPending: false,
+          signedIn: true,
+          integrityPending: false,
+          integrity: AccountIntegrity.deletionAccountInProgress,
+        ),
+        AuthGateDestination.recovery,
+      );
+    },
+  );
 
   test('ready root maps to MainShell only when no deletion guard', () {
     expect(

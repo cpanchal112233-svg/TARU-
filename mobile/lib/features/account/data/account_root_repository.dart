@@ -6,10 +6,9 @@ import '../domain/account_integrity.dart';
 /// Minimal identity-root create/repair. Never writes health data or guards.
 class AccountRootRepository {
   AccountRootRepository({
-    required FirebaseFirestore firestore,
+    required this._firestore,
     String? Function()? currentUid,
-  }) : _firestore = firestore,
-       _currentUid =
+  }) : _currentUid =
            currentUid ?? (() => FirebaseAuth.instance.currentUser?.uid);
 
   final FirebaseFirestore _firestore;

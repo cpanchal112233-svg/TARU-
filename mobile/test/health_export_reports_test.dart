@@ -62,8 +62,9 @@ void main() {
           'reviewedAt': Timestamp.fromDate(DateTime.utc(2026, 8, 2, 10)),
         });
 
-    storage.objects['users/$uid/reports/scan1/scan.jpg'] =
-        Uint8List.fromList(<int>[0xFF, 0xD8, 0xFF, 0xD9]);
+    storage.objects['users/$uid/reports/scan1/scan.jpg'] = Uint8List.fromList(
+      <int>[0xFF, 0xD8, 0xFF, 0xD9],
+    );
     storage.objects[reviewedExtractionStoragePath(uid, 'scan1')] =
         Uint8List.fromList(utf8.encode('OCR reviewed text'));
   });
@@ -74,55 +75,63 @@ void main() {
     }
   });
 
-  test('exportToZip includes OCR reviewed sidecar and method metadata', () async {
-    final HealthExportService service = HealthExportService(
-      firestore: firestore,
-      auth: _FakeAuth(uid),
-      storage: storage,
-    );
+  test(
+    'exportToZip includes OCR reviewed sidecar and method metadata',
+    () async {
+      final HealthExportService service = HealthExportService(
+        firestore: firestore,
+        auth: _FakeAuth(uid),
+        storage: storage,
+      );
 
-    final File zipFile = await service.exportToZip();
-    addTearDown(() async {
-      if (zipFile.existsSync()) await zipFile.delete();
-    });
+      final File zipFile = await service.exportToZip();
+      addTearDown(() async {
+        if (zipFile.existsSync()) await zipFile.delete();
+      });
 
-    final Archive archive = ZipDecoder().decodeBytes(zipFile.readAsBytesSync());
-    final List<String> names = archive.map((ArchiveFile f) => f.name).toList();
+      final Archive archive = ZipDecoder().decodeBytes(
+        zipFile.readAsBytesSync(),
+      );
+      final List<String> names = archive
+          .map((ArchiveFile f) => f.name)
+          .toList();
 
-    expect(
-      names.any((String n) => n.endsWith('reports/scan1/reviewed_extracted.txt')),
-      isTrue,
-    );
+      expect(
+        names.any(
+          (String n) => n.endsWith('reports/scan1/reviewed_extracted.txt'),
+        ),
+        isTrue,
+      );
 
-    final ArchiveFile reviewedFile = archive.files.firstWhere(
-      (ArchiveFile f) => f.name.endsWith('reports/scan1/reviewed_extracted.txt'),
-    );
-    expect(
-      utf8.decode(reviewedFile.content as List<int>),
-      'OCR reviewed text',
-    );
+      final ArchiveFile reviewedFile = archive.files.firstWhere(
+        (ArchiveFile f) =>
+            f.name.endsWith('reports/scan1/reviewed_extracted.txt'),
+      );
+      expect(
+        utf8.decode(reviewedFile.content as List<int>),
+        'OCR reviewed text',
+      );
 
-    final ArchiveFile indexFile = archive.files.firstWhere(
-      (ArchiveFile f) => f.name.endsWith('reports/index.json'),
-    );
-    final Map<String, dynamic> indexRoot = Map<String, dynamic>.from(
-      jsonDecode(utf8.decode(indexFile.content as List<int>)) as Map,
-    );
-    final List<dynamic> index = indexRoot['reports'] as List<dynamic>;
-    final Map<String, dynamic> row =
-        Map<String, dynamic>.from(index.first as Map);
-    final Map<String, dynamic> derived = Map<String, dynamic>.from(
-      row['derivedReviewedText'] as Map,
-    );
+      final ArchiveFile indexFile = archive.files.firstWhere(
+        (ArchiveFile f) => f.name.endsWith('reports/index.json'),
+      );
+      final Map<String, dynamic> indexRoot = Map<String, dynamic>.from(
+        jsonDecode(utf8.decode(indexFile.content as List<int>)) as Map,
+      );
+      final List<dynamic> index = indexRoot['reports'] as List<dynamic>;
+      final Map<String, dynamic> row = Map<String, dynamic>.from(
+        index.first as Map,
+      );
+      final Map<String, dynamic> derived = Map<String, dynamic>.from(
+        row['derivedReviewedText'] as Map,
+      );
 
-    expect(derived['method'], 'ocr');
-    expect(derived['role'], 'DERIVED');
-    expect(
-      derived['archivePath'],
-      'reports/scan1/reviewed_extracted.txt',
-    );
-    expect(DateTime.tryParse(derived['reviewedAt'] as String), isNotNull);
-  });
+      expect(derived['method'], 'ocr');
+      expect(derived['role'], 'DERIVED');
+      expect(derived['archivePath'], 'reports/scan1/reviewed_extracted.txt');
+      expect(DateTime.tryParse(derived['reviewedAt'] as String), isNotNull);
+    },
+  );
 }
 
 class _FakePathProvider extends Fake
@@ -162,26 +171,29 @@ class _MemoryStorage extends Fake implements FirebaseStorage {
 }
 
 class _MemoryReference extends Fake implements Reference {
-  _MemoryReference(this.fullPath, this.objects);
+  _MemoryReference(this._fullPath, this.objects);
 
-  final String fullPath;
+  final String _fullPath;
   final Map<String, Uint8List> objects;
 
   @override
+  String get fullPath => _fullPath;
+
+  @override
   Reference child(String path) {
-    final String joined = fullPath.isEmpty ? path : '$fullPath/$path';
+    final String joined = _fullPath.isEmpty ? path : '$_fullPath/$path';
     return _MemoryReference(joined, objects);
   }
 
   @override
   DownloadTask writeToFile(File file) {
     return _ImmediateDownloadTask(() async {
-      final Uint8List? bytes = objects[fullPath];
+      final Uint8List? bytes = objects[_fullPath];
       if (bytes == null) {
         throw FirebaseException(
           plugin: 'storage',
           code: 'object-not-found',
-          message: fullPath,
+          message: _fullPath,
         );
       }
       await file.writeAsBytes(bytes, flush: true);

@@ -38,42 +38,48 @@ void main() {
     PlatformDispatcher.instance.onError = previousPlatform;
   });
 
-  test('FlutterError preserves presentation and reports only when enabled', () async {
-    int presented = 0;
-    FlutterError.onError = (FlutterErrorDetails details) {
-      presented += 1;
-    };
+  test(
+    'FlutterError preserves presentation and reports only when enabled',
+    () async {
+      int presented = 0;
+      FlutterError.onError = (FlutterErrorDetails details) {
+        presented += 1;
+      };
 
-    final MemoryCrashDiagnosticsStore store = MemoryCrashDiagnosticsStore();
-    final RecordingCrashlyticsBackend backend = RecordingCrashlyticsBackend();
-    final CrashReporter reporter = CrashReporter(
-      store: store,
-      backend: backend,
-      allowRemoteReporting: true,
-    );
-    await reporter.applyStartup();
-    installCrashHandlers(reporter);
+      final MemoryCrashDiagnosticsStore store = MemoryCrashDiagnosticsStore();
+      final RecordingCrashlyticsBackend backend = RecordingCrashlyticsBackend();
+      final CrashReporter reporter = CrashReporter(
+        store: store,
+        backend: backend,
+        allowRemoteReporting: true,
+      );
+      await reporter.applyStartup();
+      installCrashHandlers(reporter);
 
-    FlutterError.reportError(
-      FlutterErrorDetails(
-        exception: StateError('REPORT_NAME_DO_NOT_SEND'),
-        stack: StackTrace.current,
-      ),
-    );
-    expect(presented, 1);
-    expect(backend.recorded, isEmpty);
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: StateError('REPORT_NAME_DO_NOT_SEND'),
+          stack: StackTrace.current,
+        ),
+      );
+      expect(presented, 1);
+      expect(backend.recorded, isEmpty);
 
-    await reporter.setDesiredEnabled(true);
-    FlutterError.reportError(
-      FlutterErrorDetails(
-        exception: StateError('WEIGHT_123_DO_NOT_SEND'),
-        stack: StackTrace.current,
-      ),
-    );
-    expect(presented, 2);
-    expect(backend.recorded, <String>['UnexpectedFailure(framework)']);
-    expect(backend.recorded.single, isNot(contains('WEIGHT_123_DO_NOT_SEND')));
-  });
+      await reporter.setDesiredEnabled(true);
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: StateError('WEIGHT_123_DO_NOT_SEND'),
+          stack: StackTrace.current,
+        ),
+      );
+      expect(presented, 2);
+      expect(backend.recorded, <String>['UnexpectedFailure(framework)']);
+      expect(
+        backend.recorded.single,
+        isNot(contains('WEIGHT_123_DO_NOT_SEND')),
+      );
+    },
+  );
 
   test('A previous handler true → result true', () async {
     PlatformDispatcher.instance.onError = (Object error, StackTrace stack) =>
@@ -124,26 +130,29 @@ void main() {
     expect(handled, isFalse);
   });
 
-  test('C no previous + diagnostics OFF → false and reporter not invoked', () async {
-    PlatformDispatcher.instance.onError = null;
-    final MemoryCrashDiagnosticsStore store = MemoryCrashDiagnosticsStore();
-    final RecordingCrashlyticsBackend backend = RecordingCrashlyticsBackend();
-    final CrashReporter reporter = CrashReporter(
-      store: store,
-      backend: backend,
-      allowRemoteReporting: true,
-    );
-    await reporter.applyStartup();
-    installCrashHandlers(reporter);
+  test(
+    'C no previous + diagnostics OFF → false and reporter not invoked',
+    () async {
+      PlatformDispatcher.instance.onError = null;
+      final MemoryCrashDiagnosticsStore store = MemoryCrashDiagnosticsStore();
+      final RecordingCrashlyticsBackend backend = RecordingCrashlyticsBackend();
+      final CrashReporter reporter = CrashReporter(
+        store: store,
+        backend: backend,
+        allowRemoteReporting: true,
+      );
+      await reporter.applyStartup();
+      installCrashHandlers(reporter);
 
-    final bool handled = PlatformDispatcher.instance.onError!(
-      Exception('REPORT_NAME_DO_NOT_SEND'),
-      StackTrace.current,
-    );
+      final bool handled = PlatformDispatcher.instance.onError!(
+        Exception('REPORT_NAME_DO_NOT_SEND'),
+        StackTrace.current,
+      );
 
-    expect(handled, isFalse);
-    expect(backend.recorded, isEmpty);
-  });
+      expect(handled, isFalse);
+      expect(backend.recorded, isEmpty);
+    },
+  );
 
   test('D no previous + diagnostics ON → sanitized report + true', () async {
     PlatformDispatcher.instance.onError = null;

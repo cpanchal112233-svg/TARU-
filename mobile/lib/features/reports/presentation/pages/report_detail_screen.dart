@@ -79,10 +79,7 @@ class ReportDetailScreen extends ConsumerWidget {
                 : _PdfActions(url: downloadUrl, fileName: current.fileName),
           ),
           const SizedBox(height: 16),
-          _ExtractedTextSection(
-            report: current,
-            extraction: extraction,
-          ),
+          _ExtractedTextSection(report: current, extraction: extraction),
           const SizedBox(height: 24),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -267,10 +264,7 @@ class _MetaLine extends StatelessWidget {
 }
 
 class _ExtractedTextSection extends ConsumerStatefulWidget {
-  const _ExtractedTextSection({
-    required this.report,
-    required this.extraction,
-  });
+  const _ExtractedTextSection({required this.report, required this.extraction});
 
   final MedicalReport report;
   final AsyncValue<ReportExtraction?> extraction;
@@ -280,8 +274,7 @@ class _ExtractedTextSection extends ConsumerStatefulWidget {
       _ExtractedTextSectionState();
 }
 
-class _ExtractedTextSectionState
-    extends ConsumerState<_ExtractedTextSection> {
+class _ExtractedTextSectionState extends ConsumerState<_ExtractedTextSection> {
   bool _busy = false;
   bool _canceled = false;
   bool _offerScannedPdfOcr = false;
@@ -290,8 +283,7 @@ class _ExtractedTextSectionState
   String? _progress;
   String? _replacePrevious;
 
-  bool get _supportsExtraction =>
-      widget.report.isPdf || widget.report.isImage;
+  bool get _supportsExtraction => widget.report.isPdf || widget.report.isImage;
 
   @override
   Widget build(BuildContext context) {
@@ -410,10 +402,10 @@ class _ExtractedTextSectionState
             onPressed: _busy
                 ? null
                 : () => _runPdfOcr(
-                      replace: _pendingReplace,
-                      previous: _replacePrevious,
-                      skipReplaceConfirm: true,
-                    ),
+                    replace: _pendingReplace,
+                    previous: _replacePrevious,
+                    skipReplaceConfirm: true,
+                  ),
             icon: _busyIcon(Icons.document_scanner_outlined),
             label: Text(
               _busy ? (_progress ?? 'Reading…') : 'Read text from pages',
@@ -534,10 +526,10 @@ class _ExtractedTextSectionState
             onPressed: _busy
                 ? null
                 : () => _runPdfOcr(
-                      replace: _pendingReplace,
-                      previous: _replacePrevious,
-                      skipReplaceConfirm: true,
-                    ),
+                    replace: _pendingReplace,
+                    previous: _replacePrevious,
+                    skipReplaceConfirm: true,
+                  ),
             icon: _busyIcon(Icons.document_scanner_outlined),
             label: Text(
               _busy ? (_progress ?? 'Reading…') : 'Read text from pages',

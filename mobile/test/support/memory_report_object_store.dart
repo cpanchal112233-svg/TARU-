@@ -26,11 +26,19 @@ class MemoryReportObjectStore implements ReportObjectStore {
     putCount += 1;
     if (failNextPut) {
       failNextPut = false;
-      throw FirebaseException(plugin: 'storage', code: 'unknown', message: 'put');
+      throw FirebaseException(
+        plugin: 'storage',
+        code: 'unknown',
+        message: 'put',
+      );
     }
     if (failNextPutAfterSuccessCount >= 0 &&
         putCount > failNextPutAfterSuccessCount) {
-      throw FirebaseException(plugin: 'storage', code: 'unknown', message: 'put');
+      throw FirebaseException(
+        plugin: 'storage',
+        code: 'unknown',
+        message: 'put',
+      );
     }
     objects[path] = Uint8List.fromList(bytes);
     contentTypes[path] = contentType;

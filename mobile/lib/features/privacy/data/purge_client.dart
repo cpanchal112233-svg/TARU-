@@ -43,10 +43,12 @@ class PurgeClient {
         error.code == 'failed-precondition') {
       return PurgeFailureCode.recentAuthRequired;
     }
-    if (message.contains('UNAUTHENTICATED') || error.code == 'unauthenticated') {
+    if (message.contains('UNAUTHENTICATED') ||
+        error.code == 'unauthenticated') {
       return PurgeFailureCode.unauthenticated;
     }
-    if (message.contains('PURGE_RETRY_REQUIRED') || error.code == 'unavailable') {
+    if (message.contains('PURGE_RETRY_REQUIRED') ||
+        error.code == 'unavailable') {
       return PurgeFailureCode.purgeRetryRequired;
     }
     return PurgeFailureCode.purgeFailed;

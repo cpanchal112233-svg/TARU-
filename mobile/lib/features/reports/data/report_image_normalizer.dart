@@ -23,9 +23,7 @@ class ReportImageNormalizer {
     final Uint8List bytes = await source.readAsBytes();
     final String lower = source.path.toLowerCase();
     final bool heic =
-        lower.endsWith('.heic') ||
-        lower.endsWith('.heif') ||
-        _looksHeic(bytes);
+        lower.endsWith('.heic') || lower.endsWith('.heif') || _looksHeic(bytes);
 
     final Uint8List pngBytes = heic
         ? await _heicToPng(bytes)

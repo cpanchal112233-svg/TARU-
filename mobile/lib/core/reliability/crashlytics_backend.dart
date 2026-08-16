@@ -32,8 +32,7 @@ class NoOpCrashlyticsBackend implements CrashlyticsBackend {
 }
 
 class FirebaseCrashlyticsBackend implements CrashlyticsBackend {
-  FirebaseCrashlyticsBackend({FirebaseCrashlytics? crashlytics})
-    : _crashlytics = crashlytics;
+  FirebaseCrashlyticsBackend({this._crashlytics});
 
   final FirebaseCrashlytics? _crashlytics;
 

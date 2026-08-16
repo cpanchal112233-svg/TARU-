@@ -24,7 +24,8 @@ class _ManageHabitsSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final HabitPreferences prefs =
-        ref.watch(habitPreferencesProvider).value ?? HabitPreferences.allEnabled;
+        ref.watch(habitPreferencesProvider).value ??
+        HabitPreferences.allEnabled;
     final MediaQueryData media = MediaQuery.of(context);
 
     return SafeArea(
@@ -47,9 +48,9 @@ class _ManageHabitsSheet extends ConsumerWidget {
             const SizedBox(height: 16),
             Text(
               'Your lifestyle habits',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 6),
             Text(
@@ -63,9 +64,7 @@ class _ManageHabitsSheet extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
             ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: media.size.height * 0.55,
-              ),
+              constraints: BoxConstraints(maxHeight: media.size.height * 0.55),
               child: ListView(
                 shrinkWrap: true,
                 children: [
@@ -94,9 +93,8 @@ class _ManageHabitsSheet extends ConsumerWidget {
                       SwitchListTile(
                         contentPadding: EdgeInsets.zero,
                         value: prefs.isEnabled(habit.id),
-                        onChanged: (bool value) => ref.read(
-                          setHabitEnabledProvider,
-                        )(habit.id, value),
+                        onChanged: (bool value) =>
+                            ref.read(setHabitEnabledProvider)(habit.id, value),
                         title: Text(
                           habit.title,
                           style: const TextStyle(

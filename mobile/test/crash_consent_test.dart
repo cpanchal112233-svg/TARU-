@@ -106,34 +106,37 @@ void main() {
     expect(backend.collectionEnabled, isTrue);
   });
 
-  test('disable preference persists and Dart reporter stops immediately', () async {
-    final MemoryCrashDiagnosticsStore store = MemoryCrashDiagnosticsStore()
-      ..value = true;
-    final RecordingCrashlyticsBackend backend = RecordingCrashlyticsBackend();
-    final CrashReporter reporter = CrashReporter(
-      store: store,
-      backend: backend,
-      allowRemoteReporting: true,
-    );
-    await reporter.applyStartup();
-    reporter.recordUnexpected(
-      category: CrashCategory.unknown,
-      stack: StackTrace.current,
-    );
-    expect(backend.recorded, isNotEmpty);
+  test(
+    'disable preference persists and Dart reporter stops immediately',
+    () async {
+      final MemoryCrashDiagnosticsStore store = MemoryCrashDiagnosticsStore()
+        ..value = true;
+      final RecordingCrashlyticsBackend backend = RecordingCrashlyticsBackend();
+      final CrashReporter reporter = CrashReporter(
+        store: store,
+        backend: backend,
+        allowRemoteReporting: true,
+      );
+      await reporter.applyStartup();
+      reporter.recordUnexpected(
+        category: CrashCategory.unknown,
+        stack: StackTrace.current,
+      );
+      expect(backend.recorded, isNotEmpty);
 
-    await reporter.setDesiredEnabled(false);
+      await reporter.setDesiredEnabled(false);
 
-    expect(store.value, isFalse);
-    expect(reporter.sessionReportingEnabled, isFalse);
-    backend.recorded.clear();
-    reporter.recordUnexpected(
-      category: CrashCategory.unknown,
-      stack: StackTrace.current,
-    );
-    expect(backend.recorded, isEmpty);
-    expect(backend.deleteUnsentCount, greaterThan(0));
-  });
+      expect(store.value, isFalse);
+      expect(reporter.sessionReportingEnabled, isFalse);
+      backend.recorded.clear();
+      reporter.recordUnexpected(
+        category: CrashCategory.unknown,
+        stack: StackTrace.current,
+      );
+      expect(backend.recorded, isEmpty);
+      expect(backend.deleteUnsentCount, greaterThan(0));
+    },
+  );
 
   test('startup while false requests deleteUnsentReports', () async {
     final MemoryCrashDiagnosticsStore store = MemoryCrashDiagnosticsStore();

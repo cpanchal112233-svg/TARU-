@@ -171,11 +171,7 @@ class ReportsRepository {
     final bool isReplace = previousReviewedText != null;
     final Uint8List payload = Uint8List.fromList(utf8Bytes);
 
-    await _objects.putData(
-      path,
-      payload,
-      contentType: 'text/plain',
-    );
+    await _objects.putData(path, payload, contentType: 'text/plain');
 
     final ReportExtraction extraction = ReportExtraction(
       method: method.storageValue,
@@ -218,9 +214,7 @@ class ReportsRepository {
   }
 
   Future<void> removeReviewedExtraction(String uid, String reportId) async {
-    await _objects.deleteIfExists(
-      reviewedExtractionStoragePath(uid, reportId),
-    );
+    await _objects.deleteIfExists(reviewedExtractionStoragePath(uid, reportId));
 
     try {
       await _extractionDoc(uid, reportId).delete();

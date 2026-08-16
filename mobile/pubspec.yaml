@@ -73,6 +73,9 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
   fake_cloud_firestore: ^4.2.0
+  # Direct imports in path_provider fakes (depend_on_referenced_packages).
+  path_provider_platform_interface: 2.1.3
+  plugin_platform_interface: 2.1.8
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -89,11 +92,9 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
-  assets:
-    - assets/images/
-    - assets/icons/
-    - assets/logo/
-    
+  # Onboarding currently uses Material icons, not bundled image assets.
+  # Re-declare asset directories when real image/icon/logo files are added.
+
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 

@@ -7,15 +7,15 @@ import 'package:mobile/features/routine/domain/dose_schedule.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class _FakeReminderService extends ReminderService {
-  _FakeReminderService({
-    required this.allowed,
-    this.throwOnCheck = false,
-  }) : super(notificationsAllowed: () async {
+  _FakeReminderService({required this.allowed, this.throwOnCheck = false})
+    : super(
+        notificationsAllowed: () async {
           if (throwOnCheck) {
             throw StateError('permission check failed');
           }
           return allowed;
-        });
+        },
+      );
 
   final bool allowed;
   final bool throwOnCheck;
@@ -52,7 +52,9 @@ void main() {
     );
     addTearDown(container.dispose);
 
-    final bool enabled = await container.read(remindersControllerProvider.future);
+    final bool enabled = await container.read(
+      remindersControllerProvider.future,
+    );
     expect(enabled, isTrue);
     expect(service.scheduleCount, 1);
   });
@@ -70,7 +72,9 @@ void main() {
     );
     addTearDown(container.dispose);
 
-    final bool enabled = await container.read(remindersControllerProvider.future);
+    final bool enabled = await container.read(
+      remindersControllerProvider.future,
+    );
     expect(enabled, isFalse);
     expect(service.cancelCount, 1);
     expect(service.scheduleCount, 0);
@@ -92,7 +96,9 @@ void main() {
     );
     addTearDown(container.dispose);
 
-    final bool enabled = await container.read(remindersControllerProvider.future);
+    final bool enabled = await container.read(
+      remindersControllerProvider.future,
+    );
     expect(enabled, isFalse);
   });
 }

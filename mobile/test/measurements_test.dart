@@ -59,22 +59,10 @@ void main() {
       expect(isPlausibleWeightKg(1), isFalse);
       expect(isPlausibleWeightKg(401), isFalse);
 
-      expect(
-        isIntentionalNewWeight(previous: null, next: 70),
-        isTrue,
-      );
-      expect(
-        isIntentionalNewWeight(previous: 70, next: 70),
-        isFalse,
-      );
-      expect(
-        isIntentionalNewWeight(previous: 70, next: 71),
-        isTrue,
-      );
-      expect(
-        isIntentionalNewWeight(previous: 70, next: null),
-        isFalse,
-      );
+      expect(isIntentionalNewWeight(previous: null, next: 70), isTrue);
+      expect(isIntentionalNewWeight(previous: 70, next: 70), isFalse);
+      expect(isIntentionalNewWeight(previous: 70, next: 71), isTrue);
+      expect(isIntentionalNewWeight(previous: 70, next: null), isFalse);
     });
   });
 
@@ -151,8 +139,10 @@ void main() {
       await repository.recordWeight(uid, 70);
       await Future<void>.delayed(const Duration(milliseconds: 2));
       await repository.recordWeight(uid, 72);
-      final WeightMeasurement latest =
-          (await repository.fetchLatestWeights(uid, limit: 1)).first;
+      final WeightMeasurement latest = (await repository.fetchLatestWeights(
+        uid,
+        limit: 1,
+      )).first;
 
       await repository.deleteWeightMeasurement(uid, latest.id);
 
@@ -162,8 +152,10 @@ void main() {
 
     test('delete final measurement clears snapshot', () async {
       await repository.recordWeight(uid, 72);
-      final WeightMeasurement only =
-          (await repository.fetchLatestWeights(uid, limit: 1)).first;
+      final WeightMeasurement only = (await repository.fetchLatestWeights(
+        uid,
+        limit: 1,
+      )).first;
 
       await repository.deleteWeightMeasurement(uid, only.id);
 
@@ -180,10 +172,7 @@ void main() {
           .doc('profile')
           .set(<String, dynamic>{'weightKg': 80.0, 'heightCm': 170.0});
 
-      const HealthProfile previous = HealthProfile(
-        weightKg: 80,
-        heightCm: 170,
-      );
+      const HealthProfile previous = HealthProfile(weightKg: 80, heightCm: 170);
       const HealthProfile next = HealthProfile(weightKg: 80, heightCm: 170);
 
       await repository.saveHealthProfileWithWeightTracking(
@@ -198,28 +187,31 @@ void main() {
       expect(profile?['weightKg'], 80);
     });
 
-    test('changed legacy weight creates first measurement atomically', () async {
-      const HealthProfile previous = HealthProfile(
-        weightKg: 80,
-        heightCm: 170,
-      );
-      const HealthProfile next = HealthProfile(weightKg: 81, heightCm: 170);
+    test(
+      'changed legacy weight creates first measurement atomically',
+      () async {
+        const HealthProfile previous = HealthProfile(
+          weightKg: 80,
+          heightCm: 170,
+        );
+        const HealthProfile next = HealthProfile(weightKg: 81, heightCm: 170);
 
-      await repository.saveHealthProfileWithWeightTracking(
-        uid: uid,
-        previous: previous,
-        next: next,
-        hasWeightHistory: false,
-      );
+        await repository.saveHealthProfileWithWeightTracking(
+          uid: uid,
+          previous: previous,
+          next: next,
+          hasWeightHistory: false,
+        );
 
-      final List<WeightMeasurement> history = await repository
-          .fetchLatestWeights(uid, limit: 5);
-      expect(history, hasLength(1));
-      expect(history.first.valueKg, 81);
-      final Map<String, dynamic>? profile = await profileMap();
-      expect(profile?['weightKg'], 81);
-      expect(profile?['heightCm'], 170);
-    });
+        final List<WeightMeasurement> history = await repository
+            .fetchLatestWeights(uid, limit: 5);
+        expect(history, hasLength(1));
+        expect(history.first.valueKg, 81);
+        final Map<String, dynamic>? profile = await profileMap();
+        expect(profile?['weightKg'], 81);
+        expect(profile?['heightCm'], 170);
+      },
+    );
 
     test('null to non-null starts history', () async {
       const HealthProfile previous = HealthProfile(heightCm: 170);
@@ -268,52 +260,58 @@ void main() {
       expect(await repository.hasWeightHistory(uid), isTrue);
     });
 
-    test('tracked profile weight change creates exactly one measurement', () async {
-      await repository.recordWeight(uid, 70);
-      await repository.saveHealthProfileWithWeightTracking(
-        uid: uid,
-        previous: const HealthProfile(weightKg: 70, heightCm: 170),
-        next: const HealthProfile(weightKg: 71, heightCm: 170),
-        hasWeightHistory: true,
-      );
+    test(
+      'tracked profile weight change creates exactly one measurement',
+      () async {
+        await repository.recordWeight(uid, 70);
+        await repository.saveHealthProfileWithWeightTracking(
+          uid: uid,
+          previous: const HealthProfile(weightKg: 70, heightCm: 170),
+          next: const HealthProfile(weightKg: 71, heightCm: 170),
+          hasWeightHistory: true,
+        );
 
-      final List<WeightMeasurement> history = await repository
-          .fetchLatestWeights(uid, limit: 10);
-      expect(history, hasLength(2));
-      expect(history.first.valueKg, 71);
-    });
+        final List<WeightMeasurement> history = await repository
+            .fetchLatestWeights(uid, limit: 10);
+        expect(history, hasLength(2));
+        expect(history.first.valueKg, 71);
+      },
+    );
 
-    test('multi-field profile save records one measurement and other fields', () async {
-      const HealthProfile previous = HealthProfile(
-        weightKg: 70,
-        heightCm: 170,
-        emergencyContactName: 'Alex',
-      );
-      const HealthProfile next = HealthProfile(
-        weightKg: 71.5,
-        heightCm: 172,
-        emergencyContactName: 'Sam',
-        preferredUnits: UnitSystem.imperial,
-      );
+    test(
+      'multi-field profile save records one measurement and other fields',
+      () async {
+        const HealthProfile previous = HealthProfile(
+          weightKg: 70,
+          heightCm: 170,
+          emergencyContactName: 'Alex',
+        );
+        const HealthProfile next = HealthProfile(
+          weightKg: 71.5,
+          heightCm: 172,
+          emergencyContactName: 'Sam',
+          preferredUnits: UnitSystem.imperial,
+        );
 
-      await repository.saveHealthProfileWithWeightTracking(
-        uid: uid,
-        previous: previous,
-        next: next,
-        hasWeightHistory: false,
-      );
+        await repository.saveHealthProfileWithWeightTracking(
+          uid: uid,
+          previous: previous,
+          next: next,
+          hasWeightHistory: false,
+        );
 
-      final List<WeightMeasurement> history = await repository
-          .fetchLatestWeights(uid, limit: 10);
-      expect(history, hasLength(1));
-      expect(history.first.valueKg, 71.5);
+        final List<WeightMeasurement> history = await repository
+            .fetchLatestWeights(uid, limit: 10);
+        expect(history, hasLength(1));
+        expect(history.first.valueKg, 71.5);
 
-      final Map<String, dynamic>? profile = await profileMap();
-      expect(profile?['weightKg'], 71.5);
-      expect(profile?['heightCm'], 172);
-      expect(profile?['emergencyContactName'], 'Sam');
-      expect(profile?['preferredUnits'], 'imperial');
-    });
+        final Map<String, dynamic>? profile = await profileMap();
+        expect(profile?['weightKg'], 71.5);
+        expect(profile?['heightCm'], 172);
+        expect(profile?['emergencyContactName'], 'Sam');
+        expect(profile?['preferredUnits'], 'imperial');
+      },
+    );
 
     test('start tracking uses recordWeight path', () async {
       await firestore
@@ -375,12 +373,7 @@ void main() {
 
     test('historical insert creates doc and does not change mirror', () async {
       final DateTime now = DateTime.utc(2026, 8, 9, 12);
-      await repository.recordWeight(
-        uid,
-        80,
-        recordedAt: now,
-        now: now,
-      );
+      await repository.recordWeight(uid, 80, recordedAt: now, now: now);
 
       await repository.recordWeight(
         uid,
@@ -392,10 +385,10 @@ void main() {
       final List<WeightMeasurement> history = await repository
           .fetchLatestWeights(uid, limit: 10);
       expect(history, hasLength(2));
-      expect(history.map((WeightMeasurement m) => m.valueKg), containsAll(<double>[
-        80,
-        70,
-      ]));
+      expect(
+        history.map((WeightMeasurement m) => m.valueKg),
+        containsAll(<double>[80, 70]),
+      );
       expect((await profileMap())?['weightKg'], 80);
     });
 
@@ -407,12 +400,7 @@ void main() {
         recordedAt: now.subtract(const Duration(days: 2)),
         now: now,
       );
-      await repository.recordWeight(
-        uid,
-        72,
-        recordedAt: now,
-        now: now,
-      );
+      await repository.recordWeight(uid, 72, recordedAt: now, now: now);
       expect((await profileMap())?['weightKg'], 72);
     });
 
@@ -477,8 +465,10 @@ void main() {
         await repository.recordWeight(uid, 70, recordedAt: at, now: now);
         await repository.recordWeight(uid, 71, recordedAt: at, now: now);
 
-        final WeightMeasurement latest =
-            (await repository.fetchLatestWeights(uid, limit: 1)).first;
+        final WeightMeasurement latest = (await repository.fetchLatestWeights(
+          uid,
+          limit: 1,
+        )).first;
         expect((await profileMap())?['weightKg'], latest.valueKg);
         expect(latest.valueKg, anyOf(70, 71));
       },
@@ -492,12 +482,7 @@ void main() {
         recordedAt: now.subtract(const Duration(days: 2)),
         now: now,
       );
-      await repository.recordWeight(
-        uid,
-        72,
-        recordedAt: now,
-        now: now,
-      );
+      await repository.recordWeight(uid, 72, recordedAt: now, now: now);
       final List<WeightMeasurement> both = await repository.fetchLatestWeights(
         uid,
         limit: 2,
@@ -528,8 +513,10 @@ void main() {
       );
       await repository.recordWeight(uid, 72, recordedAt: now, now: now);
 
-      final String latestId =
-          (await repository.fetchLatestWeights(uid, limit: 1)).first.id;
+      final String latestId = (await repository.fetchLatestWeights(
+        uid,
+        limit: 1,
+      )).first.id;
       await repository.deleteWeightMeasurement(uid, latestId);
       expect((await profileMap())?['weightKg'], 71);
     });
@@ -583,12 +570,7 @@ void main() {
 
     test('health profile weight save uses mirror gate at now', () async {
       final DateTime now = DateTime.utc(2026, 8, 9, 12);
-      await repository.recordWeight(
-        uid,
-        70,
-        recordedAt: now,
-        now: now,
-      );
+      await repository.recordWeight(uid, 70, recordedAt: now, now: now);
 
       await repository.saveHealthProfileWithWeightTracking(
         uid: uid,

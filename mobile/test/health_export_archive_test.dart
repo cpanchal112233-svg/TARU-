@@ -94,8 +94,12 @@ void main() {
 
       expect(zipFile.existsSync(), isTrue);
 
-      final Archive archive = ZipDecoder().decodeBytes(zipFile.readAsBytesSync());
-      final List<String> names = archive.map((ArchiveFile f) => f.name).toList();
+      final Archive archive = ZipDecoder().decodeBytes(
+        zipFile.readAsBytesSync(),
+      );
+      final List<String> names = archive
+          .map((ArchiveFile f) => f.name)
+          .toList();
 
       expect(
         names.any((String n) => n.endsWith('measurements/weight.json')),
@@ -138,10 +142,7 @@ void main() {
       expect(weightRow['type'], 'weight');
       expect(weightRow['valueKg'], isA<num>());
       expect(weightRow['source'], 'manual');
-      expect(
-        DateTime.tryParse(weightRow['recordedAt'] as String),
-        isNotNull,
-      );
+      expect(DateTime.tryParse(weightRow['recordedAt'] as String), isNotNull);
       expect(weightRow.containsKey('category'), isFalse);
 
       final Map<String, dynamic> bpRow = Map<String, dynamic>.from(
@@ -204,38 +205,38 @@ void main() {
     expect(_jsonList(archive, 'measurements/weight.json'), hasLength(1));
   });
 
-  test(
-    'BP query failure fails the whole export (complete-or-fail)',
-    () async {
-      final HealthExportService service = HealthExportService(
-        firestore: _BpQueryFailingFirestore(firestore),
-        auth: _FakeAuth(uid),
-        storage: _FakeStorage(),
-      );
+  test('BP query failure fails the whole export (complete-or-fail)', () async {
+    final HealthExportService service = HealthExportService(
+      firestore: firestore,
+      auth: _FakeAuth(uid),
+      storage: _FakeStorage(),
+      bloodPressureLoader: (String _) async {
+        throw StateError('Simulated blood_pressure query failure');
+      },
+    );
 
-      await expectLater(
-        service.exportToZip(),
-        throwsA(
-          isA<StateError>().having(
-            (StateError e) => e.message,
-            'message',
-            contains('blood_pressure query failure'),
-          ),
+    await expectLater(
+      service.exportToZip(),
+      throwsA(
+        isA<StateError>().having(
+          (StateError e) => e.message,
+          'message',
+          contains('blood_pressure query failure'),
         ),
-      );
+      ),
+    );
 
-      final List<FileSystemEntity> leftoverZips = tempRoot
-          .listSync()
-          .whereType<File>()
-          .where((File f) => f.path.endsWith('.zip'))
-          .toList();
-      expect(
-        leftoverZips,
-        isEmpty,
-        reason: 'Failed export must not leave a partial ZIP success artifact',
-      );
-    },
-  );
+    final List<FileSystemEntity> leftoverZips = tempRoot
+        .listSync()
+        .whereType<File>()
+        .where((File f) => f.path.endsWith('.zip'))
+        .toList();
+    expect(
+      leftoverZips,
+      isEmpty,
+      reason: 'Failed export must not leave a partial ZIP success artifact',
+    );
+  });
 }
 
 List<dynamic> _jsonList(Archive archive, String suffix) {
@@ -275,108 +276,3 @@ class _FakeUser extends Fake implements User {
 }
 
 class _FakeStorage extends Fake implements FirebaseStorage {}
-
-/// Delegates to [inner] except blood-pressure measurement queries, which fail.
-///
-/// Proves Phase 11 BP collection participates in complete-or-fail — there is
-/// no soft-skip path when the required BP read throws.
-class _BpQueryFailingFirestore extends Fake implements FirebaseFirestore {
-  _BpQueryFailingFirestore(this.inner);
-
-  final FakeFirebaseFirestore inner;
-
-  @override
-  CollectionReference<Map<String, dynamic>> collection(String path) {
-    return _BpAwareCollection(inner.collection(path), path);
-  }
-}
-
-class _BpAwareCollection extends Fake
-    implements CollectionReference<Map<String, dynamic>> {
-  _BpAwareCollection(this.inner, this.fullPath);
-
-  final CollectionReference<Map<String, dynamic>> inner;
-  final String fullPath;
-
-  @override
-  DocumentReference<Map<String, dynamic>> doc([String? path]) {
-    final DocumentReference<Map<String, dynamic>> doc = inner.doc(path);
-    if (fullPath == 'users') {
-      return _BpAwareUserDoc(doc);
-    }
-    return doc;
-  }
-}
-
-class _BpAwareUserDoc extends Fake
-    implements DocumentReference<Map<String, dynamic>> {
-  _BpAwareUserDoc(this.inner);
-
-  final DocumentReference<Map<String, dynamic>> inner;
-
-  @override
-  CollectionReference<Map<String, dynamic>> collection(String path) {
-    final CollectionReference<Map<String, dynamic>> col = inner.collection(
-      path,
-    );
-    if (path == 'measurements') {
-      return _FailingBpMeasurements(col);
-    }
-    return col;
-  }
-
-  @override
-  Future<DocumentSnapshot<Map<String, dynamic>>> get([GetOptions? options]) {
-    return inner.get(options);
-  }
-}
-
-class _FailingBpMeasurements extends Fake
-    implements CollectionReference<Map<String, dynamic>> {
-  _FailingBpMeasurements(this.inner);
-
-  final CollectionReference<Map<String, dynamic>> inner;
-
-  @override
-  Query<Map<String, dynamic>> where(
-    Object field, {
-    Object? isEqualTo,
-    Object? isNotEqualTo,
-    Object? isLessThan,
-    Object? isLessThanOrEqualTo,
-    Object? isGreaterThan,
-    Object? isGreaterThanOrEqualTo,
-    Object? arrayContains,
-    Iterable<Object?>? arrayContainsAny,
-    Iterable<Object?>? whereIn,
-    Iterable<Object?>? whereNotIn,
-    bool? isNull,
-  }) {
-    if (field == 'type' && isEqualTo == 'blood_pressure') {
-      return _ThrowingQuery();
-    }
-    return inner.where(
-      field,
-      isEqualTo: isEqualTo,
-      isNotEqualTo: isNotEqualTo,
-      isLessThan: isLessThan,
-      isLessThanOrEqualTo: isLessThanOrEqualTo,
-      isGreaterThan: isGreaterThan,
-      isGreaterThanOrEqualTo: isGreaterThanOrEqualTo,
-      arrayContains: arrayContains,
-      arrayContainsAny: arrayContainsAny,
-      whereIn: whereIn,
-      whereNotIn: whereNotIn,
-      isNull: isNull,
-    );
-  }
-}
-
-class _ThrowingQuery extends Fake implements Query<Map<String, dynamic>> {
-  @override
-  Future<QuerySnapshot<Map<String, dynamic>>> get([GetOptions? options]) {
-    return Future<QuerySnapshot<Map<String, dynamic>>>.error(
-      StateError('Simulated blood_pressure query failure'),
-    );
-  }
-}

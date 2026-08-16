@@ -203,8 +203,10 @@ void main() {
         now: now,
       );
       expect(
-        (await repository.fetchLatestBloodPressures(uid, limit: 1)).first
-            .systolicMmHg,
+        (await repository.fetchLatestBloodPressures(
+          uid,
+          limit: 1,
+        )).first.systolicMmHg,
         121,
       );
     });
@@ -245,9 +247,7 @@ void main() {
             'systolicMmHg': 125,
             'diastolicMmHg': 82,
             'source': bloodPressureSourceManual,
-            'recordedAt': Timestamp.fromDate(
-              day.add(const Duration(hours: 1)),
-            ),
+            'recordedAt': Timestamp.fromDate(day.add(const Duration(hours: 1))),
           });
 
       final List<BloodPressureMeasurement> history = await repository
@@ -256,11 +256,10 @@ void main() {
         history.map((BloodPressureMeasurement m) => m.systolicMmHg).toList(),
         <int>[125, 130, 110],
       );
-      expect(history.map((BloodPressureMeasurement m) => m.id).toList(), <String>[
-        'mid',
-        'zzz',
-        'aaa',
-      ]);
+      expect(
+        history.map((BloodPressureMeasurement m) => m.id).toList(),
+        <String>['mid', 'zzz', 'aaa'],
+      );
     });
 
     test('recent history limit is 50', () async {
@@ -281,7 +280,10 @@ void main() {
 
       await repository.deleteBloodPressureMeasurement(uid, bp.id);
 
-      expect(await repository.fetchLatestBloodPressures(uid, limit: 5), isEmpty);
+      expect(
+        await repository.fetchLatestBloodPressures(uid, limit: 5),
+        isEmpty,
+      );
       expect(
         (await repository.fetchLatestWeights(uid, limit: 1)).first.valueKg,
         70,

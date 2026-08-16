@@ -49,15 +49,16 @@ void main() {
     expect(utf8.decode(objects.objects[path]!), 'OCR line one\nOCR line two');
     expect(objects.objects.keys, <String>{path});
 
-    final Map<String, dynamic>? meta = (await firestore
-            .collection('users')
-            .doc('u1')
-            .collection('reports')
-            .doc('img1')
-            .collection('extraction')
-            .doc('current')
-            .get())
-        .data();
+    final Map<String, dynamic>? meta =
+        (await firestore
+                .collection('users')
+                .doc('u1')
+                .collection('reports')
+                .doc('img1')
+                .collection('extraction')
+                .doc('current')
+                .get())
+            .data();
     expect(meta?['method'], 'ocr');
     expect(meta?['reviewedAt'], isNotNull);
   });
@@ -70,15 +71,16 @@ void main() {
       method: ReportExtractionMethod.ocr,
     );
 
-    final Map<String, dynamic>? firstMeta = (await firestore
-            .collection('users')
-            .doc('u1')
-            .collection('reports')
-            .doc('img1')
-            .collection('extraction')
-            .doc('current')
-            .get())
-        .data();
+    final Map<String, dynamic>? firstMeta =
+        (await firestore
+                .collection('users')
+                .doc('u1')
+                .collection('reports')
+                .doc('img1')
+                .collection('extraction')
+                .doc('current')
+                .get())
+            .data();
     final Object? firstReviewedAt = firstMeta?['reviewedAt'];
 
     await Future<void>.delayed(const Duration(milliseconds: 2));
@@ -94,15 +96,16 @@ void main() {
     expect(replaced.method, ReportExtraction.pdfTextMethod);
     expect(replaced.isPdfText, isTrue);
 
-    final Map<String, dynamic>? secondMeta = (await firestore
-            .collection('users')
-            .doc('u1')
-            .collection('reports')
-            .doc('img1')
-            .collection('extraction')
-            .doc('current')
-            .get())
-        .data();
+    final Map<String, dynamic>? secondMeta =
+        (await firestore
+                .collection('users')
+                .doc('u1')
+                .collection('reports')
+                .doc('img1')
+                .collection('extraction')
+                .doc('current')
+                .get())
+            .data();
     expect(secondMeta?['method'], 'pdf_text');
     expect(secondMeta?['reviewedAt'], isNot(equals(firstReviewedAt)));
 

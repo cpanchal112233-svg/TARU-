@@ -7,11 +7,11 @@ void main() {
   group('weightChartPoints', () {
     test('one reading -> one point; raw value preserved', () {
       final DateTime at = DateTime.utc(2026, 8, 1, 12);
-      final List<MeasurementChartPoint> points = weightChartPoints(<
-        WeightMeasurement
-      >[
-        WeightMeasurement(id: 'a', valueKg: 70.5, recordedAt: at),
-      ]);
+      final List<MeasurementChartPoint> points = weightChartPoints(
+        <WeightMeasurement>[
+          WeightMeasurement(id: 'a', valueKg: 70.5, recordedAt: at),
+        ],
+      );
       expect(points, hasLength(1));
       expect(points.single.value, 70.5);
       expect(points.single.recordedAt, at);
@@ -22,19 +22,17 @@ void main() {
       final DateTime evening = DateTime.utc(2026, 8, 1, 20);
       final DateTime nextDay = DateTime.utc(2026, 8, 3, 9);
 
-      final List<MeasurementChartPoint> points = weightChartPoints(<
-        WeightMeasurement
-      >[
-        WeightMeasurement(id: 'c', valueKg: 72, recordedAt: nextDay),
-        WeightMeasurement(id: 'b', valueKg: 71, recordedAt: evening),
-        WeightMeasurement(id: 'a', valueKg: 70, recordedAt: morning),
-      ]);
+      final List<MeasurementChartPoint> points =
+          weightChartPoints(<WeightMeasurement>[
+            WeightMeasurement(id: 'c', valueKg: 72, recordedAt: nextDay),
+            WeightMeasurement(id: 'b', valueKg: 71, recordedAt: evening),
+            WeightMeasurement(id: 'a', valueKg: 70, recordedAt: morning),
+          ]);
 
-      expect(points.map((MeasurementChartPoint p) => p.value).toList(), <double>[
-        70,
-        71,
-        72,
-      ]);
+      expect(
+        points.map((MeasurementChartPoint p) => p.value).toList(),
+        <double>[70, 71, 72],
+      );
       expect(points, hasLength(3));
       // Gap day 2 is not fabricated.
       expect(
@@ -47,16 +45,15 @@ void main() {
   group('bloodPressureChartSeries', () {
     test('one reading -> paired points at same x; exact mmHg', () {
       final DateTime at = DateTime.utc(2026, 8, 1, 12);
-      final BloodPressureChartSeries series = bloodPressureChartSeries(<
-        BloodPressureMeasurement
-      >[
-        BloodPressureMeasurement(
-          id: 'bp',
-          systolicMmHg: 128,
-          diastolicMmHg: 84,
-          recordedAt: at,
-        ),
-      ]);
+      final BloodPressureChartSeries series =
+          bloodPressureChartSeries(<BloodPressureMeasurement>[
+            BloodPressureMeasurement(
+              id: 'bp',
+              systolicMmHg: 128,
+              diastolicMmHg: 84,
+              recordedAt: at,
+            ),
+          ]);
 
       expect(series.systolic, hasLength(1));
       expect(series.diastolic, hasLength(1));
@@ -69,22 +66,21 @@ void main() {
     test('chronological; same-day retained; no synthetic observations', () {
       final DateTime a = DateTime.utc(2026, 8, 1, 8);
       final DateTime b = DateTime.utc(2026, 8, 1, 18);
-      final BloodPressureChartSeries series = bloodPressureChartSeries(<
-        BloodPressureMeasurement
-      >[
-        BloodPressureMeasurement(
-          id: '2',
-          systolicMmHg: 130,
-          diastolicMmHg: 85,
-          recordedAt: b,
-        ),
-        BloodPressureMeasurement(
-          id: '1',
-          systolicMmHg: 120,
-          diastolicMmHg: 80,
-          recordedAt: a,
-        ),
-      ]);
+      final BloodPressureChartSeries series =
+          bloodPressureChartSeries(<BloodPressureMeasurement>[
+            BloodPressureMeasurement(
+              id: '2',
+              systolicMmHg: 130,
+              diastolicMmHg: 85,
+              recordedAt: b,
+            ),
+            BloodPressureMeasurement(
+              id: '1',
+              systolicMmHg: 120,
+              diastolicMmHg: 80,
+              recordedAt: a,
+            ),
+          ]);
 
       expect(
         series.systolic.map((MeasurementChartPoint p) => p.value).toList(),

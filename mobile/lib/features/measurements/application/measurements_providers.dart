@@ -54,16 +54,17 @@ final bloodPressureHistoryProvider =
           .watchBloodPressureHistory(user.uid);
     });
 
-final latestBloodPressureProvider =
-    StreamProvider<BloodPressureMeasurement?>((ref) {
-      final User? user = ref.watch(authStateChangesProvider).value;
-      if (user == null) {
-        return Stream<BloodPressureMeasurement?>.value(null);
-      }
-      return ref
-          .watch(measurementsRepositoryProvider)
-          .watchLatestBloodPressure(user.uid);
-    });
+final latestBloodPressureProvider = StreamProvider<BloodPressureMeasurement?>((
+  ref,
+) {
+  final User? user = ref.watch(authStateChangesProvider).value;
+  if (user == null) {
+    return Stream<BloodPressureMeasurement?>.value(null);
+  }
+  return ref
+      .watch(measurementsRepositoryProvider)
+      .watchLatestBloodPressure(user.uid);
+});
 
 final recordWeightProvider =
     Provider<Future<void> Function(double, {DateTime? recordedAt})>((ref) {
@@ -78,18 +79,19 @@ final recordWeightProvider =
       };
     });
 
-final deleteWeightMeasurementProvider =
-    Provider<Future<void> Function(String)>((ref) {
-      return (String measurementId) async {
-        final User? user = ref.read(authStateChangesProvider).value;
-        if (user == null) {
-          throw StateError('Cannot delete weight while signed out.');
-        }
-        await ref
-            .read(measurementsRepositoryProvider)
-            .deleteWeightMeasurement(user.uid, measurementId);
-      };
-    });
+final deleteWeightMeasurementProvider = Provider<Future<void> Function(String)>(
+  (ref) {
+    return (String measurementId) async {
+      final User? user = ref.read(authStateChangesProvider).value;
+      if (user == null) {
+        throw StateError('Cannot delete weight while signed out.');
+      }
+      await ref
+          .read(measurementsRepositoryProvider)
+          .deleteWeightMeasurement(user.uid, measurementId);
+    };
+  },
+);
 
 final recordBloodPressureProvider =
     Provider<

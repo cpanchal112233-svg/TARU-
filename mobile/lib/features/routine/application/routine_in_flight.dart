@@ -36,5 +36,6 @@ Future<void> performRoutineWrite({
   }
 }
 
-final routineInFlightProvider =
-    NotifierProvider<RoutineInFlight, Set<String>>(RoutineInFlight.new);
+final routineInFlightProvider = NotifierProvider<RoutineInFlight, Set<String>>(
+  RoutineInFlight.new,
+);

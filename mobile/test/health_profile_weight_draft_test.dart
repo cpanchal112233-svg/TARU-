@@ -57,7 +57,9 @@ void main() {
               'type': measurementTypeWeight,
               'valueKg': liveAfterWeightHistory,
               'source': measurementSourceManual,
-              'recordedAt': Timestamp.fromDate(DateTime.utc(2026, 8, 9, 15, 45)),
+              'recordedAt': Timestamp.fromDate(
+                DateTime.utc(2026, 8, 9, 15, 45),
+              ),
             });
 
         final HealthProfile liveProfile = HealthProfile(
@@ -99,10 +101,7 @@ void main() {
         );
 
         expect(preserved, intentionalEdit);
-        expect(
-          sameWeightKg(preserved, liveAfterWeightHistory),
-          isFalse,
-        );
+        expect(sameWeightKg(preserved, liveAfterWeightHistory), isFalse);
         expect(
           isIntentionalNewWeight(
             previous: liveAfterWeightHistory,

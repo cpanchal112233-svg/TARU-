@@ -20,6 +20,8 @@ class HealthExportService {
     FirebaseFirestore? firestore,
     FirebaseStorage? storage,
     FirebaseAuth? auth,
+    this._weightLoader,
+    this._bloodPressureLoader,
   }) : _firestore = firestore ?? FirebaseFirestore.instance,
        _storage = storage ?? FirebaseStorage.instance,
        _auth = auth ?? FirebaseAuth.instance;
@@ -27,6 +29,9 @@ class HealthExportService {
   final FirebaseFirestore _firestore;
   final FirebaseStorage _storage;
   final FirebaseAuth _auth;
+  final Future<List<Map<String, dynamic>>> Function(String uid)? _weightLoader;
+  final Future<List<Map<String, dynamic>>> Function(String uid)?
+  _bloodPressureLoader;
 
   /// Returns the generated ZIP file. Caller shares then cleans up.
   Future<File> exportToZip({void Function(String step)? onProgress}) async {
@@ -46,9 +51,7 @@ class HealthExportService {
     }
     await staging.create(recursive: true);
 
-    final File zipFile = File(
-      p.join(tempRoot.path, 'taru-export-$stamp.zip'),
-    );
+    final File zipFile = File(p.join(tempRoot.path, 'taru-export-$stamp.zip'));
     if (zipFile.existsSync()) {
       await zipFile.delete();
     }
@@ -201,6 +204,9 @@ class HealthExportService {
   }
 
   Future<List<Map<String, dynamic>>> _allWeightMeasurements(String uid) async {
+    if (_weightLoader != null) {
+      return _weightLoader(uid);
+    }
     final QuerySnapshot<Map<String, dynamic>> snap = await _firestore
         .collection('users')
         .doc(uid)
@@ -215,6 +221,9 @@ class HealthExportService {
   Future<List<Map<String, dynamic>>> _allBloodPressureMeasurements(
     String uid,
   ) async {
+    if (_bloodPressureLoader != null) {
+      return _bloodPressureLoader(uid);
+    }
     final QuerySnapshot<Map<String, dynamic>> snap = await _firestore
         .collection('users')
         .doc(uid)
@@ -379,11 +388,9 @@ class HealthExportService {
     Directory dir,
     String zipRoot,
   ) async {
-    final List<File> files = dir
-        .listSync(recursive: true)
-        .whereType<File>()
-        .toList()
-      ..sort((File a, File b) => a.path.compareTo(b.path));
+    final List<File> files =
+        dir.listSync(recursive: true).whereType<File>().toList()
+          ..sort((File a, File b) => a.path.compareTo(b.path));
 
     for (final File file in files) {
       final String relative = p.join(
