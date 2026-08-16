@@ -35,7 +35,9 @@ class ProgressScreen extends ConsumerWidget {
         centerTitle: true,
         backgroundColor: Colors.white,
         elevation: 0,
-        automaticallyImplyLeading: false,
+        // Tab root hides leading; pushed routes (e.g. Evidence Brief source)
+        // keep the system back affordance.
+        automaticallyImplyLeading: ModalRoute.of(context)?.canPop ?? false,
       ),
       body: _buildBody(context, ref, view),
     );

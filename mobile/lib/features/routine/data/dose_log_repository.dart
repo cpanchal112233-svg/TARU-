@@ -46,6 +46,24 @@ class DoseLogRepository {
         );
   }
 
+  /// Inclusive `yyyy-MM-dd` document-ID window (no composite index).
+  Stream<List<DailyDoseLog>> watchDateKeyRange(
+    String uid, {
+    required String startKey,
+    required String endKey,
+  }) {
+    return _logs(uid)
+        .where(FieldPath.documentId, isGreaterThanOrEqualTo: startKey)
+        .where(FieldPath.documentId, isLessThanOrEqualTo: endKey)
+        .orderBy(FieldPath.documentId)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => DailyDoseLog.fromMap(doc.id, doc.data()))
+              .toList(),
+        );
+  }
+
   /// Records, changes or clears one dose. Passing null removes the tick, so an
   /// accidental tap can be undone rather than leaving a wrong record behind.
   Future<void> setStatus(
