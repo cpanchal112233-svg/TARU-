@@ -74,8 +74,7 @@ class _WeightHistoryScreenState extends ConsumerState<WeightHistoryScreen> {
                   ? null
                   : () => _startTracking(context, ref, profile.weightKg!),
               starting: _starting,
-              onAdd: () =>
-                  _openAddWeight(context, ref, profile.preferredUnits),
+              onAdd: () => _openAddWeight(context, ref, profile.preferredUnits),
             );
           }
 
@@ -121,7 +120,8 @@ class _WeightHistoryScreenState extends ConsumerState<WeightHistoryScreen> {
                     if (items.length >= 2) ...[
                       const SizedBox(height: 16),
                       RawMeasurementChart(
-                        semanticsLabel: 'Recent weight chart',
+                        semanticsLabel:
+                            'Recent weight chart. Exact values are listed below.',
                         series: [
                           RawChartSeries(
                             color: const Color(0xff1D4ED8),
@@ -190,9 +190,9 @@ class _WeightHistoryScreenState extends ConsumerState<WeightHistoryScreen> {
     try {
       await ref.read(recordWeightProvider)(weightKg);
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Weight tracking started.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Weight tracking started.')));
     } catch (error) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -282,7 +282,11 @@ class _EmptyHistory extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.monitor_weight_outlined, size: 48, color: Colors.grey.shade400),
+          Icon(
+            Icons.monitor_weight_outlined,
+            size: 48,
+            color: Colors.grey.shade400,
+          ),
           const SizedBox(height: 16),
           Text(
             'No weight history yet',

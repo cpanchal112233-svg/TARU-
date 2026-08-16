@@ -106,6 +106,7 @@ class HabitSlotSection extends StatelessWidget {
   }
 }
 
+/// One habit row: primary logging action + separate Skip control.
 class HabitRow extends StatelessWidget {
   const HabitRow({
     super.key,
@@ -126,6 +127,13 @@ class HabitRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isDone = status == HabitStatus.done;
     final bool isSkipped = status == HabitStatus.skipped;
+    final String semanticLabel = busy
+        ? '${habit.title}, Saving'
+        : isDone
+        ? '${habit.title}, recorded as done'
+        : isSkipped
+        ? '${habit.title}, recorded as skipped'
+        : '${habit.title}, not recorded as done';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -138,46 +146,96 @@ class HabitRow extends StatelessWidget {
       ),
       child: Material(
         type: MaterialType.transparency,
-        child: ListTile(
-          contentPadding: const EdgeInsets.fromLTRB(12, 4, 8, 4),
-          onTap: busy ? null : () => onSetStatus(isDone ? null : HabitStatus.done),
-          leading: Icon(
-            isDone
-                ? Icons.check_circle
-                : isSkipped
-                ? Icons.remove_circle_outline
-                : Icons.circle_outlined,
-            color: isDone
-                ? accent
-                : isSkipped
-                ? Colors.grey.shade500
-                : accent.withValues(alpha: 0.55),
-            size: 28,
-          ),
-          title: Text(
-            habit.title,
-            style: TextStyle(
-              fontSize: 15.5,
-              fontWeight: FontWeight.w600,
-              color: isSkipped ? Colors.grey.shade600 : Colors.black87,
-              decoration: isSkipped ? TextDecoration.lineThrough : null,
-            ),
-          ),
-          subtitle: Text(
-            '${habit.pillar.label} · ${habit.detail}',
-            style: TextStyle(fontSize: 12.5, color: Colors.grey.shade700),
-          ),
-          trailing: busy
-              ? const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : TextButton(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(4, 4, 4, 4),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Semantics(
+                  button: true,
+                  checked: isDone,
+                  enabled: !busy,
+                  label: semanticLabel,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: busy
+                        ? null
+                        : () => onSetStatus(isDone ? null : HabitStatus.done),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(8, 8, 4, 8),
+                      child: Row(
+                        children: [
+                          ExcludeSemantics(
+                            child: Icon(
+                              isDone
+                                  ? Icons.check_circle
+                                  : isSkipped
+                                  ? Icons.remove_circle_outline
+                                  : Icons.circle_outlined,
+                              color: isDone
+                                  ? accent
+                                  : isSkipped
+                                  ? Colors.grey.shade500
+                                  : accent.withValues(alpha: 0.55),
+                              size: 28,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: ExcludeSemantics(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    habit.title,
+                                    style: TextStyle(
+                                      fontSize: 15.5,
+                                      fontWeight: FontWeight.w600,
+                                      color: isSkipped
+                                          ? Colors.grey.shade600
+                                          : Colors.black87,
+                                      decoration: isSkipped
+                                          ? TextDecoration.lineThrough
+                                          : null,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    '${habit.pillar.label} · ${habit.detail}',
+                                    style: TextStyle(
+                                      fontSize: 12.5,
+                                      color: Colors.grey.shade700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          if (busy)
+                            const ExcludeSemantics(
+                              child: SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              if (!busy)
+                TextButton(
                   onPressed: () =>
                       onSetStatus(isSkipped ? null : HabitStatus.skipped),
                   child: Text(isSkipped ? 'Skipped' : 'Skip'),
                 ),
+            ],
+          ),
         ),
       ),
     );

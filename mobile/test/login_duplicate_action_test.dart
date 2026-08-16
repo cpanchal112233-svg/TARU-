@@ -31,22 +31,25 @@ void main() {
     final _SlowAuthService fake = _SlowAuthService();
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          authServiceProvider.overrideWith((Ref ref) => fake),
-        ],
+        overrides: [authServiceProvider.overrideWith((Ref ref) => fake)],
         child: const MaterialApp(home: LoginScreen()),
       ),
     );
 
-    await tester.enterText(find.byType(TextFormField).at(0), 'user@example.com');
+    await tester.enterText(
+      find.byType(TextFormField).at(0),
+      'user@example.com',
+    );
     await tester.enterText(find.byType(TextFormField).at(1), 'password');
     await tester.tap(find.widgetWithText(ElevatedButton, AppStrings.login));
     await tester.pump();
 
     expect(fake.loginCalls, 1);
-    final AuthButton button = tester.widget<AuthButton>(find.byType(AuthButton));
+    final AuthButton button = tester.widget<AuthButton>(
+      find.byType(AuthButton),
+    );
     expect(button.onPressed, isNull);
-    expect(find.text('Logging in...'), findsOneWidget);
+    expect(find.text('Logging in'), findsOneWidget);
 
     await tester.tap(find.byType(AuthButton));
     await tester.pump();

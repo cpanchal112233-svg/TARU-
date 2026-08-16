@@ -528,9 +528,9 @@ class _HealthProfileFormState extends ConsumerState<_HealthProfileForm> {
           Text(
             ref.watch(hasWeightHistoryProvider)
                 ? 'Saving a new weight also adds it to Weight history. '
-                    'Clearing weight here is disabled while history exists.'
+                      'Clearing weight here is disabled while history exists.'
                 : 'Saving a new weight starts Weight history. Unchanged '
-                    'legacy weights stay as a snapshot until you track them.',
+                      'legacy weights stay as a snapshot until you track them.',
             style: TextStyle(
               fontSize: 12.5,
               height: 1.35,
@@ -553,10 +553,7 @@ class _HealthProfileFormState extends ConsumerState<_HealthProfileForm> {
 
           const SizedBox(height: 12),
 
-          BmiCard(
-            bmi: draft.bmi,
-            needsCaveat: draft.bmiNeedsCaveat,
-          ),
+          BmiCard(bmi: draft.bmi, needsCaveat: draft.bmiNeedsCaveat),
 
           const SizedBox(height: 28),
 
@@ -593,10 +590,13 @@ class _HealthProfileFormState extends ConsumerState<_HealthProfileForm> {
           const SizedBox(height: 32),
 
           SizedBox(
-            height: 54,
-            child: FilledButton(
-              onPressed: _isSaving ? null : _save,
-              child: Text(_isSaving ? 'Saving...' : 'Save health profile'),
+            width: double.infinity,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 54),
+              child: FilledButton(
+                onPressed: _isSaving ? null : _save,
+                child: Text(_isSaving ? 'Saving...' : 'Save health profile'),
+              ),
             ),
           ),
         ],

@@ -19,15 +19,10 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-
   final TextEditingController emailController = TextEditingController();
-
   final TextEditingController passwordController = TextEditingController();
-
   bool hidePassword = true;
-
   bool isLoading = false;
-
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   Future<void> loginUser() async {
@@ -40,10 +35,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     try {
-      await ref.read(authServiceProvider).login(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
-      );
+      await ref
+          .read(authServiceProvider)
+          .login(
+            email: emailController.text.trim(),
+            password: passwordController.text.trim(),
+          );
 
       // No navigation here: AuthGate listens to the auth state and swaps this
       // screen for the app shell as soon as the sign-in lands.
@@ -56,9 +53,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     } catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(userFacingErrorMessage(e))),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(userFacingErrorMessage(e))));
     } finally {
       if (mounted) {
         setState(() {
@@ -72,7 +69,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void dispose() {
     emailController.dispose();
     passwordController.dispose();
-
     super.dispose();
   }
 
@@ -80,85 +76,75 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xffF8FAFC),
-
       body: SafeArea(
         child: Form(
           key: _formKey,
-
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
-
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-
               children: [
                 const SizedBox(height: 40),
-
                 const AuthHeader(
                   title: 'Welcome Back',
                   subtitle: 'Sign in to your TARU health organizer.',
                 ),
-
                 const SizedBox(height: 40),
-
                 AuthTextField(
+                  labelText: 'Email address',
                   hintText: AppStrings.email,
                   icon: Icons.email_outlined,
                   controller: emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  textInputAction: TextInputAction.next,
+                  autofillHints: const [AutofillHints.email],
+                  validator: (String? value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter your email';
+                    }
+                    if (!value.contains('@')) {
+                      return 'Enter a valid email';
+                    }
+                    return null;
+                  },
                 ),
-
                 const SizedBox(height: 20),
-
-                TextFormField(
+                AuthTextField(
+                  labelText: 'Password',
+                  hintText: AppStrings.password,
+                  icon: Icons.lock_outline,
                   controller: passwordController,
-
                   obscureText: hidePassword,
-
-                  validator: (value) {
+                  textInputAction: TextInputAction.done,
+                  autofillHints: const [AutofillHints.password],
+                  onFieldSubmitted: (_) {
+                    if (!isLoading) {
+                      loginUser();
+                    }
+                  },
+                  suffixIcon: IconButton(
+                    tooltip: hidePassword ? 'Show password' : 'Hide password',
+                    icon: Icon(
+                      hidePassword ? Icons.visibility_off : Icons.visibility,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        hidePassword = !hidePassword;
+                      });
+                    },
+                  ),
+                  validator: (String? value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your password';
                     }
-
                     if (value.length < 6) {
                       return 'Password must be at least 6 characters';
                     }
-
                     return null;
                   },
-
-                  decoration: InputDecoration(
-                    hintText: AppStrings.password,
-
-                    prefixIcon: const Icon(
-                      Icons.lock_outline,
-                      color: Colors.blue,
-                    ),
-
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        hidePassword ? Icons.visibility_off : Icons.visibility,
-                      ),
-
-                      onPressed: () {
-                        setState(() {
-                          hidePassword = !hidePassword;
-                        });
-                      },
-                    ),
-
-                    filled: true,
-
-                    fillColor: Colors.white,
-
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
                 ),
-
                 Align(
                   alignment: Alignment.centerRight,
-
                   child: TextButton(
                     onPressed: () {
                       Navigator.push(
@@ -170,31 +156,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                       );
                     },
-
                     child: const Text('Forgot Password?'),
                   ),
                 ),
-
                 const SizedBox(height: 10),
-
                 AuthButton(
-                  text: isLoading ? 'Logging in...' : AppStrings.login,
-
+                  text: isLoading ? 'Logging in' : AppStrings.login,
+                  busy: isLoading,
                   onPressed: isLoading ? null : loginUser,
                 ),
-
                 const SizedBox(height: 20),
-
                 Center(
                   child: TextButton(
                     onPressed: () {
                       Navigator.push(
                         context,
-
                         MaterialPageRoute(builder: (_) => const SignupScreen()),
                       );
                     },
-
                     child: const Text("Don't have an account? Sign Up"),
                   ),
                 ),

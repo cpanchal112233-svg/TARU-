@@ -404,26 +404,37 @@ class _DayStrip extends StatelessWidget {
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 2),
-                  child: Column(
-                    children: [
-                      Container(
-                        height: 10,
-                        decoration: BoxDecoration(
-                          color: day.hasRecord
-                              ? const Color(0xff2563EB).withValues(alpha: 0.75)
-                              : Colors.grey.shade200,
-                          borderRadius: BorderRadius.circular(4),
+                  child: Semantics(
+                    label: day.hasRecord
+                        ? '${_weekdayName(day.dateKey)}, activity recorded'
+                        : '${_weekdayName(day.dateKey)}, no activity recorded',
+                    child: Column(
+                      children: [
+                        ExcludeSemantics(
+                          child: Container(
+                            height: 10,
+                            decoration: BoxDecoration(
+                              color: day.hasRecord
+                                  ? const Color(
+                                      0xff2563EB,
+                                    ).withValues(alpha: 0.75)
+                                  : Colors.grey.shade200,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _weekdayLetter(day.dateKey),
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: Colors.grey.shade500,
+                        const SizedBox(height: 4),
+                        ExcludeSemantics(
+                          child: Text(
+                            _weekdayLetter(day.dateKey),
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Colors.grey.shade500,
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -441,16 +452,23 @@ class _DayStrip extends StatelessWidget {
   String _weekdayLetter(String dateKey) {
     final DateTime? date = DateTime.tryParse(dateKey);
     if (date == null) return '·';
-    const List<String> letters = <String>[
-      'M',
-      'T',
-      'W',
-      'T',
-      'F',
-      'S',
-      'S',
-    ];
+    const List<String> letters = <String>['M', 'T', 'W', 'T', 'F', 'S', 'S'];
     return letters[date.weekday - 1];
+  }
+
+  String _weekdayName(String dateKey) {
+    final DateTime? date = DateTime.tryParse(dateKey);
+    if (date == null) return 'Day';
+    const List<String> names = <String>[
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday',
+    ];
+    return names[date.weekday - 1];
   }
 }
 

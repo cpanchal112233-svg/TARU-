@@ -163,11 +163,19 @@ class _ReportsListBody extends StatelessWidget {
           decoration: InputDecoration(
             hintText: 'Search title or notes',
             prefixIcon: const Icon(Icons.search),
+            suffixIcon: searchController.text.isEmpty
+                ? null
+                : IconButton(
+                    icon: const Icon(Icons.clear),
+                    tooltip: 'Clear search',
+                    onPressed: () {
+                      searchController.clear();
+                      onSearchChanged('');
+                    },
+                  ),
             filled: true,
             fillColor: Colors.white,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
             isDense: true,
           ),
         ),

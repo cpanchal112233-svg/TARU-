@@ -272,36 +272,40 @@ class _EmergencyActions extends StatelessWidget {
         if (phone != null && phone.isNotEmpty)
           SizedBox(
             width: double.infinity,
-            height: 52,
-            child: FilledButton.icon(
-              style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xffB3261E),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 52),
+              child: FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xffB3261E),
+                ),
+                onPressed: () => _call(context, phone),
+                icon: const Icon(Icons.call),
+                label: Text('Call $name'),
               ),
-              onPressed: () => _call(context, phone),
-              icon: const Icon(Icons.call),
-              label: Text('Call $name'),
             ),
           ),
         if (phone != null && phone.isNotEmpty) const SizedBox(height: 10),
         SizedBox(
           width: double.infinity,
-          height: 52,
-          child: OutlinedButton.icon(
-            style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xffB3261E),
-              side: const BorderSide(color: Color(0xffB3261E)),
-              backgroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 52),
+            child: OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xffB3261E),
+                side: const BorderSide(color: Color(0xffB3261E)),
+                backgroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
               ),
-            ),
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => const EmergencyCardScreen(),
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const EmergencyCardScreen(),
+                ),
               ),
+              icon: const Icon(Icons.emergency_outlined),
+              label: const Text('Open emergency card'),
             ),
-            icon: const Icon(Icons.emergency_outlined),
-            label: const Text('Open emergency card'),
           ),
         ),
       ],

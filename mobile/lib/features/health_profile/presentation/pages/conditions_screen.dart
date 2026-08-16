@@ -254,6 +254,7 @@ class _ConditionsEditorState extends ConsumerState<_ConditionsEditor> {
                         ? null
                         : IconButton(
                             icon: const Icon(Icons.clear),
+                            tooltip: 'Clear search',
                             onPressed: () {
                               _searchController.clear();
                               setState(() => _query = '');

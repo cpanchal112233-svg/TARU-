@@ -114,6 +114,16 @@ class _SymptomCheckScreenState extends ConsumerState<SymptomCheckScreen> {
             decoration: InputDecoration(
               hintText: 'Search — "chest", "loose motion", "giddy"',
               prefixIcon: const Icon(Icons.search),
+              suffixIcon: _query.isEmpty
+                  ? null
+                  : IconButton(
+                      icon: const Icon(Icons.clear),
+                      tooltip: 'Clear search',
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() => _query = '');
+                      },
+                    ),
               filled: true,
               fillColor: Colors.white,
               border: OutlineInputBorder(
@@ -306,12 +316,16 @@ class _ContinueBar extends StatelessWidget {
         border: Border(top: BorderSide(color: Colors.grey.shade200)),
       ),
       child: SizedBox(
-        height: 52,
         width: double.infinity,
-        child: FilledButton(
-          onPressed: onContinue,
-          child: Text(
-            count == 0 ? 'Choose what you are feeling' : 'Continue with $count',
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 52),
+          child: FilledButton(
+            onPressed: onContinue,
+            child: Text(
+              count == 0
+                  ? 'Choose what you are feeling'
+                  : 'Continue with $count',
+            ),
           ),
         ),
       ),
