@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../emergency/presentation/pages/emergency_card_screen.dart';
+import '../../../evidence_brief/presentation/pages/evidence_brief_screen.dart';
 import '../../../health_profile/presentation/widgets/health_profile_completeness_card.dart';
 import '../../../interactions/presentation/pages/medicine_safety_screen.dart';
 import '../../../interactions/presentation/widgets/medicine_safety_banner.dart';
@@ -174,6 +175,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                 _buildEmergencyCardButton(),
 
+                const SizedBox(height: 12),
+
+                _buildEvidenceBriefButton(),
+
                 const SizedBox(height: 25),
 
                 const Text(
@@ -258,6 +263,82 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           label: const Text(
             'Check a symptom',
             style: TextStyle(fontWeight: FontWeight.w600),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEvidenceBriefButton() {
+    return Semantics(
+      button: true,
+      label:
+          'Evidence Brief. Create a factual summary from information '
+          'you have recorded. Create brief',
+      child: Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(18),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => const EvidenceBriefScreen(),
+            ),
+          ),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: const Color(0xffBFDBFE)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.folder_shared_outlined,
+                      color: const Color(0xff1D4ED8),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Evidence Brief',
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.grey.shade900,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Create a factual summary from information you\'ve recorded.',
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    height: 1.35,
+                    color: Colors.grey.shade700,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 44),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Create brief',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xff1D4ED8),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

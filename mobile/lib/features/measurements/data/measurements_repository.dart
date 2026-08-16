@@ -46,6 +46,32 @@ class MeasurementsRepository {
     ).limit(historyLimit).snapshots().map(_mapWeightDocs);
   }
 
+  /// Full weight history without the UI display cap ([historyLimit]).
+  ///
+  /// Prefer [watchWeightHistoryInRange] for Evidence Brief period windows.
+  Stream<List<WeightMeasurement>> watchWeightHistoryUncapped(String uid) {
+    return _weightQuery(uid).snapshots().map(_mapWeightDocs);
+  }
+
+  /// Weight readings with `recordedAt` in `[startInclusive, endExclusive)`.
+  ///
+  /// Uses the existing composite index:
+  /// `type ASC, recordedAt DESC, __name__ DESC`.
+  Stream<List<WeightMeasurement>> watchWeightHistoryInRange(
+    String uid, {
+    required DateTime startInclusive,
+    required DateTime endExclusive,
+  }) {
+    return _weightQuery(uid)
+        .where(
+          'recordedAt',
+          isGreaterThanOrEqualTo: Timestamp.fromDate(startInclusive),
+        )
+        .where('recordedAt', isLessThan: Timestamp.fromDate(endExclusive))
+        .snapshots()
+        .map(_mapWeightDocs);
+  }
+
   Stream<WeightMeasurement?> watchLatestWeight(String uid) {
     return _weightQuery(uid).limit(1).snapshots().map((snapshot) {
       final List<WeightMeasurement> items = _mapWeightDocs(snapshot);
@@ -57,6 +83,29 @@ class MeasurementsRepository {
     return _bloodPressureQuery(
       uid,
     ).limit(historyLimit).snapshots().map(_mapBloodPressureDocs);
+  }
+
+  /// Full blood-pressure history without the UI display cap ([historyLimit]).
+  Stream<List<BloodPressureMeasurement>> watchBloodPressureHistoryUncapped(
+    String uid,
+  ) {
+    return _bloodPressureQuery(uid).snapshots().map(_mapBloodPressureDocs);
+  }
+
+  /// BP readings with `recordedAt` in `[startInclusive, endExclusive)`.
+  Stream<List<BloodPressureMeasurement>> watchBloodPressureHistoryInRange(
+    String uid, {
+    required DateTime startInclusive,
+    required DateTime endExclusive,
+  }) {
+    return _bloodPressureQuery(uid)
+        .where(
+          'recordedAt',
+          isGreaterThanOrEqualTo: Timestamp.fromDate(startInclusive),
+        )
+        .where('recordedAt', isLessThan: Timestamp.fromDate(endExclusive))
+        .snapshots()
+        .map(_mapBloodPressureDocs);
   }
 
   Stream<BloodPressureMeasurement?> watchLatestBloodPressure(String uid) {

@@ -43,6 +43,24 @@ class HabitLogRepository {
         );
   }
 
+  /// Inclusive `yyyy-MM-dd` document-ID window (no composite index).
+  Stream<List<DailyHabitLog>> watchDateKeyRange(
+    String uid, {
+    required String startKey,
+    required String endKey,
+  }) {
+    return _logs(uid)
+        .where(FieldPath.documentId, isGreaterThanOrEqualTo: startKey)
+        .where(FieldPath.documentId, isLessThanOrEqualTo: endKey)
+        .orderBy(FieldPath.documentId)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => DailyHabitLog.fromMap(doc.id, doc.data()))
+              .toList(),
+        );
+  }
+
   Future<void> setStatus(
     String uid,
     String dateKey,
