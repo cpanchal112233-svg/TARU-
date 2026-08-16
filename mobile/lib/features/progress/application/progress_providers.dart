@@ -144,9 +144,7 @@ final progressViewProvider = Provider<ProgressView>((ref) {
   final AsyncValue<HabitPreferences> prefsAsync = ref.watch(
     habitPreferencesProvider,
   );
-  final AsyncValue<MedicationRecord> medsAsync = ref.watch(
-    medicationsProvider,
-  );
+  final AsyncValue<MedicationRecord> medsAsync = ref.watch(medicationsProvider);
 
   if (_stillBooting(doseLogsAsync) ||
       _stillBooting(habitLogsAsync) ||
@@ -172,8 +170,9 @@ final progressViewProvider = Provider<ProgressView>((ref) {
   final AdherenceSummary? medicine = ref.watch(adherenceProvider);
   final HabitAdherenceSummary? lifestyle = ref.watch(habitAdherenceProvider);
 
-  final AdherenceSummary? medicineForView =
-      medicine != null && medicine.hasData ? medicine : null;
+  final AdherenceSummary? medicineForView = medicine != null && medicine.hasData
+      ? medicine
+      : null;
   final HabitAdherenceSummary? lifestyleForView =
       lifestyle != null && lifestyle.hasData ? lifestyle : null;
 

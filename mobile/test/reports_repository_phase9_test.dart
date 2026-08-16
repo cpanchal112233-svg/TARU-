@@ -77,13 +77,14 @@ void main() {
       ),
     );
 
-    final Map<String, dynamic>? data = (await firestore
-            .collection('users')
-            .doc('u1')
-            .collection('reports')
-            .doc('r1')
-            .get())
-        .data();
+    final Map<String, dynamic>? data =
+        (await firestore
+                .collection('users')
+                .doc('u1')
+                .collection('reports')
+                .doc('r1')
+                .get())
+            .data();
 
     expect(data?['title'], 'CBC updated');
     expect(data?['category'], 'other');
@@ -109,15 +110,16 @@ void main() {
     expect(utf8.decode(objects.objects[path]!), 'Hemoglobin 13.8');
     expect(objects.contentTypes[path], 'text/plain');
 
-    final Map<String, dynamic>? meta = (await firestore
-            .collection('users')
-            .doc('u1')
-            .collection('reports')
-            .doc('r1')
-            .collection('extraction')
-            .doc('current')
-            .get())
-        .data();
+    final Map<String, dynamic>? meta =
+        (await firestore
+                .collection('users')
+                .doc('u1')
+                .collection('reports')
+                .doc('r1')
+                .collection('extraction')
+                .doc('current')
+                .get())
+            .data();
     expect(meta?['method'], 'pdf_text');
     expect(meta?['reviewedAt'], isNotNull);
   });
@@ -179,8 +181,9 @@ void main() {
 
   test('replace metadata failure restores previous sidecar', () async {
     final MemoryReportObjectStore store = MemoryReportObjectStore()
-      ..objects[reviewedExtractionStoragePath('u1', 'r1')] =
-          Uint8List.fromList(utf8.encode('old text'))
+      ..objects[reviewedExtractionStoragePath('u1', 'r1')] = Uint8List.fromList(
+        utf8.encode('old text'),
+      )
       ..contentTypes[reviewedExtractionStoragePath('u1', 'r1')] = 'text/plain';
 
     final ReportsRepository failing = _FailingMetaRepository(

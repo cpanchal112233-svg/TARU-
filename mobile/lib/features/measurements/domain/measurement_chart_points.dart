@@ -6,10 +6,7 @@ import 'weight_measurement.dart';
 /// One raw chart observation. No interpolation or synthetic dates.
 @immutable
 class MeasurementChartPoint {
-  const MeasurementChartPoint({
-    required this.recordedAt,
-    required this.value,
-  });
+  const MeasurementChartPoint({required this.recordedAt, required this.value});
 
   final DateTime recordedAt;
   final double value;
@@ -18,9 +15,7 @@ class MeasurementChartPoint {
 /// Builds chronological raw weight points (oldest → newest) for charting.
 ///
 /// [weights] may arrive newest-first from Firestore; output is ascending time.
-List<MeasurementChartPoint> weightChartPoints(
-  List<WeightMeasurement> weights,
-) {
+List<MeasurementChartPoint> weightChartPoints(List<WeightMeasurement> weights) {
   final List<WeightMeasurement> ordered = List<WeightMeasurement>.of(weights)
     ..sort((WeightMeasurement a, WeightMeasurement b) {
       final int time = a.recordedAt.compareTo(b.recordedAt);
@@ -30,10 +25,8 @@ List<MeasurementChartPoint> weightChartPoints(
 
   return List<MeasurementChartPoint>.unmodifiable(
     ordered.map(
-      (WeightMeasurement m) => MeasurementChartPoint(
-        recordedAt: m.recordedAt,
-        value: m.valueKg,
-      ),
+      (WeightMeasurement m) =>
+          MeasurementChartPoint(recordedAt: m.recordedAt, value: m.valueKg),
     ),
   );
 }

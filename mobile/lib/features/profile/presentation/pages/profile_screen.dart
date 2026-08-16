@@ -39,9 +39,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(userFacingErrorMessage(e))),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(userFacingErrorMessage(e))));
     }
   }
 
@@ -136,9 +136,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } on FirebaseException catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(userFacingErrorMessage(e))),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(userFacingErrorMessage(e))));
     } finally {
       if (mounted) {
         setState(() {
@@ -184,9 +184,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(userFacingErrorMessage(e))),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(userFacingErrorMessage(e))));
     } finally {
       if (mounted) {
         setState(() {
@@ -278,9 +278,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(userFacingErrorMessage(e))),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(userFacingErrorMessage(e))));
     } finally {
       if (mounted) {
         setState(() {

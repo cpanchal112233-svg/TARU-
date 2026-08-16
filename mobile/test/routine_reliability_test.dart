@@ -12,7 +12,9 @@ void main() {
   test('medicine write success records once', () async {
     final ProviderContainer container = ProviderContainer();
     addTearDown(container.dispose);
-    final RoutineInFlight guard = container.read(routineInFlightProvider.notifier);
+    final RoutineInFlight guard = container.read(
+      routineInFlightProvider.notifier,
+    );
     int writes = 0;
 
     await performRoutineWrite(
@@ -31,7 +33,9 @@ void main() {
   test('medicine write failure shows safe feedback and allows retry', () async {
     final ProviderContainer container = ProviderContainer();
     addTearDown(container.dispose);
-    final RoutineInFlight guard = container.read(routineInFlightProvider.notifier);
+    final RoutineInFlight guard = container.read(
+      routineInFlightProvider.notifier,
+    );
     Object? shown;
     int writes = 0;
 
@@ -66,7 +70,9 @@ void main() {
   test('duplicate same-dose action is blocked while in flight', () async {
     final ProviderContainer container = ProviderContainer();
     addTearDown(container.dispose);
-    final RoutineInFlight guard = container.read(routineInFlightProvider.notifier);
+    final RoutineInFlight guard = container.read(
+      routineInFlightProvider.notifier,
+    );
     final Completer<void> gate = Completer<void>();
     int writes = 0;
 
@@ -101,7 +107,9 @@ void main() {
   test('lifestyle habit write uses per-habit granularity', () async {
     final ProviderContainer container = ProviderContainer();
     addTearDown(container.dispose);
-    final RoutineInFlight guard = container.read(routineInFlightProvider.notifier);
+    final RoutineInFlight guard = container.read(
+      routineInFlightProvider.notifier,
+    );
     final Completer<void> gate = Completer<void>();
     int habitA = 0;
     int habitB = 0;
@@ -146,11 +154,14 @@ void main() {
     );
     expect(medicine.percent, 50);
     expect(lifestyle.percent, 50);
-    expect(TodayRoutineProgress(
-      dosesTaken: 2,
-      dosesTotal: 3,
-      habitsDone: 4,
-      habitsTotal: 6,
-    ).summaryLine, 'Medicines 2/3 · Habits 4/6');
+    expect(
+      TodayRoutineProgress(
+        dosesTaken: 2,
+        dosesTotal: 3,
+        habitsDone: 4,
+        habitsTotal: 6,
+      ).summaryLine,
+      'Medicines 2/3 · Habits 4/6',
+    );
   });
 }

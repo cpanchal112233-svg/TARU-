@@ -138,8 +138,7 @@ final todayRoutineProgressProvider = Provider<TodayRoutineProgress>((ref) {
 
   final int dosesTaken = schedule.doses
       .where(
-        (ScheduledDose dose) =>
-            doseLog?.statusOf(dose.key) == DoseStatus.taken,
+        (ScheduledDose dose) => doseLog?.statusOf(dose.key) == DoseStatus.taken,
       )
       .length;
 

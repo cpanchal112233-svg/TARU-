@@ -22,7 +22,9 @@ class HabitPreferencesRepository {
       .doc('habitPreferences');
 
   Stream<HabitPreferences> watch(String uid) {
-    return _doc(uid).snapshots().map((DocumentSnapshot<Map<String, dynamic>> snap) {
+    return _doc(uid).snapshots().map((
+      DocumentSnapshot<Map<String, dynamic>> snap,
+    ) {
       if (!snap.exists) return HabitPreferences.allEnabled;
       return HabitPreferences.fromMap(snap.data());
     });

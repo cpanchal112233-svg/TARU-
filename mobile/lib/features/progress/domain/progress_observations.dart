@@ -37,8 +37,7 @@ List<ProgressObservation> buildProgressObservations({
     out.add(
       ProgressObservation(
         id: 'habit_log_days',
-        text:
-            'You logged habits on $habitLogDaysInWindow of the last 7 days.',
+        text: 'You logged habits on $habitLogDaysInWindow of the last 7 days.',
       ),
     );
   }

@@ -128,13 +128,15 @@ final reportDownloadUrlProvider = FutureProvider.family<String, MedicalReport>((
   return ref.watch(reportsRepositoryProvider).downloadUrl(report);
 });
 
-final loadReviewedTextProvider =
-    FutureProvider.family<String, String>((ref, reportId) async {
-      final User? user = ref.watch(authStateChangesProvider).value;
-      if (user == null) {
-        throw StateError('Cannot load reviewed text while signed out.');
-      }
-      return ref
-          .watch(reportsRepositoryProvider)
-          .loadReviewedText(user.uid, reportId);
-    });
+final loadReviewedTextProvider = FutureProvider.family<String, String>((
+  ref,
+  reportId,
+) async {
+  final User? user = ref.watch(authStateChangesProvider).value;
+  if (user == null) {
+    throw StateError('Cannot load reviewed text while signed out.');
+  }
+  return ref
+      .watch(reportsRepositoryProvider)
+      .loadReviewedText(user.uid, reportId);
+});

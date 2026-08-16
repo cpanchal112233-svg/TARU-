@@ -22,36 +22,42 @@ void main() {
   group('habit preferences defaults and toggles', () {
     test('new / missing prefs document enables all eight', () {
       expect(HabitPreferences.fromMap(null).activeHabits, hasLength(8));
-      expect(HabitPreferences.fromMap(<String, dynamic>{}).activeHabits, hasLength(8));
+      expect(
+        HabitPreferences.fromMap(<String, dynamic>{}).activeHabits,
+        hasLength(8),
+      );
       expect(HabitPreferences.allEnabled.activeHabits, hasLength(8));
     });
 
-    test('disabling one habit shrinks active list and progress denominator', () {
-      final HabitPreferences prefs =
-          HabitPreferences.allEnabled.copyWithEnabled('diet_water', false);
+    test(
+      'disabling one habit shrinks active list and progress denominator',
+      () {
+        final HabitPreferences prefs = HabitPreferences.allEnabled
+            .copyWithEnabled('diet_water', false);
 
-      expect(prefs.activeHabits, hasLength(7));
-      expect(prefs.activeHabits.any((h) => h.id == 'diet_water'), isFalse);
+        expect(prefs.activeHabits, hasLength(7));
+        expect(prefs.activeHabits.any((h) => h.id == 'diet_water'), isFalse);
 
-      final DailyHabitLog log = DailyHabitLog(
-        dateKey: '2026-08-09',
-        statuses: <String, HabitStatus>{
-          'diet_water': HabitStatus.done,
-          'diet_plants': HabitStatus.done,
-        },
-      );
+        final DailyHabitLog log = DailyHabitLog(
+          dateKey: '2026-08-09',
+          statuses: <String, HabitStatus>{
+            'diet_water': HabitStatus.done,
+            'diet_plants': HabitStatus.done,
+          },
+        );
 
-      // Historical done on a disabled habit must not count toward today.
-      expect(log.doneCountFor(prefs.activeHabits), 1);
+        // Historical done on a disabled habit must not count toward today.
+        expect(log.doneCountFor(prefs.activeHabits), 1);
 
-      final TodayRoutineProgress progress = TodayRoutineProgress(
-        dosesTaken: 0,
-        dosesTotal: 0,
-        habitsDone: log.doneCountFor(prefs.activeHabits),
-        habitsTotal: prefs.activeHabits.length,
-      );
-      expect(progress.summaryLine, 'Medicines 0/0 · Habits 1/7');
-    });
+        final TodayRoutineProgress progress = TodayRoutineProgress(
+          dosesTaken: 0,
+          dosesTotal: 0,
+          habitsDone: log.doneCountFor(prefs.activeHabits),
+          habitsTotal: prefs.activeHabits.length,
+        );
+        expect(progress.summaryLine, 'Medicines 0/0 · Habits 1/7');
+      },
+    );
 
     test('disabling multiple habits updates denominator', () {
       HabitPreferences prefs = HabitPreferences.allEnabled;
@@ -76,9 +82,7 @@ void main() {
         logs: <DailyHabitLog>[
           DailyHabitLog(
             dateKey: DailyHabitLog.keyFor(DateTime.now()),
-            statuses: <String, HabitStatus>{
-              'diet_water': HabitStatus.done,
-            },
+            statuses: <String, HabitStatus>{'diet_water': HabitStatus.done},
           ),
         ],
         activeHabits: prefs.activeHabits,
@@ -101,19 +105,19 @@ void main() {
     });
 
     test('re-enabling a habit restores it; historical done still readable', () {
-      final HabitPreferences disabled =
-          HabitPreferences.allEnabled.copyWithEnabled('sleep_hours', false);
-      final HabitPreferences reenabled =
-          disabled.copyWithEnabled('sleep_hours', true);
+      final HabitPreferences disabled = HabitPreferences.allEnabled
+          .copyWithEnabled('sleep_hours', false);
+      final HabitPreferences reenabled = disabled.copyWithEnabled(
+        'sleep_hours',
+        true,
+      );
 
       expect(reenabled.isEnabled('sleep_hours'), isTrue);
       expect(reenabled.activeHabits, hasLength(8));
 
       final DailyHabitLog historical = DailyHabitLog(
         dateKey: '2026-08-01',
-        statuses: <String, HabitStatus>{
-          'sleep_hours': HabitStatus.done,
-        },
+        statuses: <String, HabitStatus>{'sleep_hours': HabitStatus.done},
       );
 
       // Prefs mutation never clears the log map.
@@ -163,39 +167,45 @@ void main() {
   });
 
   group('weekly pillar summary', () {
-    test('separates diet / exercise / sleep / mindfulness for active habits', () {
-      final HabitAdherenceSummary summary = HabitAdherenceSummary.fromLogs(
-        logs: <DailyHabitLog>[
-          DailyHabitLog(
-            dateKey: DailyHabitLog.keyFor(DateTime.now()),
-            statuses: <String, HabitStatus>{
-              'diet_water': HabitStatus.done,
-              'diet_plants': HabitStatus.done,
-              'exercise_move': HabitStatus.done,
-              'sleep_wind_down': HabitStatus.skipped,
-              'mind_quiet': HabitStatus.done,
-            },
-          ),
-        ],
-        activeHabits: defaultHabits,
-        windowDays: 7,
-      );
+    test(
+      'separates diet / exercise / sleep / mindfulness for active habits',
+      () {
+        final HabitAdherenceSummary summary = HabitAdherenceSummary.fromLogs(
+          logs: <DailyHabitLog>[
+            DailyHabitLog(
+              dateKey: DailyHabitLog.keyFor(DateTime.now()),
+              statuses: <String, HabitStatus>{
+                'diet_water': HabitStatus.done,
+                'diet_plants': HabitStatus.done,
+                'exercise_move': HabitStatus.done,
+                'sleep_wind_down': HabitStatus.skipped,
+                'mind_quiet': HabitStatus.done,
+              },
+            ),
+          ],
+          activeHabits: defaultHabits,
+          windowDays: 7,
+        );
 
-      expect(summary.byPillar.map((s) => s.pillar), containsAll(<HabitPillar>[
-        HabitPillar.diet,
-        HabitPillar.exercise,
-        HabitPillar.sleep,
-        HabitPillar.mindfulness,
-      ]));
+        expect(
+          summary.byPillar.map((s) => s.pillar),
+          containsAll(<HabitPillar>[
+            HabitPillar.diet,
+            HabitPillar.exercise,
+            HabitPillar.sleep,
+            HabitPillar.mindfulness,
+          ]),
+        );
 
-      HabitPillarWeekStat pillar(HabitPillar p) =>
-          summary.byPillar.firstWhere((s) => s.pillar == p);
+        HabitPillarWeekStat pillar(HabitPillar p) =>
+            summary.byPillar.firstWhere((s) => s.pillar == p);
 
-      expect(pillar(HabitPillar.diet).done, 2);
-      expect(pillar(HabitPillar.exercise).done, 1);
-      expect(pillar(HabitPillar.sleep).done, 0);
-      expect(pillar(HabitPillar.mindfulness).done, 1);
-    });
+        expect(pillar(HabitPillar.diet).done, 2);
+        expect(pillar(HabitPillar.exercise).done, 1);
+        expect(pillar(HabitPillar.sleep).done, 0);
+        expect(pillar(HabitPillar.mindfulness).done, 1);
+      },
+    );
 
     test('disabled pillars drop out of the week breakdown', () {
       HabitPreferences prefs = HabitPreferences.allEnabled;
@@ -221,10 +231,7 @@ void main() {
         summary.byPillar.any((s) => s.pillar == HabitPillar.sleep),
         isFalse,
       );
-      expect(
-        summary.byPillar.any((s) => s.pillar == HabitPillar.diet),
-        isTrue,
-      );
+      expect(summary.byPillar.any((s) => s.pillar == HabitPillar.diet), isTrue);
     });
   });
 
@@ -246,10 +253,11 @@ void main() {
       expect(morning.intersection(day), isEmpty);
       expect(day.intersection(evening), isEmpty);
       expect(morning.intersection(evening), isEmpty);
-      expect(
-        {...morning, ...day, ...evening},
-        defaultHabits.map((h) => h.id).toSet(),
-      );
+      expect({
+        ...morning,
+        ...day,
+        ...evening,
+      }, defaultHabits.map((h) => h.id).toSet());
     });
   });
 
@@ -260,7 +268,10 @@ void main() {
         for (int i = 0; i < 4; i++) medicineBase + i,
       };
 
-      expect(medicineIds.contains(ReminderService.lifestyleReminderId), isFalse);
+      expect(
+        medicineIds.contains(ReminderService.lifestyleReminderId),
+        isFalse,
+      );
       expect(ReminderService.lifestyleReminderHour, 19);
     });
   });

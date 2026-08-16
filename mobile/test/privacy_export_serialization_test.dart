@@ -22,15 +22,12 @@ void main() {
     test('weight export row preserves Phase 10 shape', () {
       final DateTime at = DateTime.utc(2026, 8, 1, 10, 30);
       final Map<String, dynamic> row =
-          HealthExportService.serializeWeightExportRow(
-        'w1',
-        <String, dynamic>{
-          'type': 'weight',
-          'valueKg': 72.4,
-          'source': 'manual',
-          'recordedAt': Timestamp.fromDate(at),
-        },
-      );
+          HealthExportService.serializeWeightExportRow('w1', <String, dynamic>{
+            'type': 'weight',
+            'valueKg': 72.4,
+            'source': 'manual',
+            'recordedAt': Timestamp.fromDate(at),
+          });
 
       expect(row.keys.toSet(), <String>{
         'id',
@@ -51,16 +48,16 @@ void main() {
       final DateTime at = DateTime.utc(2026, 8, 2, 8, 0);
       final Map<String, dynamic> row =
           HealthExportService.serializeBloodPressureExportRow(
-        'bp1',
-        <String, dynamic>{
-          'type': 'blood_pressure',
-          'systolicMmHg': 120,
-          'diastolicMmHg': 80,
-          'source': 'manual',
-          'recordedAt': Timestamp.fromDate(at),
-          'pulseBpm': 72, // must not be copied even if present
-        },
-      );
+            'bp1',
+            <String, dynamic>{
+              'type': 'blood_pressure',
+              'systolicMmHg': 120,
+              'diastolicMmHg': 80,
+              'source': 'manual',
+              'recordedAt': Timestamp.fromDate(at),
+              'pulseBpm': 72, // must not be copied even if present
+            },
+          );
 
       expect(row.keys.toSet(), <String>{
         'id',

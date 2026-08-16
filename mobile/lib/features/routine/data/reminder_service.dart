@@ -243,10 +243,12 @@ class ReminderService {
 
     if (!next.isAfter(now)) next = next.add(const Duration(days: 1));
 
-    final Importance importance =
-        highPriority ? Importance.high : Importance.defaultImportance;
-    final Priority priority =
-        highPriority ? Priority.high : Priority.defaultPriority;
+    final Importance importance = highPriority
+        ? Importance.high
+        : Importance.defaultImportance;
+    final Priority priority = highPriority
+        ? Priority.high
+        : Priority.defaultPriority;
 
     final NotificationDetails details = NotificationDetails(
       android: AndroidNotificationDetails(

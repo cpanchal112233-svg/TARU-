@@ -9,9 +9,7 @@ const Duration kMeasurementFutureSkewTolerance = Duration(minutes: 2);
 void ensureRecordedAtAllowed(DateTime recordedAt, {DateTime? now}) {
   final DateTime reference = now ?? DateTime.now();
   if (recordedAt.isAfter(reference.add(kMeasurementFutureSkewTolerance))) {
-    throw ArgumentError(
-      'Choose a measurement time that is not in the future.',
-    );
+    throw ArgumentError('Choose a measurement time that is not in the future.');
   }
 }
 

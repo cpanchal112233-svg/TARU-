@@ -131,7 +131,9 @@ void main() {
 
   group('LocalReportOcr temp cleanup', () {
     test('deletes taru_ocr work dir when normalizer fails', () async {
-      final LocalReportOcr ocr = LocalReportOcr(normalizer: _MarkerNormalizer());
+      final LocalReportOcr ocr = LocalReportOcr(
+        normalizer: _MarkerNormalizer(),
+      );
       final File source = ReportImageFixtures.file('upright.jpg');
       final Directory workDir = Directory(p.join(tempRoot.path, 'taru_ocr_r1'));
 
@@ -168,7 +170,8 @@ void main() {
 }
 
 String? _mlKitUnavailableReason() {
-  if (Platform.isMacOS && !Platform.environment.containsKey('FLUTTER_TEST_DEVICE')) {
+  if (Platform.isMacOS &&
+      !Platform.environment.containsKey('FLUTTER_TEST_DEVICE')) {
     return 'ML Kit text recognition requires iOS/Android device or emulator.';
   }
   return null;

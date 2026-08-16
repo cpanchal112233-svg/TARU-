@@ -7,19 +7,12 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
-          body: BmiCard(bmi: 22.4),
-        ),
-      ),
+      const MaterialApp(home: Scaffold(body: BmiCard(bmi: 22.4))),
     );
 
     expect(find.text('22.4'), findsOneWidget);
     expect(find.text('BMI'), findsOneWidget);
-    expect(
-      find.textContaining('not a diagnosis'),
-      findsOneWidget,
-    );
+    expect(find.textContaining('not a diagnosis'), findsOneWidget);
     expect(find.text('Underweight'), findsNothing);
     expect(find.text('Healthy weight'), findsNothing);
     expect(find.text('Overweight'), findsNothing);

@@ -11,15 +11,17 @@ List<MedicalReport> filterReports(
 }) {
   final String needle = query.trim().toLowerCase();
 
-  return reports.where((MedicalReport report) {
-    if (category != null && report.category != category) return false;
-    if (needle.isEmpty) return true;
+  return reports
+      .where((MedicalReport report) {
+        if (category != null && report.category != category) return false;
+        if (needle.isEmpty) return true;
 
-    final String title = report.title.toLowerCase();
-    if (title.contains(needle)) return true;
+        final String title = report.title.toLowerCase();
+        if (title.contains(needle)) return true;
 
-    final String? notes = report.notes;
-    if (notes == null) return false;
-    return notes.toLowerCase().contains(needle);
-  }).toList(growable: false);
+        final String? notes = report.notes;
+        if (notes == null) return false;
+        return notes.toLowerCase().contains(needle);
+      })
+      .toList(growable: false);
 }

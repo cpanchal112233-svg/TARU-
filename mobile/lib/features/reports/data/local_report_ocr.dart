@@ -162,7 +162,9 @@ class LocalReportOcr {
       );
       final bool looksRender = error.runtimeType.toString().contains('Pdf');
       throw ReportOcrException(
-        looksRender ? ReportOcrFailure.renderFailed : ReportOcrFailure.ocrFailed,
+        looksRender
+            ? ReportOcrFailure.renderFailed
+            : ReportOcrFailure.ocrFailed,
         cause: error,
       );
     } finally {
@@ -174,9 +176,7 @@ class LocalReportOcr {
 
   Future<Directory> _ocrWorkDir(String reportId) async {
     final Directory tmp = await getTemporaryDirectory();
-    final Directory work = Directory(
-      p.join(tmp.path, 'taru_ocr_$reportId'),
-    );
+    final Directory work = Directory(p.join(tmp.path, 'taru_ocr_$reportId'));
     if (await work.exists()) {
       await work.delete(recursive: true);
     }

@@ -12,7 +12,9 @@ import 'package:mobile/features/measurements/presentation/pages/blood_pressure_h
 import 'package:mobile/features/measurements/presentation/pages/weight_history_screen.dart';
 
 void main() {
-  testWidgets('start tracking duplicate tap is blocked', (WidgetTester tester) async {
+  testWidgets('start tracking duplicate tap is blocked', (
+    WidgetTester tester,
+  ) async {
     final Completer<void> gate = Completer<void>();
     int starts = 0;
 
@@ -20,9 +22,8 @@ void main() {
       ProviderScope(
         overrides: [
           healthProfileProvider.overrideWith(
-            (Ref ref) => Stream<HealthProfile>.value(
-              const HealthProfile(weightKg: 70),
-            ),
+            (Ref ref) =>
+                Stream<HealthProfile>.value(const HealthProfile(weightKg: 70)),
           ),
           weightHistoryProvider.overrideWith(
             (Ref ref) => Stream<List<WeightMeasurement>>.value(
@@ -41,7 +42,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.textContaining('Start tracking with your current weight'));
+    await tester.tap(
+      find.textContaining('Start tracking with your current weight'),
+    );
     await tester.pump();
     await tester.tap(find.byType(FilledButton).first);
     await tester.pump();
@@ -56,7 +59,9 @@ void main() {
     await tester.pump();
   });
 
-  testWidgets('weight delete duplicate action is blocked', (WidgetTester tester) async {
+  testWidgets('weight delete duplicate action is blocked', (
+    WidgetTester tester,
+  ) async {
     final Completer<void> gate = Completer<void>();
     int deletes = 0;
     final WeightMeasurement item = WeightMeasurement(

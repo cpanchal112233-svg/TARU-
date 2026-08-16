@@ -69,10 +69,14 @@ class WeightMeasurement {
 }
 
 /// Structural bounds matching Health Profile weight validation (typo catch).
-bool isPlausibleWeightKg(double kilograms) => kilograms >= 2 && kilograms <= 400;
+bool isPlausibleWeightKg(double kilograms) =>
+    kilograms >= 2 && kilograms <= 400;
 
 /// True when [next] is a non-null intentional change from [previous].
-bool isIntentionalNewWeight({required double? previous, required double? next}) {
+bool isIntentionalNewWeight({
+  required double? previous,
+  required double? next,
+}) {
   if (next == null) return false;
   if (previous == null) return true;
   return (previous - next).abs() > 0.0001;

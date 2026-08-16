@@ -35,18 +35,21 @@ void main() {
     }
   });
 
-  test('clearTaruTempFiles removes taru_ocr_* directories recursively', () async {
-    final Directory ocrDir = Directory(p.join(tempRoot.path, 'taru_ocr_r42'));
-    await ocrDir.create(recursive: true);
-    await File(p.join(ocrDir.path, 'norm_r42.png')).writeAsString('png');
-    await File(p.join(ocrDir.path, 'nested', 'page.txt'))
-        .create(recursive: true)
-        .then((File f) => f.writeAsString('page'));
+  test(
+    'clearTaruTempFiles removes taru_ocr_* directories recursively',
+    () async {
+      final Directory ocrDir = Directory(p.join(tempRoot.path, 'taru_ocr_r42'));
+      await ocrDir.create(recursive: true);
+      await File(p.join(ocrDir.path, 'norm_r42.png')).writeAsString('png');
+      await File(
+        p.join(ocrDir.path, 'nested', 'page.txt'),
+      ).create(recursive: true).then((File f) => f.writeAsString('page'));
 
-    await cleanup.clearTaruTempFiles();
+      await cleanup.clearTaruTempFiles();
 
-    expect(ocrDir.existsSync(), isFalse);
-  });
+      expect(ocrDir.existsSync(), isFalse);
+    },
+  );
 
   test('clearTaruTempFiles leaves unrelated temp files', () async {
     final Directory ocrDir = Directory(p.join(tempRoot.path, 'taru_ocr_r99'));
@@ -63,12 +66,14 @@ void main() {
   });
 
   test('clearTaruTempFiles removes taru_export_* files and dirs', () async {
-    final Directory exportDir =
-        Directory(p.join(tempRoot.path, 'taru_export_user_20260809'));
+    final Directory exportDir = Directory(
+      p.join(tempRoot.path, 'taru_export_user_20260809'),
+    );
     await exportDir.create(recursive: true);
     await File(p.join(exportDir.path, 'manifest.json')).writeAsString('{}');
-    final File exportZip =
-        File(p.join(tempRoot.path, 'taru_export_user_20260809.zip'));
+    final File exportZip = File(
+      p.join(tempRoot.path, 'taru_export_user_20260809.zip'),
+    );
     await exportZip.writeAsString('zip');
 
     await cleanup.clearTaruTempFiles();

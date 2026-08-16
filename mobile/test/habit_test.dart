@@ -76,7 +76,10 @@ void main() {
       // Medicine IDs are 5000 + DoseTime.index (0..3). Lifestyle must never
       // share that range so cancelAll cannot wipe the evening nudge.
       expect(ReminderService.lifestyleReminderId, greaterThanOrEqualTo(6000));
-      expect(ReminderService.lifestyleReminderId, isNot(inInclusiveRange(5000, 5003)));
+      expect(
+        ReminderService.lifestyleReminderId,
+        isNot(inInclusiveRange(5000, 5003)),
+      );
     });
   });
 
