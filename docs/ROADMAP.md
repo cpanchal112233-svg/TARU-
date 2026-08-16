@@ -184,24 +184,80 @@ Analytics, no intentional health-data attachment, no `setUserIdentifier`.
 Dart reporting is sanitized (`UnexpectedFailure(<category>)`) and stops
 immediately on opt-out. Account-root integrity is fail-closed: Auth
 presence is not enough for MainShell; missing `users/{uid}` does not
-auto-bootstrap. Crashlytics is **not** marked publicly enabled until
-Firebase Console activation and a synthetic remote smoke are done
-separately. Accessibility Phase B is not started.
+auto-bootstrap. Crashlytics external state is **configured, receiving,
+and synthetically verified**. Remaining public-release Crashlytics work
+is disclosure / store privacy review (Privacy Policy, App Store Privacy,
+Play Data safety) — not Console enablement.
 
-### Public-release blockers (unresolved)
-- **Founder:** first launch country; real support email
-- **Legal:** Privacy Policy; Terms; jurisdiction/product disclaimer;
-  Firebase/ML Kit/data-processing disclosure; Crashlytics disclosure
-  before production use; store claim review
-- **Clinical:** triage diagnosis-named guidance; self-care
-  false-reassurance review; medicine Pause/Stop skim-risk wording;
-  future clinical thresholds
-- **Platform:** physical iPhone Phase 12 OCR smoke before
-  TestFlight/public release
-- **Accessibility Phase B:** project-wide semantics and text scaling
-- **Crashlytics:** Firebase Console enablement and synthetic remote
-  smoke (source integration only so far)
+## Accessibility Foundation ✅
+Automated accessibility source work for critical flows (semantics, text
+scaling foundations, destructive confirmations, charts/OCR/routine/
+progress coverage in tests). Manual TalkBack / VoiceOver / physical
+large-text repetition remain public-release blockers — see
+`docs/ACCESSIBILITY_RELEASE_CHECKLIST.md`.
+
+## Evidence Brief V1 ✅
+On-device factual period summary from existing TARU records. No cloud
+Evidence Brief document; ephemeral notes; no OCR/report body inclusion;
+no AI. Closed — Evidence Delta not started.
+
+## Early User Release Readiness (engineering)
+In-app **Your data in TARU** trust map; optional **Send product feedback**
+gated on configured `feedbackEmail` / `feedbackUrl`; factual inventories
+in `docs/RELEASE_DATA_INVENTORY.md` and `docs/CLINICAL_REVIEW_SURFACES.md`.
+Legal and clinical approvals remain unresolved. No AI, Analytics,
+HealthKit/Health Connect, or Firebase schema changes in this work.
+
+### PUBLIC RELEASE BLOCKERS
+
+Canonical list — do not fork inconsistent copies elsewhere.
+
+**FOUNDER**
+
+* first launch country (**FOUNDER INPUT REQUIRED**; do not guess)
+* real support email
+* real feedback endpoint if product feedback is included in distribution
+* final intended early-user distribution scope
+
+**LEGAL**
+
+* Privacy Policy
+* Terms
+* Crashlytics disclosure / store privacy review (data-processing wording,
+  App Store Privacy, Google Play Data safety) — Console is already
+  configured/receiving/verified; do not list “enable Crashlytics” as open
+* review of product/medical boundary claims
+
+**CLINICAL**
+
+* triage
+* self-care reassurance
+* medicine caution wording
+
+See `docs/CLINICAL_REVIEW_SURFACES.md`.
+
+**ACCESSIBILITY**
+
+* manual TalkBack critical flow
+* manual VoiceOver critical flow
+* physical-device large-text repetition
+
+See `docs/ACCESSIBILITY_RELEASE_CHECKLIST.md`.
+
+**PLATFORM**
+
+* physical iPhone OCR (`docs/PHYSICAL_IPHONE_OCR_GATE.md`)
+* Android release signing: release builds currently use the **debug**
+  signing config in `mobile/android/app/build.gradle.kts` — production
+  keystore / Play signing not configured
+* iOS distribution: Automatic signing / team membership and App Store
+  Connect / TestFlight setup required before archive upload (no upload
+  performed by engineering release-readiness work)
+* Crashlytics disclosure / store privacy review (not Console setup)
 
 ## Phase 5 — AI assistant (future)
 Report explanations and health chat remain deferred until grounded
 safety, consent, and evidence design are ready. Not started.
+
+## Evidence Delta (future)
+Not started.

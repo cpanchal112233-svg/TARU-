@@ -173,11 +173,17 @@
 ## Trust & Launch Integrity
 Present-tense claims match the shipped personal health organizer +
 companion. Password reset uses Firebase Auth. Help & support exposes the
-product medical boundary and Privacy & data; support email and legal
-document URLs appear only when configured. Public-release blockers
-(legal, clinical, founder inputs, physical iPhone OCR, Accessibility
-Phase B, Crashlytics Console enablement) remain listed in
-`docs/ROADMAP.md`.
+product medical boundary and Privacy & data; support email, product
+feedback, and legal document URLs appear only when configured.
+
+## Early User Release Readiness
+**Your data in TARU** (Profile → Privacy & data) explains current data
+categories, sources, and deliberate non-actions in ordinary language — not
+a Privacy Policy. **Send product feedback** appears under Help & support
+only when `feedbackEmail` or `feedbackUrl` is configured; feedback does
+not auto-attach account or health contents. Engineering inventories for
+legal/clinical/accessibility/OCR live under `docs/`. Canonical public
+release blockers remain in `docs/ROADMAP.md`.
 
 ## Reliability Foundation
 Opt-in **Share crash diagnostics** under Profile → Privacy & data.

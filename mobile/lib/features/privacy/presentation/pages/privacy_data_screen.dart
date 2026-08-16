@@ -7,6 +7,7 @@ import '../../../../core/reliability/user_facing_error.dart';
 import '../../application/privacy_controller.dart';
 import '../../application/privacy_providers.dart';
 import '../../domain/purge_mode.dart';
+import 'your_data_in_taru_screen.dart';
 
 class PrivacyDataScreen extends ConsumerStatefulWidget {
   const PrivacyDataScreen({super.key});
@@ -381,6 +382,22 @@ class _PrivacyDataScreenState extends ConsumerState<PrivacyDataScreen> {
                 ),
               ],
               const SizedBox(height: 24),
+              _ActionCard(
+                title: 'Your data in TARU',
+                subtitle:
+                    'See what kinds of information TARU keeps, where it comes '
+                    'from, and what TARU does not do with it.',
+                onTap: _busy
+                    ? null
+                    : () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => const YourDataInTaruScreen(),
+                          ),
+                        );
+                      },
+              ),
+              const SizedBox(height: 12),
               _CrashDiagnosticsTile(),
               const SizedBox(height: 12),
               _ActionCard(
