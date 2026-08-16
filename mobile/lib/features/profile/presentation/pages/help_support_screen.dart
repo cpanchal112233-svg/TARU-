@@ -6,11 +6,33 @@ import '../../../privacy/presentation/pages/privacy_data_screen.dart';
 
 /// Minimal Help & support: medical boundary, privacy controls, optional links.
 class HelpSupportScreen extends StatelessWidget {
-  const HelpSupportScreen({super.key});
+  const HelpSupportScreen({
+    super.key,
+    this.feedbackEmailOverride,
+    this.feedbackUrlOverride,
+  });
+
+  /// Test-only overrides. Production uses [AppPublicLinks].
+  final String? feedbackEmailOverride;
+  final String? feedbackUrlOverride;
 
   static const String medicalBoundary =
       'TARU helps you organize and review information you record. It does not '
       'diagnose conditions or replace professional medical care.';
+
+  static const String feedbackHelper =
+      'Share feedback about the TARU app. Do not include personal medical '
+      'information unless you choose to. This is not emergency care, medical '
+      'advice, or clinical support.';
+
+  bool get _hasFeedback {
+    final String? email =
+        (feedbackEmailOverride ?? AppPublicLinks.feedbackEmail)?.trim();
+    if (email != null && email.isNotEmpty) return true;
+    final String? url =
+        (feedbackUrlOverride ?? AppPublicLinks.feedbackUrl)?.trim();
+    return url != null && url.isNotEmpty;
+  }
 
   Future<void> _openUri(BuildContext context, Uri uri) async {
     try {
@@ -79,6 +101,22 @@ class HelpSupportScreen extends StatelessWidget {
               );
             },
           ),
+          if (_hasFeedback) ...[
+            const SizedBox(height: 12),
+            _HelpTile(
+              icon: Icons.feedback_outlined,
+              title: 'Send product feedback',
+              subtitle: feedbackHelper,
+              onTap: () {
+                final Uri? uri = AppPublicLinks.feedbackLaunchUri(
+                  emailOverride: feedbackEmailOverride,
+                  urlOverride: feedbackUrlOverride,
+                );
+                if (uri == null) return;
+                _openUri(context, uri);
+              },
+            ),
+          ],
           if (AppPublicLinks.hasSupportEmail) ...[
             const SizedBox(height: 12),
             _HelpTile(

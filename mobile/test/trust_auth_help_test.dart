@@ -159,11 +159,13 @@ void main() {
     WidgetTester tester,
   ) async {
     expect(AppPublicLinks.hasSupportEmail, isFalse);
+    expect(AppPublicLinks.hasFeedbackDestination, isFalse);
     expect(AppPublicLinks.hasPrivacyPolicyUrl, isFalse);
     expect(AppPublicLinks.hasTermsOfUseUrl, isFalse);
 
     await tester.pumpWidget(const MaterialApp(home: HelpSupportScreen()));
     expect(find.text('Contact support'), findsNothing);
+    expect(find.text('Send product feedback'), findsNothing);
     expect(find.text('Privacy Policy'), findsNothing);
     expect(find.text('Terms of Use'), findsNothing);
     expect(find.text('Privacy & data'), findsOneWidget);
