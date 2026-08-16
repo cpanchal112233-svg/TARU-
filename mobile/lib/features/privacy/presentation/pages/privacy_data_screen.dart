@@ -74,28 +74,48 @@ class _PrivacyDataScreenState extends ConsumerState<PrivacyDataScreen> {
 
   Future<String?> _askPassword(String actionLabel) async {
     final TextEditingController controller = TextEditingController();
+    bool hidePassword = true;
     final String? password = await showDialog<String>(
       context: context,
       builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: Text('Confirm password to $actionLabel'),
-          content: TextField(
-            controller: controller,
-            obscureText: true,
-            autofocus: true,
-            decoration: const InputDecoration(hintText: 'Current password'),
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () =>
-                  Navigator.pop(dialogContext, controller.text.trim()),
-              child: const Text('Continue'),
-            ),
-          ],
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setDialogState) {
+            return AlertDialog(
+              title: Text('Confirm password to $actionLabel'),
+              content: SingleChildScrollView(
+                child: TextField(
+                  controller: controller,
+                  obscureText: hidePassword,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    labelText: 'Current password',
+                    suffixIcon: IconButton(
+                      tooltip: hidePassword ? 'Show password' : 'Hide password',
+                      icon: Icon(
+                        hidePassword ? Icons.visibility_off : Icons.visibility,
+                      ),
+                      onPressed: () {
+                        setDialogState(() {
+                          hidePassword = !hidePassword;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () =>
+                      Navigator.pop(dialogContext, controller.text.trim()),
+                  child: const Text('Continue'),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -150,9 +170,9 @@ class _PrivacyDataScreenState extends ConsumerState<PrivacyDataScreen> {
       Navigator.pop(context);
     } on PurgeException catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(_purgeMessage(error))),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(_purgeMessage(error))));
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -211,21 +231,25 @@ class _PrivacyDataScreenState extends ConsumerState<PrivacyDataScreen> {
       builder: (BuildContext dialogContext) {
         return AlertDialog(
           title: const Text('Type DELETE to confirm'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              const Text(
-                'Removes profile, conditions, allergies, medications, history, '
-                'measurements, reports, reviewed text, and your login.',
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: confirmController,
-                autofocus: true,
-                decoration: const InputDecoration(hintText: 'DELETE'),
-              ),
-            ],
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                const Text(
+                  'Removes profile, conditions, allergies, medications, history, '
+                  'measurements, reports, reviewed text, and your login.',
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: confirmController,
+                  autofocus: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Type DELETE to confirm',
+                  ),
+                ),
+              ],
+            ),
           ),
           actions: <Widget>[
             TextButton(
@@ -281,9 +305,9 @@ class _PrivacyDataScreenState extends ConsumerState<PrivacyDataScreen> {
       // AuthGate will show login when signed out.
     } on PurgeException catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(_purgeMessage(error))),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(_purgeMessage(error))));
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -371,16 +395,14 @@ class _PrivacyDataScreenState extends ConsumerState<PrivacyDataScreen> {
               const SizedBox(height: 12),
               _ActionCard(
                 title: 'Delete my health data',
-                subtitle:
-                    'Remove health information but keep your TARU login.',
+                subtitle: 'Remove health information but keep your TARU login.',
                 onTap: _busy ? null : _deleteHealthData,
                 destructive: true,
               ),
               const SizedBox(height: 12),
               _ActionCard(
                 title: 'Delete TARU account',
-                subtitle:
-                    'Remove your health data and login permanently.',
+                subtitle: 'Remove your health data and login permanently.',
                 onTap: _busy ? null : _deleteAccount,
                 destructive: true,
               ),
@@ -423,7 +445,9 @@ class _CrashDiagnosticsTile extends ConsumerWidget {
       child: SwitchListTile(
         value: enabled,
         onChanged: (bool value) {
-          ref.read(crashDiagnosticsControllerProvider.notifier).setEnabled(value);
+          ref
+              .read(crashDiagnosticsControllerProvider.notifier)
+              .setEnabled(value);
         },
         title: const Text(
           'Share crash diagnostics',

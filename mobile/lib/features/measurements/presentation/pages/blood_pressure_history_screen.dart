@@ -65,7 +65,9 @@ class _BloodPressureHistoryScreenState
             return _EmptyHistory(onAdd: () => _openAdd(context, ref));
           }
 
-          final BloodPressureChartSeries chart = bloodPressureChartSeries(items);
+          final BloodPressureChartSeries chart = bloodPressureChartSeries(
+            items,
+          );
 
           return ListView.separated(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
@@ -99,7 +101,7 @@ class _BloodPressureHistoryScreenState
                       RawMeasurementChart(
                         semanticsLabel:
                             'Recent blood pressure chart with systolic and '
-                            'diastolic series',
+                            'diastolic series. Exact values are listed below.',
                         series: [
                           RawChartSeries(
                             label: 'Systolic',

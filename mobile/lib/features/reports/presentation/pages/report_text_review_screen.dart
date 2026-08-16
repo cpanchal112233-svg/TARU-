@@ -123,6 +123,8 @@ class _ReportTextReviewScreenState
                   maxLines: null,
                   textAlignVertical: TextAlignVertical.top,
                   decoration: InputDecoration(
+                    labelText: 'Reviewed text',
+                    alignLabelWithHint: true,
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -147,10 +149,7 @@ class _ReportTextReviewScreenState
               ),
               if (_error != null) ...[
                 const SizedBox(height: 8),
-                Text(
-                  _error!,
-                  style: const TextStyle(color: Color(0xffB3261E)),
-                ),
+                Text(_error!, style: const TextStyle(color: Color(0xffB3261E))),
               ],
               const SizedBox(height: 12),
               Row(
@@ -168,10 +167,15 @@ class _ReportTextReviewScreenState
                     child: FilledButton(
                       onPressed: _saving || _overLimit ? null : _save,
                       child: _saving
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                          ? Semantics(
+                              label: 'Saving',
+                              child: const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              ),
                             )
                           : const Text('Save'),
                     ),

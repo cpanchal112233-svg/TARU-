@@ -137,16 +137,18 @@ class HealthSaveBar extends StatelessWidget {
         border: Border(top: BorderSide(color: Colors.grey.shade200)),
       ),
       child: SizedBox(
-        height: 52,
         width: double.infinity,
-        child: FilledButton(
-          onPressed: onSave,
-          child: Text(
-            isSaving
-                ? 'Saving...'
-                : hasChanges
-                ? label
-                : 'Saved',
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 52),
+          child: FilledButton(
+            onPressed: onSave,
+            child: Text(
+              isSaving
+                  ? 'Saving...'
+                  : hasChanges
+                  ? label
+                  : 'Saved',
+            ),
           ),
         ),
       ),

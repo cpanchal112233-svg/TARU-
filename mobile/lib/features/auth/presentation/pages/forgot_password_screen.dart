@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../application/auth_providers.dart';
+import '../widgets/auth_button.dart';
+import '../widgets/auth_textfield.dart';
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key, this.initialEmail = ''});
@@ -39,7 +41,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     final int at = email.indexOf('@');
     if (at <= 0 || at != email.lastIndexOf('@')) return false;
     final String domain = email.substring(at + 1);
-    return domain.contains('.') && !domain.startsWith('.') && !domain.endsWith('.');
+    return domain.contains('.') &&
+        !domain.startsWith('.') &&
+        !domain.endsWith('.');
   }
 
   Future<void> _sendReset() async {
@@ -90,81 +94,81 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Forgot Password'), centerTitle: true),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 20),
-              const Text(
-                'Reset Password',
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                'Enter your registered email address and we will send '
-                'password reset instructions if an account exists.',
-                style: TextStyle(color: Colors.grey, fontSize: 16),
-              ),
-              const SizedBox(height: 40),
-              TextFormField(
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                autofillHints: const [AutofillHints.email],
-                enabled: !_isLoading,
-                decoration: InputDecoration(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 20),
+                const Text(
+                  'Reset Password',
+                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  'Enter your registered email address and we will send '
+                  'password reset instructions if an account exists.',
+                  style: TextStyle(color: Colors.grey, fontSize: 16),
+                ),
+                const SizedBox(height: 40),
+                AuthTextField(
+                  labelText: 'Email address',
                   hintText: 'Email',
-                  prefixIcon: const Icon(Icons.email_outlined),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
+                  icon: Icons.email_outlined,
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  autofillHints: const [AutofillHints.email],
+                  enabled: !_isLoading,
+                  textInputAction: TextInputAction.done,
+                  onFieldSubmitted: (_) {
+                    if (!_isLoading) {
+                      _sendReset();
+                    }
+                  },
+                  validator: (String? value) {
+                    final String email = value?.trim() ?? '';
+                    if (email.isEmpty) return 'Please enter your email.';
+                    if (!_looksLikeEmail(email)) {
+                      return 'Please enter a valid email address.';
+                    }
+                    return null;
+                  },
+                ),
+                if (_error != null) ...[
+                  const SizedBox(height: 16),
+                  Text(
+                    _error!,
+                    style: const TextStyle(color: Color(0xffB3261E)),
                   ),
-                ),
-                validator: (String? value) {
-                  final String email = value?.trim() ?? '';
-                  if (email.isEmpty) return 'Please enter your email.';
-                  if (!_looksLikeEmail(email)) {
-                    return 'Please enter a valid email address.';
-                  }
-                  return null;
-                },
-              ),
-              if (_error != null) ...[
-                const SizedBox(height: 16),
-                Text(
-                  _error!,
-                  style: const TextStyle(color: Color(0xffB3261E)),
-                ),
-              ],
-              if (_sent) ...[
-                const SizedBox(height: 16),
-                Text(
-                  'If an account exists for that email, we have sent password '
-                  'reset instructions. Check your inbox and spam folder.',
-                  style: TextStyle(color: Colors.grey.shade800, height: 1.4),
-                ),
-              ],
-              const SizedBox(height: 30),
-              SizedBox(
-                width: double.infinity,
-                height: 55,
-                child: ElevatedButton(
+                ],
+                if (_sent) ...[
+                  const SizedBox(height: 16),
+                  Text(
+                    'If an account exists for that email, we have sent password '
+                    'reset instructions. Check your inbox and spam folder.',
+                    style: TextStyle(color: Colors.grey.shade800, height: 1.4),
+                  ),
+                ],
+                const SizedBox(height: 30),
+                AuthButton(
+                  text: _isLoading
+                      ? 'Sending reset instructions'
+                      : 'Send Reset Link',
+                  busy: _isLoading,
                   onPressed: _isLoading ? null : _sendReset,
-                  child: Text(
-                    _isLoading ? 'Sending…' : 'Send Reset Link',
-                    style: const TextStyle(fontSize: 18),
-                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              TextButton(
-                onPressed: _isLoading
-                    ? null
-                    : () => Navigator.of(context).pop(),
-                child: const Text('Back to sign in'),
-              ),
-            ],
+                const SizedBox(height: 12),
+                TextButton(
+                  onPressed: _isLoading
+                      ? null
+                      : () => Navigator.of(context).pop(),
+                  child: const Text('Back to sign in'),
+                ),
+              ],
+            ),
           ),
         ),
       ),

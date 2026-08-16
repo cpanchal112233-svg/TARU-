@@ -52,8 +52,7 @@ class _AccountRecoveryScreenState extends ConsumerState<AccountRecoveryScreen> {
 
   bool get _isCleanup => _isHealthCleanup || _isAccountCleanup;
 
-  bool get _isMissingRoot =>
-      widget.integrity == AccountIntegrity.missingRoot;
+  bool get _isMissingRoot => widget.integrity == AccountIntegrity.missingRoot;
 
   Future<void> _retryCheck() async {
     ref.invalidate(accountIntegrityProvider);
@@ -76,28 +75,48 @@ class _AccountRecoveryScreenState extends ConsumerState<AccountRecoveryScreen> {
 
   Future<String?> _askPassword(String actionLabel) async {
     final TextEditingController controller = TextEditingController();
+    bool hidePassword = true;
     final String? password = await showDialog<String>(
       context: context,
       builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: Text('Confirm password to $actionLabel'),
-          content: TextField(
-            controller: controller,
-            obscureText: true,
-            autofocus: true,
-            decoration: const InputDecoration(hintText: 'Current password'),
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () =>
-                  Navigator.pop(dialogContext, controller.text.trim()),
-              child: const Text('Continue'),
-            ),
-          ],
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setDialogState) {
+            return AlertDialog(
+              title: Text('Confirm password to $actionLabel'),
+              content: SingleChildScrollView(
+                child: TextField(
+                  controller: controller,
+                  obscureText: hidePassword,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    labelText: 'Current password',
+                    suffixIcon: IconButton(
+                      tooltip: hidePassword ? 'Show password' : 'Hide password',
+                      icon: Icon(
+                        hidePassword ? Icons.visibility_off : Icons.visibility,
+                      ),
+                      onPressed: () {
+                        setDialogState(() {
+                          hidePassword = !hidePassword;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () =>
+                      Navigator.pop(dialogContext, controller.text.trim()),
+                  child: const Text('Continue'),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -134,9 +153,9 @@ class _AccountRecoveryScreenState extends ConsumerState<AccountRecoveryScreen> {
       ref.invalidate(accountIntegrityProvider);
     } on PurgeException catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(userFacingErrorMessage(error))),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(userFacingErrorMessage(error))));
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -192,9 +211,9 @@ class _AccountRecoveryScreenState extends ConsumerState<AccountRecoveryScreen> {
       ref.invalidate(accountIntegrityProvider);
     } on PurgeException catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(userFacingErrorMessage(error))),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(userFacingErrorMessage(error))));
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -304,13 +323,15 @@ class _AccountRecoveryScreenState extends ConsumerState<AccountRecoveryScreen> {
               if (_isCleanup) ...<Widget>[
                 SizedBox(
                   width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: _busy ? null : _continueCleanup,
-                    child: Text(
-                      _isHealthCleanup
-                          ? 'Continue health-data cleanup'
-                          : 'Continue account cleanup',
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minHeight: 48),
+                    child: ElevatedButton(
+                      onPressed: _busy ? null : _continueCleanup,
+                      child: Text(
+                        _isHealthCleanup
+                            ? 'Continue health-data cleanup'
+                            : 'Continue account cleanup',
+                      ),
                     ),
                   ),
                 ),
@@ -334,10 +355,12 @@ class _AccountRecoveryScreenState extends ConsumerState<AccountRecoveryScreen> {
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: _busy ? null : _finishSetup,
-                    child: const Text('Finish account setup'),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minHeight: 48),
+                    child: ElevatedButton(
+                      onPressed: _busy ? null : _finishSetup,
+                      child: const Text('Finish account setup'),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -351,10 +374,12 @@ class _AccountRecoveryScreenState extends ConsumerState<AccountRecoveryScreen> {
               if (!_isCleanup)
                 SizedBox(
                   width: double.infinity,
-                  height: 48,
-                  child: OutlinedButton(
-                    onPressed: _busy ? null : _retryCheck,
-                    child: const Text('Try again'),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minHeight: 48),
+                    child: OutlinedButton(
+                      onPressed: _busy ? null : _retryCheck,
+                      child: const Text('Try again'),
+                    ),
                   ),
                 ),
               if (!_isCleanup) const SizedBox(height: 12),

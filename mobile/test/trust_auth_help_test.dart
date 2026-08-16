@@ -35,9 +35,7 @@ void main() {
     final _FakeAuthService fake = _FakeAuthService();
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          authServiceProvider.overrideWith((ref) => fake),
-        ],
+        overrides: [authServiceProvider.overrideWith((ref) => fake)],
         child: const MaterialApp(home: ForgotPasswordScreen()),
       ),
     );
@@ -60,9 +58,7 @@ void main() {
     final _FakeAuthService fake = _FakeAuthService();
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          authServiceProvider.overrideWith((ref) => fake),
-        ],
+        overrides: [authServiceProvider.overrideWith((ref) => fake)],
         child: const MaterialApp(
           home: ForgotPasswordScreen(initialEmail: '  a@b.co  '),
         ),
@@ -85,22 +81,18 @@ void main() {
     WidgetTester tester,
   ) async {
     final Completer<void> gate = Completer<void>();
-    final _FakeAuthService fake = _FakeAuthService(
-      onReset: (_) => gate.future,
-    );
+    final _FakeAuthService fake = _FakeAuthService(onReset: (_) => gate.future);
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          authServiceProvider.overrideWith((ref) => fake),
-        ],
+        overrides: [authServiceProvider.overrideWith((ref) => fake)],
         child: const MaterialApp(home: ForgotPasswordScreen()),
       ),
     );
     await tester.enterText(find.byType(TextFormField), 'user@example.com');
     await tester.tap(find.text('Send Reset Link'));
     await tester.pump();
-    expect(find.text('Sending…'), findsOneWidget);
-    await tester.tap(find.text('Sending…'));
+    expect(find.text('Sending reset instructions'), findsOneWidget);
+    await tester.tap(find.text('Sending reset instructions'));
     await tester.pump();
     expect(fake.resetCalls, 1);
     gate.complete();
@@ -114,9 +106,7 @@ void main() {
       ..throwAuth = FirebaseAuthException(code: 'network-request-failed');
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          authServiceProvider.overrideWith((ref) => fake),
-        ],
+        overrides: [authServiceProvider.overrideWith((ref) => fake)],
         child: const MaterialApp(home: ForgotPasswordScreen()),
       ),
     );
@@ -134,9 +124,7 @@ void main() {
       ..throwAuth = FirebaseAuthException(code: 'user-not-found');
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          authServiceProvider.overrideWith((ref) => fake),
-        ],
+        overrides: [authServiceProvider.overrideWith((ref) => fake)],
         child: const MaterialApp(home: ForgotPasswordScreen()),
       ),
     );

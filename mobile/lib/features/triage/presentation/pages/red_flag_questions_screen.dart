@@ -300,19 +300,21 @@ class _QuestionsBar extends StatelessWidget {
             const SizedBox(height: 10),
           ],
           SizedBox(
-            height: 52,
             width: double.infinity,
-            child: FilledButton(
-              style: emergency
-                  ? FilledButton.styleFrom(backgroundColor: red)
-                  : null,
-              onPressed: emergency || complete ? onSubmit : null,
-              child: Text(
-                emergency
-                    ? 'See what to do now'
-                    : complete
-                    ? 'See what to do'
-                    : '$remaining question${remaining == 1 ? '' : 's'} left',
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 52),
+              child: FilledButton(
+                style: emergency
+                    ? FilledButton.styleFrom(backgroundColor: red)
+                    : null,
+                onPressed: emergency || complete ? onSubmit : null,
+                child: Text(
+                  emergency
+                      ? 'See what to do now'
+                      : complete
+                      ? 'See what to do'
+                      : '$remaining question${remaining == 1 ? '' : 's'} left',
+                ),
               ),
             ),
           ),

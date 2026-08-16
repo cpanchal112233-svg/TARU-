@@ -59,23 +59,28 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               ),
             ),
 
-            /// Indicators
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(onboardingPages.length, (index) {
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  margin: const EdgeInsets.all(4),
-                  width: currentPage == index ? 24 : 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: currentPage == index
-                        ? Colors.blue
-                        : Colors.grey.shade400,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                );
-              }),
+            /// Indicators — one announcement for the strip; dots are decorative.
+            Semantics(
+              label: 'Page ${currentPage + 1} of ${onboardingPages.length}',
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(onboardingPages.length, (index) {
+                  return ExcludeSemantics(
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      margin: const EdgeInsets.all(4),
+                      width: currentPage == index ? 24 : 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: currentPage == index
+                            ? Colors.blue
+                            : Colors.grey.shade400,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                  );
+                }),
+              ),
             ),
 
             const SizedBox(height: 30),
@@ -85,24 +90,26 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: SizedBox(
                 width: double.infinity,
-                height: 55,
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (currentPage == onboardingPages.length - 1) {
-                      _finishOnboarding();
-                    } else {
-                      if (_pageController.hasClients) {
-                        _pageController.nextPage(
-                          duration: const Duration(milliseconds: 400),
-                          curve: Curves.easeInOut,
-                        );
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 55),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (currentPage == onboardingPages.length - 1) {
+                        _finishOnboarding();
+                      } else {
+                        if (_pageController.hasClients) {
+                          _pageController.nextPage(
+                            duration: const Duration(milliseconds: 400),
+                            curve: Curves.easeInOut,
+                          );
+                        }
                       }
-                    }
-                  },
-                  child: Text(
-                    currentPage == onboardingPages.length - 1
-                        ? "Get Started"
-                        : "Next",
+                    },
+                    child: Text(
+                      currentPage == onboardingPages.length - 1
+                          ? "Get Started"
+                          : "Next",
+                    ),
                   ),
                 ),
               ),

@@ -243,20 +243,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildSymptomCheckButton() {
     return SizedBox(
       width: double.infinity,
-      height: 52,
-      child: FilledButton.icon(
-        style: FilledButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 52),
+        child: FilledButton.icon(
+          style: FilledButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
           ),
-        ),
-        onPressed: () => Navigator.of(context).push(
-          MaterialPageRoute<void>(builder: (_) => const SymptomCheckScreen()),
-        ),
-        icon: const Icon(Icons.health_and_safety_outlined),
-        label: const Text(
-          'Check a symptom',
-          style: TextStyle(fontWeight: FontWeight.w600),
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => const SymptomCheckScreen()),
+          ),
+          icon: const Icon(Icons.health_and_safety_outlined),
+          label: const Text(
+            'Check a symptom',
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
         ),
       ),
     );
@@ -267,23 +269,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildEmergencyCardButton() {
     return SizedBox(
       width: double.infinity,
-      height: 52,
-      child: OutlinedButton.icon(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: const Color(0xffB3261E),
-          side: const BorderSide(color: Color(0xffB3261E)),
-          backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 52),
+        child: OutlinedButton.icon(
+          style: OutlinedButton.styleFrom(
+            foregroundColor: const Color(0xffB3261E),
+            side: const BorderSide(color: Color(0xffB3261E)),
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
           ),
-        ),
-        onPressed: () => Navigator.of(context).push(
-          MaterialPageRoute<void>(builder: (_) => const EmergencyCardScreen()),
-        ),
-        icon: const Icon(Icons.emergency_outlined),
-        label: const Text(
-          'Emergency card',
-          style: TextStyle(fontWeight: FontWeight.w600),
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => const EmergencyCardScreen(),
+            ),
+          ),
+          icon: const Icon(Icons.emergency_outlined),
+          label: const Text(
+            'Emergency card',
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
         ),
       ),
     );
@@ -294,39 +300,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     required String title,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-
-      child: Container(
-        padding: const EdgeInsets.all(20),
-
-        decoration: BoxDecoration(
-          color: Colors.white,
-
-          borderRadius: BorderRadius.circular(20),
-
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+    return Semantics(
+      button: true,
+      label: title,
+      child: GestureDetector(
+        onTap: onTap,
+        child: ExcludeSemantics(
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
-          ],
-        ),
-
-        child: Column(
-          children: [
-            Icon(icon, size: 35, color: Colors.blue),
-
-            const SizedBox(height: 12),
-
-            Text(
-              title,
-              textAlign: TextAlign.center,
-
-              style: const TextStyle(fontWeight: FontWeight.bold),
+            child: Column(
+              children: [
+                Icon(icon, size: 35, color: Colors.blue),
+                const SizedBox(height: 12),
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

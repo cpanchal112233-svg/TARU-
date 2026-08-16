@@ -231,6 +231,7 @@ class _AllergiesEditorState extends ConsumerState<_AllergiesEditor> {
                         ? null
                         : IconButton(
                             icon: const Icon(Icons.clear),
+                            tooltip: 'Clear search',
                             onPressed: () {
                               _searchController.clear();
                               setState(() => _query = '');

@@ -480,14 +480,16 @@ class _EmergencyContact extends StatelessWidget {
           const SizedBox(height: 14),
           SizedBox(
             width: double.infinity,
-            height: 52,
-            child: FilledButton.icon(
-              style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xffB3261E),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 52),
+              child: FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xffB3261E),
+                ),
+                onPressed: () => _call(context, phone),
+                icon: const Icon(Icons.call),
+                label: const Text('Call now', style: TextStyle(fontSize: 16)),
               ),
-              onPressed: () => _call(context, phone),
-              icon: const Icon(Icons.call),
-              label: const Text('Call now', style: TextStyle(fontSize: 16)),
             ),
           ),
         ],

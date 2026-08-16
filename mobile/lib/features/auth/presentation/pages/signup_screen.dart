@@ -5,7 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/reliability/user_facing_error.dart';
 import '../../../account/application/account_providers.dart';
 import '../../application/auth_providers.dart';
+import '../widgets/auth_button.dart';
 import '../widgets/auth_header.dart';
+import '../widgets/auth_textfield.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
@@ -15,7 +17,6 @@ class SignupScreen extends ConsumerStatefulWidget {
 }
 
 class _SignupScreenState extends ConsumerState<SignupScreen> {
-
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -41,11 +42,13 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     ref.read(pendingSignupIdentityProvider).remember(name: name, email: email);
 
     try {
-      await ref.read(authServiceProvider).signUp(
-        email: email,
-        password: passwordController.text.trim(),
-        name: name,
-      );
+      await ref
+          .read(authServiceProvider)
+          .signUp(
+            email: email,
+            password: passwordController.text.trim(),
+            name: name,
+          );
       if (!mounted) return;
 
       ref.read(pendingSignupIdentityProvider).clear();
@@ -71,9 +74,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       ).showSnackBar(SnackBar(content: Text(userFacingErrorMessage(e))));
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(userFacingErrorMessage(e))),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(userFacingErrorMessage(e))));
     } finally {
       if (mounted) {
         setState(() {
@@ -105,25 +108,20 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 30),
-
                 const AuthHeader(
                   title: 'Create Account',
                   subtitle:
                       'Join TARU to organize your health information and '
                       'daily routines.',
                 ),
-
                 const SizedBox(height: 35),
-
-                TextFormField(
+                AuthTextField(
+                  labelText: 'Full name',
+                  hintText: 'Full Name',
+                  icon: Icons.person_outline,
                   controller: nameController,
-                  decoration: InputDecoration(
-                    hintText: 'Full Name',
-                    prefixIcon: const Icon(Icons.person_outline),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
+                  textInputAction: TextInputAction.next,
+                  autofillHints: const [AutofillHints.name],
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Please enter your name';
@@ -131,126 +129,101 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     return null;
                   },
                 ),
-
                 const SizedBox(height: 20),
-
-                TextFormField(
+                AuthTextField(
+                  labelText: 'Email address',
+                  hintText: 'Email',
+                  icon: Icons.email_outlined,
                   controller: emailController,
                   keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    hintText: 'Email',
-                    prefixIcon: const Icon(Icons.email_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
+                  textInputAction: TextInputAction.next,
+                  autofillHints: const [AutofillHints.email],
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Please enter your email';
                     }
-
                     if (!value.contains('@')) {
                       return 'Enter a valid email';
                     }
-
                     return null;
                   },
                 ),
-
                 const SizedBox(height: 20),
-
-                TextFormField(
+                AuthTextField(
+                  labelText: 'Password',
+                  hintText: 'Password',
+                  icon: Icons.lock_outline,
                   controller: passwordController,
                   obscureText: hidePassword,
-                  decoration: InputDecoration(
-                    hintText: 'Password',
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        hidePassword ? Icons.visibility_off : Icons.visibility,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          hidePassword = !hidePassword;
-                        });
-                      },
+                  textInputAction: TextInputAction.next,
+                  autofillHints: const [AutofillHints.newPassword],
+                  suffixIcon: IconButton(
+                    tooltip: hidePassword ? 'Show password' : 'Hide password',
+                    icon: Icon(
+                      hidePassword ? Icons.visibility_off : Icons.visibility,
                     ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
+                    onPressed: () {
+                      setState(() {
+                        hidePassword = !hidePassword;
+                      });
+                    },
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter a password';
                     }
-
                     if (value.length < 6) {
                       return 'Password must be at least 6 characters';
                     }
-
                     return null;
                   },
                 ),
-
                 const SizedBox(height: 20),
-
-                TextFormField(
+                AuthTextField(
+                  labelText: 'Confirm password',
+                  hintText: 'Confirm Password',
+                  icon: Icons.lock_outline,
                   controller: confirmPasswordController,
                   obscureText: hideConfirmPassword,
-                  decoration: InputDecoration(
-                    hintText: 'Confirm Password',
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        hideConfirmPassword
-                            ? Icons.visibility_off
-                            : Icons.visibility,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          hideConfirmPassword = !hideConfirmPassword;
-                        });
-                      },
+                  textInputAction: TextInputAction.done,
+                  autofillHints: const [AutofillHints.newPassword],
+                  onFieldSubmitted: (_) {
+                    if (!isLoading) {
+                      createAccount();
+                    }
+                  },
+                  suffixIcon: IconButton(
+                    tooltip: hideConfirmPassword
+                        ? 'Show password'
+                        : 'Hide password',
+                    icon: Icon(
+                      hideConfirmPassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
                     ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
+                    onPressed: () {
+                      setState(() {
+                        hideConfirmPassword = !hideConfirmPassword;
+                      });
+                    },
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please confirm your password';
                     }
-
                     if (value != passwordController.text) {
                       return 'Passwords do not match';
                     }
-
                     return null;
                   },
                 ),
-
                 const SizedBox(height: 35),
-
-                SizedBox(
-                  width: double.infinity,
-                  height: 55,
-                  child: ElevatedButton(
-                    onPressed: isLoading ? null : createAccount,
-                    child: isLoading
-                        ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Text(
-                            'Create Account',
-                            style: TextStyle(fontSize: 18),
-                          ),
-                  ),
+                AuthButton(
+                  text: isLoading ? 'Creating account' : 'Create Account',
+                  busy: isLoading,
+                  onPressed: isLoading ? null : createAccount,
                 ),
-
                 const SizedBox(height: 20),
-
                 Center(
                   child: TextButton(
                     onPressed: () {

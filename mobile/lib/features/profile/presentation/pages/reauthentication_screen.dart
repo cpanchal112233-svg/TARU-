@@ -139,7 +139,7 @@ class _ReauthenticationScreenState extends State<ReauthenticationScreen> {
                 obscureText: hidePassword,
 
                 decoration: InputDecoration(
-                  labelText: 'Current Password',
+                  labelText: 'Current password',
 
                   prefixIcon: const Icon(
                     Icons.lock_outline,
@@ -150,7 +150,7 @@ class _ReauthenticationScreenState extends State<ReauthenticationScreen> {
                     icon: Icon(
                       hidePassword ? Icons.visibility_off : Icons.visibility,
                     ),
-
+                    tooltip: hidePassword ? 'Show password' : 'Hide password',
                     onPressed: () {
                       setState(() {
                         hidePassword = !hidePassword;
@@ -171,30 +171,25 @@ class _ReauthenticationScreenState extends State<ReauthenticationScreen> {
 
               SizedBox(
                 width: double.infinity,
-
-                height: 55,
-
-                child: ElevatedButton(
-                  onPressed: isLoading ? null : reauthenticate,
-
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
-
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 55),
+                  child: ElevatedButton(
+                    onPressed: isLoading ? null : reauthenticate,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    child: Text(
+                      isLoading ? 'Verifying…' : 'Verify Identity',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-
-                  child: isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text(
-                          'Verify Identity',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
                 ),
               ),
 

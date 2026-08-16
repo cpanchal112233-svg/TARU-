@@ -11,7 +11,8 @@ class RawMeasurementChart extends StatelessWidget {
   const RawMeasurementChart({
     super.key,
     required this.series,
-    this.semanticsLabel = 'Recent measurement chart',
+    this.semanticsLabel =
+        'Recent measurement chart. Exact values are listed below.',
     this.height = 180,
   });
 
@@ -46,10 +47,14 @@ class RawMeasurementChart extends StatelessWidget {
         .reduce((double a, double b) => a > b ? a : b);
 
     final double xPad = maxX == minX ? 1 : (maxX - minX) * 0.05;
-    final double yPad = maxY == minY ? (maxY.abs() * 0.05 + 1) : (maxY - minY) * 0.12;
+    final double yPad = maxY == minY
+        ? (maxY.abs() * 0.05 + 1)
+        : (maxY - minY) * 0.12;
 
     return Semantics(
+      container: true,
       label: semanticsLabel,
+      excludeSemantics: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -98,10 +103,8 @@ class RawMeasurementChart extends StatelessWidget {
                   show: true,
                   drawVerticalLine: false,
                   horizontalInterval: _niceInterval(minY - yPad, maxY + yPad),
-                  getDrawingHorizontalLine: (double value) => FlLine(
-                    color: Colors.grey.shade200,
-                    strokeWidth: 1,
-                  ),
+                  getDrawingHorizontalLine: (double value) =>
+                      FlLine(color: Colors.grey.shade200, strokeWidth: 1),
                 ),
                 borderData: FlBorderData(
                   show: true,
@@ -170,13 +173,18 @@ class RawMeasurementChart extends StatelessWidget {
                       dotData: FlDotData(
                         show: true,
                         getDotPainter:
-                            (FlSpot spot, double xPercentage, LineChartBarData bar, int index) {
-                          return FlDotCirclePainter(
-                            radius: 3.2,
-                            color: s.color,
-                            strokeWidth: 0,
-                          );
-                        },
+                            (
+                              FlSpot spot,
+                              double xPercentage,
+                              LineChartBarData bar,
+                              int index,
+                            ) {
+                              return FlDotCirclePainter(
+                                radius: 3.2,
+                                color: s.color,
+                                strokeWidth: 0,
+                              );
+                            },
                       ),
                       belowBarData: BarAreaData(show: false),
                     ),
@@ -208,11 +216,7 @@ class RawMeasurementChart extends StatelessWidget {
 
 @immutable
 class RawChartSeries {
-  const RawChartSeries({
-    required this.points,
-    required this.color,
-    this.label,
-  });
+  const RawChartSeries({required this.points, required this.color, this.label});
 
   final List<MeasurementChartPoint> points;
   final Color color;
