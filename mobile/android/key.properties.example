@@ -1,0 +1,13 @@
+# Android upload signing (local only)
+#
+# Copy to key.properties in this directory and fill values.
+# Do NOT commit the completed key.properties file (it is gitignored).
+
+storePassword=
+keyPassword=
+keyAlias=
+storeFile=
+
+# storeFile is resolved relative to mobile/android/ (Gradle rootProject).
+# Example: storeFile=upload-keystore.jks
+# Never use the debug keystore for Play upload.

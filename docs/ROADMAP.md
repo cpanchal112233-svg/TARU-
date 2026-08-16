@@ -247,13 +247,20 @@ See `docs/ACCESSIBILITY_RELEASE_CHECKLIST.md`.
 **PLATFORM**
 
 * physical iPhone OCR (`docs/PHYSICAL_IPHONE_OCR_GATE.md`)
-* Android release signing: release builds currently use the **debug**
-  signing config in `mobile/android/app/build.gradle.kts` — production
-  keystore / Play signing not configured
-* iOS distribution: Automatic signing / team membership and App Store
-  Connect / TestFlight setup required before archive upload (no upload
-  performed by engineering release-readiness work)
-* Crashlytics disclosure / store privacy review (not Console setup)
+* Android **real upload keystore** + local gitignored `key.properties`
+  (release signing architecture is in place; debug fallback for release is
+  forbidden)
+* Google Play app record / Play App Signing / Internal testing track
+  (`docs/PLAY_CONSOLE_FOUNDER_CHECKLIST.md`)
+* iOS **FOUNDER APPLE DEVELOPER TEAM REQUIRED** (`DEVELOPMENT_TEAM` unset;
+  no signing identities on this machine)
+* App Store Connect / TestFlight setup
+  (`docs/APP_STORE_CONNECT_FOUNDER_CHECKLIST.md`)
+* **FINAL TARU APP ICON / BRAND MARK** — Android + iOS still use Flutter
+  placeholder logos; deliberate TARU brand assets required before external
+  beta testers (do not invent a temporary medical/generic health logo)
+* Crashlytics disclosure / store privacy review (not Console setup;
+  Console is configured/receiving/verified)
 
 ## Phase 5 — AI assistant (future)
 Report explanations and health chat remain deferred until grounded
