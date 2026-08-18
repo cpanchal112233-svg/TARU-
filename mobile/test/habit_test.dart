@@ -132,6 +132,7 @@ void main() {
         ],
         activeHabits: active,
         windowDays: 7,
+        asOf: DateTime.now(),
       );
 
       expect(summary.hasData, isTrue);
@@ -150,6 +151,7 @@ void main() {
         ],
         activeHabits: const <HabitItem>[],
         windowDays: 7,
+        asOf: DateTime.now(),
       );
 
       expect(summary.hasData, isFalse);

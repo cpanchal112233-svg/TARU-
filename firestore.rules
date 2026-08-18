@@ -49,6 +49,11 @@ service cloud.firestore {
 
       // Require at least one collection segment so this does NOT match the
       // account root document (recursive ** can match an empty remainder).
+      // Health Context uses the same owner/account/deletion-guard gate:
+      // health/dietaryProfile, health/lifestyle, supplements, familyHistory,
+      // procedures, immunizations, healthGoals, careTeam.
+      // Per-field clinical taxonomy is future public-hardening work; this
+      // private R&D phase keeps the existing broad owner + deletion-guard gate.
       match /{collectionId}/{document=**} {
         allow read: if isOwner(userId);
 

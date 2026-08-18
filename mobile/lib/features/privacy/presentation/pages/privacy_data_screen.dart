@@ -133,8 +133,10 @@ class _PrivacyDataScreenState extends ConsumerState<PrivacyDataScreen> {
           title: const Text('Delete my health data?'),
           content: const Text(
             'This permanently removes your TARU health profile, conditions, '
-            'allergies, medications, dose and lifestyle history, routine '
-            'preferences, measurements, reports, and reviewed extracted text.\n\n'
+            'allergies, medications, diet and lifestyle context, supplements, '
+            'family history, procedures, vaccinations, health goals, care team, '
+            'dose and lifestyle history, routine preferences, measurements, '
+            'reports, and reviewed extracted text.\n\n'
             'Your login and name/email account identity stay. '
             'This cannot be undone.',
           ),

@@ -275,6 +275,7 @@ class HabitAdherenceSummary {
     required List<DailyHabitLog> logs,
     required List<HabitItem> activeHabits,
     required int windowDays,
+    required DateTime asOf,
   }) {
     if (activeHabits.isEmpty || logs.isEmpty) {
       return const HabitAdherenceSummary(
@@ -290,8 +291,9 @@ class HabitAdherenceSummary {
         (DailyHabitLog a, DailyHabitLog b) => a.dateKey.compareTo(b.dateKey),
       );
 
-    final String today = DailyHabitLog.keyFor(DateTime.now());
-    final DateTime windowStart = DateTime.now().subtract(
+    final DateTime asOfDay = DateTime(asOf.year, asOf.month, asOf.day);
+    final String today = DailyHabitLog.keyFor(asOfDay);
+    final DateTime windowStart = asOfDay.subtract(
       Duration(days: windowDays - 1),
     );
     final String windowStartKey = DailyHabitLog.keyFor(windowStart);

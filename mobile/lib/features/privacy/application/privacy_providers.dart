@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../health_context/application/health_context_providers.dart';
 import '../../health_profile/application/allergies_providers.dart';
 import '../../health_profile/application/conditions_providers.dart';
 import '../../health_profile/application/health_profile_providers.dart';
@@ -51,6 +52,14 @@ final privacyControllerProvider = Provider<PrivacyController>((Ref ref) {
       ref.invalidate(todayDoseLogProvider);
       ref.invalidate(todayHabitLogProvider);
       ref.invalidate(habitPreferencesProvider);
+      ref.invalidate(dietaryProfileProvider);
+      ref.invalidate(lifestyleContextProvider);
+      ref.invalidate(supplementsProvider);
+      ref.invalidate(familyHistoryProvider);
+      ref.invalidate(proceduresProvider);
+      ref.invalidate(immunizationsProvider);
+      ref.invalidate(healthGoalsProvider);
+      ref.invalidate(careTeamProvider);
     },
   );
 });

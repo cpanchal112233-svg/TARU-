@@ -212,6 +212,7 @@ class AdherenceSummary {
     required List<DailyDoseLog> logs,
     required int dosesPerDay,
     required int windowDays,
+    required DateTime asOf,
   }) {
     if (logs.isEmpty) {
       return const AdherenceSummary(taken: 0, expected: 0, daysCovered: 0);
@@ -227,7 +228,7 @@ class AdherenceSummary {
     }
 
     final DateTime? start = DateTime.tryParse(earliest);
-    final DateTime today = DateTime.now();
+    final DateTime today = DateTime(asOf.year, asOf.month, asOf.day);
 
     final int elapsed = start == null
         ? 1

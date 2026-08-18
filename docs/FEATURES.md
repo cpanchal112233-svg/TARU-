@@ -185,6 +185,15 @@ not auto-attach account or health contents. Engineering inventories for
 legal/clinical/accessibility/OCR live under `docs/`. Canonical public
 release blockers remain in `docs/ROADMAP.md`.
 
+## Health Context Foundation (private R&D)
+Profile → Health context records diet/food preferences (not allergies),
+supplements, family history, procedures, vaccinations, lifestyle context,
+user-owned health goals, and care-team references. Existing conditions,
+allergies, and medicines are reused, not duplicated. A read-only
+`HealthContextSnapshot` aggregates current context in memory and is never
+saved as its own cloud document. No LLM, no FHIR package, Evidence Brief
+unchanged.
+
 ## Reliability Foundation
 Opt-in **Share crash diagnostics** under Profile → Privacy & data.
 Default off; native Crashlytics collection default off; no Analytics;

@@ -1,14 +1,9 @@
 import { Firestore } from "firebase-admin/firestore";
 
-/** Health-owned collection roots under users/{uid}. */
-export const HEALTH_COLLECTION_ROOTS = [
-  "health",
-  "doseLogs",
-  "habitLogs",
-  "routine",
-  "measurements",
-  "reports",
-] as const;
+import healthCollectionRoots from "./health_collection_roots.json";
+
+/** Health-owned collection roots under users/{uid}. Authoritative purge list. */
+export const HEALTH_COLLECTION_ROOTS = healthCollectionRoots as readonly string[];
 
 /**
  * Recursively deletes all approved health collection roots.

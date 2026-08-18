@@ -82,6 +82,48 @@ class HealthExportService {
         'health/medications.json',
         await _docMap(uid, 'health', 'medications'),
       );
+      await _writeJson(
+        staging,
+        'health/dietary_profile.json',
+        await _docMap(uid, 'health', 'dietaryProfile'),
+      );
+      await _writeJson(
+        staging,
+        'health/lifestyle.json',
+        await _docMap(uid, 'health', 'lifestyle'),
+      );
+
+      onProgress?.call('Collecting health context…');
+      await _writeJson(
+        staging,
+        'health_context/supplements.json',
+        await _collectionArray(uid, 'supplements'),
+      );
+      await _writeJson(
+        staging,
+        'health_context/family_history.json',
+        await _collectionArray(uid, 'familyHistory'),
+      );
+      await _writeJson(
+        staging,
+        'health_context/procedures.json',
+        await _collectionArray(uid, 'procedures'),
+      );
+      await _writeJson(
+        staging,
+        'health_context/immunizations.json',
+        await _collectionArray(uid, 'immunizations'),
+      );
+      await _writeJson(
+        staging,
+        'health_context/health_goals.json',
+        await _collectionArray(uid, 'healthGoals'),
+      );
+      await _writeJson(
+        staging,
+        'health_context/care_team.json',
+        await _collectionArray(uid, 'careTeam'),
+      );
 
       onProgress?.call('Collecting routine…');
       await _writeJson(
