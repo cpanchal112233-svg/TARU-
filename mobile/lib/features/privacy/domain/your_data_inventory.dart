@@ -32,6 +32,21 @@ class YourDataInventory {
       ],
     ),
     YourDataCategory(
+      title: 'Health context',
+      source: 'Self-reported',
+      location: 'Stored with your TARU account',
+      bullets: <String>[
+        'Dietary pattern and food preferences or avoidances you enter. These '
+            'are not medical allergy records.',
+        'Supplements and herbal products you list, including optional dose text.',
+        'Family history entries you record. TARU does not calculate inherited risk.',
+        'Procedures, surgeries, and vaccinations you choose to record.',
+        'Lifestyle context (what is generally true), separate from daily routine logs.',
+        'Health goals you set. A target date is your aim, not a predicted recovery date.',
+        'Care-team contacts you keep for yourself. TARU does not message them.',
+      ],
+    ),
+    YourDataCategory(
       title: 'Measurements',
       source: 'Manual measurement',
       location: 'Stored with your TARU account',

@@ -87,6 +87,7 @@ void main() {
         ],
         activeHabits: prefs.activeHabits,
         windowDays: 7,
+        asOf: DateTime.now(),
       );
 
       expect(summary.hasData, isFalse);
@@ -185,6 +186,7 @@ void main() {
           ],
           activeHabits: defaultHabits,
           windowDays: 7,
+          asOf: DateTime.now(),
         );
 
         expect(
@@ -225,6 +227,7 @@ void main() {
         ],
         activeHabits: prefs.activeHabits,
         windowDays: 7,
+        asOf: DateTime.now(),
       );
 
       expect(

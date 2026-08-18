@@ -11,11 +11,10 @@ Brief V1.
 
 ## First-launch country
 
-**FOUNDER INPUT REQUIRED BEFORE PUBLIC DISTRIBUTION.**
-
-Not inferred from developer location, Firebase region, timezone, currency, or
-Git identity. Product code should remain country-neutral until founder
-supplies the intended first-launch jurisdiction.
+Founder has locked **India** as the intended first public-launch country.
+Public distribution remains parked (private R&D). Product code stays
+country-neutral in runtime behavior. Legal/store work is not approved by this
+inventory.
 
 ## Account / authentication
 
@@ -33,6 +32,26 @@ Self-reported:
 - Conditions
 - Allergies
 - Medicines / medication schedule fields used for reminders
+
+## Health context (Firestore; private R&D)
+
+Current snapshot documents under `users/{uid}/health/`:
+
+- `dietaryProfile` — pattern, avoidances, dislikes, optional user-entered
+  cultural constraints. Not allergy records.
+- `lifestyle` — generally-true lifestyle context, not daily Routine logs
+
+Collections:
+
+- `users/{uid}/supplements/{id}`
+- `users/{uid}/familyHistory/{id}`
+- `users/{uid}/procedures/{id}`
+- `users/{uid}/immunizations/{id}`
+- `users/{uid}/healthGoals/{id}` — `desiredBy` is a user goal date
+- `users/{uid}/careTeam/{id}` — user-owned reference; no clinician messaging
+
+`HealthContextSnapshot` is a **read-only in-memory** aggregate. It is not
+persisted. Existing conditions/allergies/medications are not duplicated.
 
 ## Measurements (Firestore)
 

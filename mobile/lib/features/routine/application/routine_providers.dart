@@ -63,6 +63,7 @@ final adherenceProvider = Provider<AdherenceSummary?>((ref) {
     logs: logs,
     dosesPerDay: schedule.doses.length,
     windowDays: adherenceWindowDays,
+    asOf: DateTime.now(),
   );
 });
 

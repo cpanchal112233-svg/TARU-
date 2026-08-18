@@ -7,7 +7,7 @@ import {
   assertSucceeds,
   initializeTestEnvironment,
 } from "@firebase/rules-unit-testing";
-import { doc, setDoc, updateDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, updateDoc, getDoc, deleteDoc } from "firebase/firestore";
 import { ref, uploadBytes } from "firebase/storage";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -76,6 +76,28 @@ describe("Firestore deletion guard", () => {
         heightCm: 170,
       }),
     );
+    await assertSucceeds(
+      setDoc(doc(alice.firestore(), "users/alice/supplements/s1"), {
+        name: "Vitamin D",
+        provenance: "selfReported",
+      }),
+    );
+    await assertSucceeds(
+      setDoc(doc(alice.firestore(), "users/alice/health/dietaryProfile"), {
+        pattern: "vegetarian",
+      }),
+    );
+  });
+
+  it("denies other users writing health context collections", async () => {
+    await testEnv.clearFirestore();
+    await seedAccount("alice");
+    const bob = testEnv.authenticatedContext("bob");
+    await assertFails(
+      setDoc(doc(bob.firestore(), "users/alice/familyHistory/f1"), {
+        relationship: "Mother",
+      }),
+    );
   });
 
   it("denies owner child writes when deletionInProgress is health", async () => {
@@ -85,6 +107,16 @@ describe("Firestore deletion guard", () => {
     await assertFails(
       setDoc(doc(alice.firestore(), "users/alice/health/profile"), {
         heightCm: 171,
+      }),
+    );
+    await assertFails(
+      setDoc(doc(alice.firestore(), "users/alice/supplements/s1"), {
+        name: "Vitamin D",
+      }),
+    );
+    await assertFails(
+      setDoc(doc(alice.firestore(), "users/alice/healthGoals/g1"), {
+        title: "Walk more",
       }),
     );
   });
@@ -396,6 +428,113 @@ describe("Storage deletion guard (Firestore account root)", () => {
         textBytes(),
         { contentType: "text/plain" },
       ),
+    );
+  });
+});
+
+const healthContextPaths = [
+  "users/alice/health/dietaryProfile",
+  "users/alice/health/lifestyle",
+  "users/alice/supplements/s1",
+  "users/alice/familyHistory/f1",
+  "users/alice/procedures/p1",
+  "users/alice/immunizations/i1",
+  "users/alice/healthGoals/g1",
+  "users/alice/careTeam/c1",
+];
+
+const healthContextPayload = {
+  name: "Example",
+  title: "Example",
+  vaccine: "Tetanus",
+  relationship: "Mother",
+  condition: "Example",
+  pattern: "vegetarian",
+  provenance: "selfReported",
+};
+
+describe("Health Context Firestore path matrix", () => {
+  for (const path of healthContextPaths) {
+    it(`owner can read ${path} when healthy`, async () => {
+      await testEnv.clearFirestore();
+      await seedAccount("alice");
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await setDoc(doc(context.firestore(), path), healthContextPayload);
+      });
+      const alice = testEnv.authenticatedContext("alice");
+      await assertSucceeds(getDoc(doc(alice.firestore(), path)));
+    });
+
+    it(`owner can write ${path} when healthy`, async () => {
+      await testEnv.clearFirestore();
+      await seedAccount("alice");
+      const alice = testEnv.authenticatedContext("alice");
+      await assertSucceeds(
+        setDoc(doc(alice.firestore(), path), healthContextPayload),
+      );
+    });
+
+    it(`owner can delete ${path} when healthy`, async () => {
+      await testEnv.clearFirestore();
+      await seedAccount("alice");
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await setDoc(doc(context.firestore(), path), healthContextPayload);
+      });
+      const alice = testEnv.authenticatedContext("alice");
+      await assertSucceeds(deleteDoc(doc(alice.firestore(), path)));
+    });
+
+    it(`cross-user is denied ${path}`, async () => {
+      await testEnv.clearFirestore();
+      await seedAccount("alice");
+      await seedAccount("bob");
+      const bob = testEnv.authenticatedContext("bob");
+      await assertFails(getDoc(doc(bob.firestore(), path)));
+      await assertFails(
+        setDoc(doc(bob.firestore(), path), healthContextPayload),
+      );
+    });
+
+    it(`health deletion guard denies write ${path}`, async () => {
+      await testEnv.clearFirestore();
+      await seedAccount("alice", { deletionInProgress: "health" });
+      const alice = testEnv.authenticatedContext("alice");
+      await assertFails(
+        setDoc(doc(alice.firestore(), path), healthContextPayload),
+      );
+    });
+
+    it(`account deletion guard denies write ${path}`, async () => {
+      await testEnv.clearFirestore();
+      await seedAccount("alice", { deletionInProgress: "account" });
+      const alice = testEnv.authenticatedContext("alice");
+      await assertFails(
+        setDoc(doc(alice.firestore(), path), healthContextPayload),
+      );
+    });
+
+    it(`missing account root denies write ${path}`, async () => {
+      await testEnv.clearFirestore();
+      const alice = testEnv.authenticatedContext("alice");
+      await assertFails(
+        setDoc(doc(alice.firestore(), path), healthContextPayload),
+      );
+    });
+  }
+
+  it("clients cannot mutate root deletion guard fields", async () => {
+    await testEnv.clearFirestore();
+    await seedAccount("alice");
+    const alice = testEnv.authenticatedContext("alice");
+    await assertFails(
+      updateDoc(doc(alice.firestore(), "users/alice"), {
+        deletionInProgress: "health",
+      }),
+    );
+    await assertFails(
+      updateDoc(doc(alice.firestore(), "users/alice"), {
+        deletionInProgress: "account",
+      }),
     );
   });
 });

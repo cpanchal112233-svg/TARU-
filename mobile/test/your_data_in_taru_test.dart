@@ -16,6 +16,7 @@ void main() {
       containsAll(<String>[
         'Account',
         'Health profile',
+        'Health context',
         'Measurements',
         'Routine',
         'Reports',

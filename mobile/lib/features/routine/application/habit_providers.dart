@@ -66,6 +66,7 @@ final habitAdherenceProvider = Provider<HabitAdherenceSummary?>((ref) {
     logs: logs,
     activeHabits: active,
     windowDays: adherenceWindowDays,
+    asOf: DateTime.now(),
   );
 });
 

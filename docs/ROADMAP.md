@@ -214,7 +214,7 @@ Canonical list — do not fork inconsistent copies elsewhere.
 
 **FOUNDER**
 
-* first launch country (**FOUNDER INPUT REQUIRED**; do not guess)
+* first launch country: **India** (locked; public distribution still parked)
 * real support email
 * real feedback endpoint if product feedback is included in distribution
 * final intended early-user distribution scope
@@ -268,3 +268,10 @@ safety, consent, and evidence design are ready. Not started.
 
 ## Evidence Delta (future)
 Not started.
+
+## Health Context Foundation (private R&D — engineering)
+Structured personal context (diet, supplements, family history, procedures,
+vaccinations, lifestyle context, goals, care team) plus a read-only
+`HealthContextSnapshot`. No LLM. Evidence Brief not expanded. Public release
+remains parked. See `docs/HEALTH_INTELLIGENCE_ARCHITECTURE.md`.
+

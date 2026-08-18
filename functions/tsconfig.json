@@ -8,6 +8,7 @@
     "strict": true,
     "target": "ES2022",
     "esModuleInterop": true,
+    "resolveJsonModule": true,
     "skipLibCheck": true,
     "rootDir": "."
   },

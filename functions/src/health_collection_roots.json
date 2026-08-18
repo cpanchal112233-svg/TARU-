@@ -1,0 +1,14 @@
+[
+  "health",
+  "doseLogs",
+  "habitLogs",
+  "routine",
+  "measurements",
+  "reports",
+  "supplements",
+  "familyHistory",
+  "procedures",
+  "immunizations",
+  "healthGoals",
+  "careTeam"
+]

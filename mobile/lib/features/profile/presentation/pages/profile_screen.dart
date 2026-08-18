@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/reliability/user_facing_error.dart';
 import '../../../auth/data/auth_service.dart';
 import '../../../emergency/presentation/pages/emergency_card_screen.dart';
+import '../../../health_context/presentation/pages/health_context_hub_screen.dart';
 import '../../../health_profile/presentation/pages/allergies_screen.dart';
 import '../../../health_profile/presentation/pages/conditions_screen.dart';
 import '../../../health_profile/presentation/pages/health_profile_screen.dart';
@@ -388,6 +389,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     context,
                     MaterialPageRoute<void>(
                       builder: (_) => const HealthProfileScreen(),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 15),
+
+                _buildProfileOption(
+                  icon: Icons.account_tree_outlined,
+                  title: 'Health context',
+                  subtitle:
+                      'Diet, supplements, family history, procedures, lifestyle, goals',
+
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (_) => const HealthContextHubScreen(),
                     ),
                   ),
                 ),

@@ -436,6 +436,7 @@ EvidenceBriefRoutineSection buildRoutineSection({
       logs: doseInPeriod,
       dosesPerDay: dosesPerDay,
       windowDays: period.dayCount,
+      asOf: period.end,
     );
     medicine = summary.hasData ? summary : null;
   }
@@ -446,6 +447,7 @@ EvidenceBriefRoutineSection buildRoutineSection({
       logs: habitInPeriod,
       activeHabits: activeHabits,
       windowDays: period.dayCount,
+      asOf: period.end,
     );
     lifestyle = _lifestyleForPeriod(
       summary: summary,

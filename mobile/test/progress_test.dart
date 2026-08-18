@@ -11,6 +11,7 @@ void main() {
         logs: const <DailyDoseLog>[],
         dosesPerDay: 2,
         windowDays: 7,
+        asOf: DateTime.now(),
       );
 
       expect(summary.hasData, isFalse);
@@ -32,6 +33,7 @@ void main() {
         ],
         dosesPerDay: 2,
         windowDays: 7,
+        asOf: DateTime.now(),
       );
 
       expect(summary.hasData, isTrue);
@@ -56,6 +58,7 @@ void main() {
         ],
         dosesPerDay: 2,
         windowDays: 7,
+        asOf: DateTime.now(),
       );
 
       expect(summary.taken, 1);
@@ -79,6 +82,7 @@ void main() {
         logs: logs,
         dosesPerDay: 2,
         windowDays: 7,
+        asOf: DateTime.now(),
       );
 
       expect(summary.daysCovered, 7);
@@ -90,6 +94,7 @@ void main() {
           logs: logs,
           dosesPerDay: 2,
           windowDays: 7,
+          asOf: DateTime.now(),
         ).percent,
       );
     });
@@ -101,6 +106,7 @@ void main() {
         ],
         dosesPerDay: 0,
         windowDays: 7,
+        asOf: DateTime.now(),
       );
 
       expect(summary.hasData, isFalse);
@@ -136,6 +142,7 @@ void main() {
         logs: inWindow,
         dosesPerDay: 1,
         windowDays: 7,
+        asOf: DateTime.now(),
       );
 
       expect(summary.daysCovered, lessThanOrEqualTo(7));
@@ -156,11 +163,13 @@ void main() {
         logs: logs,
         dosesPerDay: 3,
         windowDays: 7,
+        asOf: DateTime.now(),
       );
       final AdherenceSummary withOne = AdherenceSummary.fromLogs(
         logs: logs,
         dosesPerDay: 1,
         windowDays: 7,
+        asOf: DateTime.now(),
       );
 
       expect(withThree.expected, 3);
@@ -175,6 +184,7 @@ void main() {
         logs: const <DailyHabitLog>[],
         activeHabits: defaultHabits,
         windowDays: 7,
+        asOf: DateTime.now(),
       );
       expect(summary.hasData, isFalse);
     });
@@ -192,6 +202,7 @@ void main() {
         ],
         activeHabits: defaultHabits,
         windowDays: 7,
+        asOf: DateTime.now(),
       );
 
       expect(summary.daysCovered, 1);
@@ -217,6 +228,7 @@ void main() {
         ],
         activeHabits: dietOnly,
         windowDays: 7,
+        asOf: DateTime.now(),
       );
 
       expect(summary.done, 1);
@@ -237,6 +249,7 @@ void main() {
         ],
         activeHabits: const <HabitItem>[],
         windowDays: 7,
+        asOf: DateTime.now(),
       );
 
       expect(summary.hasData, isFalse);
@@ -253,11 +266,13 @@ void main() {
         logs: <DailyHabitLog>[preserved],
         activeHabits: const <HabitItem>[],
         windowDays: 7,
+        asOf: DateTime.now(),
       );
       final HabitAdherenceSummary reenabled = HabitAdherenceSummary.fromLogs(
         logs: <DailyHabitLog>[preserved],
         activeHabits: habitsFor(HabitPillar.diet),
         windowDays: 7,
+        asOf: DateTime.now(),
       );
 
       expect(disabled.hasData, isFalse);
@@ -279,6 +294,7 @@ void main() {
         ],
         activeHabits: defaultHabits,
         windowDays: 7,
+        asOf: DateTime.now(),
       );
 
       expect(summary.byPillar, hasLength(4));
@@ -301,6 +317,7 @@ void main() {
         ],
         activeHabits: habitsFor(HabitPillar.diet),
         windowDays: 7,
+        asOf: DateTime.now(),
       );
 
       expect(summary.done, 0);
@@ -353,6 +370,7 @@ void main() {
           ],
           activeHabits: defaultHabits,
           windowDays: 7,
+          asOf: DateTime.now(),
         ),
         habitLogDaysInWindow: 5,
       );
@@ -376,6 +394,7 @@ void main() {
         ],
         activeHabits: defaultHabits,
         windowDays: 7,
+        asOf: DateTime.now(),
       );
 
       final List<ProgressObservation> items = buildProgressObservations(
@@ -415,6 +434,7 @@ void main() {
           ],
           activeHabits: defaultHabits,
           windowDays: 7,
+          asOf: DateTime.now(),
         ),
         habitLogDaysInWindow: 7,
       );
@@ -451,6 +471,7 @@ void main() {
         ],
         dosesPerDay: 2,
         windowDays: 7,
+        asOf: DateTime.now(),
       );
 
       final List<ProgressObservation> items = buildProgressObservations(
@@ -486,11 +507,13 @@ void main() {
         logs: const <DailyDoseLog>[],
         dosesPerDay: 2,
         windowDays: 7,
+        asOf: DateTime.now(),
       );
       final HabitAdherenceSummary lifestyle = HabitAdherenceSummary.fromLogs(
         logs: const <DailyHabitLog>[],
         activeHabits: defaultHabits,
         windowDays: 7,
+        asOf: DateTime.now(),
       );
 
       expect(medicine.hasData, isFalse);
