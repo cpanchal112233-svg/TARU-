@@ -4,7 +4,7 @@ Internal inventory of **existing** user-facing surfaces that need qualified
 clinical review before broader public distribution.
 
 This document does **not** rewrite clinical content.
-Cursor / engineering has **not** performed clinical review.
+Engineering has **not** performed clinical review.
 No recommended “correct” clinical answers are asserted here unless noted as a
 pure engineering/usability observation.
 
